@@ -10,52 +10,108 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query(sort: \Habit.title) private var habits: [Habit]
+    @State private var selectedTab = 0
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        ZStack(alignment: .bottom) {
+            Color(red: 0, green: 0, blue: 0).ignoresSafeArea()
+            
+            VStack {
+                HStack {
+                    Text("Today's Work")
+                        .font(.largeTitle)
+                        .foregroundStyle(.white)
+                        .bold()
+                        .padding(15)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Button(action: addSampleHabit) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.blue)
+                            .padding()
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                
+                VStack {
+                    if selectedTab == 0 {
+                        ScrollView {
+                            VStack{
+                                Text("Habits")
+                                    .font(.title2)
+                                    .foregroundStyle(.white)
+                                    .bold()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.leading)
+                                VStack(spacing: 16) {
+                                    ForEach(habits) { habit in
+                                        HabitCardView(habit: habit)
+                                    }
+                                }
+                                .padding(.top, 10)
+                                .padding(.bottom, 10)
+                                
+                                Spacer()
+                                
+                                Text("Tasks")
+                                    .font(.title2)
+                                    .foregroundStyle(.white)
+                                    .bold()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.leading)
+                                VStack(spacing: 16) {
+                                    ForEach(habits) { habit in
+                                        HabitCardView(habit: habit)
+                                    }
+                                }
+                                .padding(.top, 10)
+                                .padding(.bottom, 10)
+                                
+                            }
+                            .padding(.bottom, 100)
+                        }
+                    } else {
+                        Text("Progress Stats Coming Soon")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
+
             }
-        } detail: {
-            Text("Select an item")
+
+            PillMenuBar(selectedIndex: $selectedTab, tabs: ["Habits", "Progress"], baseColor: .gray)
+        }
+        .onAppear {
+            resetHabitsIfNeeded()
         }
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+
+    func resetHabitsIfNeeded() {
+        let lastResetDate = UserDefaults.standard.object(forKey: "LastResetDate") as? Date ?? Date.distantPast
+        
+        if !Calendar.current.isDateInToday(lastResetDate) {
+            for habit in habits {
+                habit.countDoneToday = 0 // Reset daily count
+            }
+            UserDefaults.standard.set(Date(), forKey: "LastResetDate")
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+    private func addSampleHabit() {
+        // Create different sample data
+        let newHabit = Habit(title: "Pray", frequencyCount: 5, frequencyUnit: .daily)
+        modelContext.insert(newHabit)
+        
+        let anotherHabit = Habit(title: "LeetCode", frequencyCount: 2, frequencyUnit: .daily)
+        modelContext.insert(anotherHabit)
+        
+        let yetAnotherHabit = Habit(title: "Workout", frequencyCount: 3, frequencyUnit: .weekly)
+        modelContext.insert(yetAnotherHabit)
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Habit.self, inMemory: true)
 }

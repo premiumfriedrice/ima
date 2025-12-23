@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SegmentedProgressBar: View {
     let value: Int
@@ -36,9 +37,8 @@ struct SegmentedProgressBar: View {
     }
 }
 
-// 1. Updated HabitCardView to accept a Habit object
 struct HabitCardView: View {
-    @Binding var habit: Habit
+    @Bindable var habit: Habit // Use Bindable for SwiftData objects
     
     var isDoneForToday: Bool {
         habit.countDoneToday >= habit.dailyGoal
@@ -60,14 +60,13 @@ struct HabitCardView: View {
                 Text(habit.title)
                     .font(.headline)
                 
-                // Dynamic Label
-                Text("\(habit.totalCount)/\(habit.frequency.count) \(habit.frequency.frequencyUnit == .daily ? "today" : "this week")")
+                Text("\(habit.totalCount)/\(habit.frequencyCount) \(habit.frequencyUnit == .daily ? "today" : "this week")")
                     .font(.caption)
                     .opacity(0.7)
                 
                 SegmentedProgressBar(
                     value: habit.totalCount,
-                    total: habit.frequency.count,
+                    total: habit.frequencyCount,
                     color: statusColor
                 )
                 .frame(height: 5)
@@ -82,14 +81,10 @@ struct HabitCardView: View {
                         habit.countDoneToday += 1
                         habit.totalCount += 1
                     } else {
-                        // Reset logic: if they tap while green, it resets today's progress
                         habit.totalCount -= habit.countDoneToday
                         habit.countDoneToday = 0
                     }
-                    
-                    let impactMed = UIImpactFeedbackGenerator(style: .medium)
-                    // 2. Trigger the haptic
-                    impactMed.impactOccurred()
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 }
             }) {
                 Image(systemName: isDoneForToday ? "square.fill" : "square")
@@ -105,6 +100,43 @@ struct HabitCardView: View {
     }
 }
 
-#Preview {
-    HabitCardView()
+struct PillMenuBar: View {
+    @Binding var selectedIndex: Int
+    let tabs: [String]
+    let baseColor: Color
+    @Namespace private var animationNamespace
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(0..<tabs.count, id: \.self) { index in
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                        selectedIndex = index
+                    }
+                }) {
+                    Text(tabs[index])
+                        .fontWeight(.heavy)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(selectedIndex == index ? .white : .primary.opacity(0.6))
+                        .background(
+                            ZStack {
+                                if selectedIndex == index {
+                                    Capsule()
+                                        .fill(Color.blue)
+                                        .matchedGeometryEffect(id: "tab", in: animationNamespace)
+                                }
+                            }
+                        )
+                }
+            }
+        }
+        .padding(6)
+        .background(
+            Capsule()
+                .fill(baseColor.opacity(0.5))
+                .background(Capsule().stroke(baseColor.opacity(0.2), lineWidth: 1))
+        )
+        .padding(.horizontal, 30)
+    }
 }

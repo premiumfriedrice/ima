@@ -15,11 +15,22 @@ final class Habit {
     var totalCount: Int
     var countDoneToday: Int
     var frequencyCount: Int
-    var frequencyUnitRaw: String // Store enum as String for SwiftData compatibility
+    var frequencyUnitRaw: String
     
+    // Computed property to handle the Enum conversion
     var frequencyUnit: FrequencyUnit {
         get { FrequencyUnit(rawValue: frequencyUnitRaw) ?? .daily }
         set { frequencyUnitRaw = newValue.rawValue }
+    }
+
+    // Defines if the habit is "finished" for today
+    var dailyGoal: Int {
+        frequencyUnit == .daily ? frequencyCount : 1
+    }
+
+    // A helper property to make View code cleaner
+    var frequency: (count: Int, unit: FrequencyUnit) {
+        (frequencyCount, frequencyUnit)
     }
 
     init(title: String, totalCount: Int = 0, countDoneToday: Int = 0, frequencyCount: Int, frequencyUnit: FrequencyUnit) {

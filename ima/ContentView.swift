@@ -67,7 +67,6 @@ struct ContentView: View {
         }
         .onAppear {
             resetHabitsIfNeeded()
-            debugPrintHabits()
         }
     }
     

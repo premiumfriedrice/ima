@@ -14,10 +14,10 @@ struct HabitGroupView: View {
     var habits: [Habit]
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 16) {
             HStack {
                 Text("Habits")
-                    .font(.title)
+                    .font(.largeTitle)
                     .foregroundStyle(.white)
                     .bold()
                     .padding(.leading, 8)
@@ -40,11 +40,13 @@ struct HabitGroupView: View {
             .padding(.horizontal, 16) // Matches the "Today's Work" alignment
             .padding(.bottom, 16)    // Space before the first card
             
-            VStack(spacing: 8) {
-                ForEach(habits) { habit in
-                    HabitCardView(habit: habit)
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach(habits) { habit in
+                        HabitCardView(habit: habit)
+                    }
                 }
-            }
+            }.safeAreaPadding(.top, 16)
         }
         .padding(.vertical, 10)
     }

@@ -12,7 +12,6 @@ struct CreateSheetView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
-    // Local state for the new habit details
     @State private var title: String = ""
     @State private var frequencyCount: Int = 1
     @State private var frequencyUnit: FrequencyUnit = .daily
@@ -21,7 +20,7 @@ struct CreateSheetView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            VStack(spacing: 40) {
+            VStack(spacing: 0) { // Set spacing to 0 and use padding/ScrollView for better control
                 // MARK: - Header
                 HStack {
                     Button("Cancel") { dismiss() }
@@ -38,60 +37,62 @@ struct CreateSheetView: View {
                 }
                 .padding(.horizontal, 25)
                 .padding(.top, 20)
+                .padding(.bottom, 20)
                 
-                // MARK: - Title Input (The "Big" Component)
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("NAME YOUR HABIT")
-                        .font(.caption2).bold().opacity(0.4)
-                    
-                    TextField("e.g., Read, Meditate...", text: $title)
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .tint(.blue)
-                        .autocorrectionDisabled()
-                }
-                .padding(.horizontal, 25)
-
-                // MARK: - Frequency Sentence Builder
-                VStack(alignment: .leading, spacing: 15) {
-                    Text("SET YOUR GOAL")
-                        .font(.caption2).bold().opacity(0.4)
-                    
-                    VStack(spacing: 1) {
-                        // Part 1: Count
-                        HStack {
-                            Text("Perform this")
-                                .font(.headline)
-                            Spacer()
-                            Stepper("\(frequencyCount) times", value: $frequencyCount, in: 1...100)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.blue)
-                        }
-                        .padding(20)
-                        .background(Color.white.opacity(0.05))
-                        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20))
+                // Wrap in ScrollView to match HabitInfoView structure
+                ScrollView {
+                    VStack(spacing: 40) {
                         
-                        // Part 2: Unit
-                        HStack {
-                            Text("every")
-                                .font(.headline)
-                            Spacer()
-                            Picker("Frequency", selection: $frequencyUnit) {
-                                ForEach(FrequencyUnit.allCases, id: \.self) { unit in
-                                    Text(unit.rawValue).tag(unit)
-                                }
-                            }
-                            .pickerStyle(.menu)
-                            .tint(.blue)
-                            .fontWeight(.bold)
+                        // MARK: - Title Input
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("NAME YOUR HABIT")
+                                .font(.caption2).bold().opacity(0.4)
+                            
+                            TextField("e.g., Read, Meditate...", text: $title)
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .tint(.blue)
+                                .autocorrectionDisabled()
                         }
-                        .padding(20)
-                        .background(Color.white.opacity(0.05))
-                        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
+                        .frame(maxWidth: .infinity, alignment: .leading) // Pushes text to the left
+                        .padding(.horizontal, 25)
+                        
+                        // MARK: - Frequency Sentence Builder
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("SET YOUR GOAL")
+                                .font(.caption2).bold().opacity(0.4)
+                            
+                            VStack(spacing: 1) {
+                                HStack {
+                                    Stepper("\(frequencyCount) times", value: $frequencyCount, in: 1...100)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.blue)
+                                }
+                                .padding(20)
+                                .background(Color.white.opacity(0.05))
+                                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20))
+                                
+                                HStack {
+                                    Text("every")
+                                        .font(.headline)
+                                    Spacer()
+                                    Picker("Frequency", selection: $frequencyUnit) {
+                                        ForEach(FrequencyUnit.allCases, id: \.self) { unit in
+                                            Text(unit.rawValue).tag(unit)
+                                        }
+                                    }
+                                    .pickerStyle(.menu)
+                                    .tint(.blue)
+                                    .fontWeight(.bold)
+                                }
+                                .padding(20)
+                                .background(Color.white.opacity(0.05))
+                                .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
+                            }
+                        }
+                        .padding(.horizontal, 25)
                     }
+                    .padding(.top, 20) // Spacing from header to content
                 }
-                .padding(.horizontal, 25)
-
-                Spacer()
             }
             .foregroundStyle(.white)
         }
@@ -104,11 +105,7 @@ struct CreateSheetView: View {
             frequencyUnit: frequencyUnit
         )
         modelContext.insert(newHabit)
-        
-        // Haptic feedback for successful creation
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-        
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()
     }
 }

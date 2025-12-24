@@ -20,40 +20,14 @@ struct ContentView: View {
             AnimatedRadialBackground()
             
             VStack {
-                Text("Today's Work")
-                    .font(.largeTitle)
-                    .foregroundStyle(.white)
-                    .bold()
-                    .padding(.leading, 16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
                 VStack {
                     if selectedTab == 0 {
-                        ScrollView {
-                            VStack{
-                                HabitGroupView(habits: habits)
-                                
-                                Spacer()
-                                
-//                                Text("Tasks")
-//                                    .font(.title2)
-//                                    .foregroundStyle(.white)
-//                                    .bold()
-//                                    .frame(maxWidth: .infinity, alignment: .leading)
-//                                    .padding(.leading)
-//                                VStack(spacing: 16) {
-//                                    ForEach(habits) { habit in
-//                                        HabitCardView(habit: habit)
-//                                    }
-//                                }
-//                                .padding(.top, 10)
-//                                .padding(.bottom, 10)
-                                
-                            }
-                            .padding(.bottom, 100)
+                        VStack{
+                            HabitGroupView(habits: habits)
                         }
+                        .padding(.bottom, 100)
                     } else {
-                        Text("Progress Stats Coming Soon")
+                        Text("Tasks Coming Soon")
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
@@ -61,7 +35,7 @@ struct ContentView: View {
                 
             }
             
-            PillMenuBar(selectedIndex: $selectedTab, tabs: ["Today", "Progress"], baseColor: .gray)
+            PillMenuBar(selectedIndex: $selectedTab, tabs: ["Habits", "Tasks"], baseColor: .gray)
         }
         .onAppear {
             resetHabitsIfNeeded()
@@ -78,30 +52,6 @@ struct ContentView: View {
             }
             UserDefaults.standard.set(Date(), forKey: "LastResetDate")
         }
-    }
-    
-    private func addSampleHabit() {
-        // Create different sample data
-        let newHabit = Habit(title: "Pray", frequencyCount: 5, frequencyUnit: .daily)
-        modelContext.insert(newHabit)
-        
-        let anotherHabit = Habit(title: "LeetCode", frequencyCount: 2, frequencyUnit: .daily)
-        modelContext.insert(anotherHabit)
-        
-        let yetAnotherHabit = Habit(title: "Workout", frequencyCount: 3, frequencyUnit: .weekly)
-        modelContext.insert(yetAnotherHabit)
-    }
-    
-    private func deleteHabit(_ habit: Habit) {
-        // 1. Remove from the local context
-        modelContext.delete(habit)
-        
-        // 2. Save the change
-        try? modelContext.save()
-        
-        // 3. Optional: Trigger haptic feedback
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
     }
     
     func debugPrintHabits() {

@@ -75,7 +75,7 @@ private func calendarDay(for date: Date) -> Date {
 }
 
 enum FrequencyUnit: String, Codable, CaseIterable {
-    case daily = "Daily"
-    case weekly = "Weekly"
-    case monthly = "Monthly"
+    case daily = "Day"
+    case weekly = "Week"
+    case monthly = "Month"
 }

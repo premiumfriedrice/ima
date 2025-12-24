@@ -53,8 +53,6 @@ struct CalendarView: View {
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 20).fill(Color.white.opacity(0.05)))
             }
-            .padding(.leading, 25)
-            .padding(.trailing, 25)
         }
         .foregroundStyle(.white)
     }

@@ -41,7 +41,8 @@ struct HabitCardView: View {
                 Image(systemName: "chart.bar.doc.horizontal")
                     .font(.system(size: 16))
                     .foregroundColor(habit.statusColor)
-                        }
+            }
+            .padding(6)
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 15).fill(habit.statusColor.opacity(0.2)))

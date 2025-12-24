@@ -31,7 +31,9 @@ struct ContentView: View {
                     if selectedTab == 0 {
                         ScrollView {
                             VStack{
-                                HabitGroupView(habits: habits, onAddTap: addSampleHabit)
+                                HabitGroupView(habits: habits,
+                                               onAddTap: addSampleHabit
+                                               )
                                 
                                 Spacer()
                                 
@@ -65,6 +67,7 @@ struct ContentView: View {
         }
         .onAppear {
             resetHabitsIfNeeded()
+            debugPrintHabits()
         }
     }
     
@@ -90,6 +93,45 @@ struct ContentView: View {
         
         let yetAnotherHabit = Habit(title: "Workout", frequencyCount: 3, frequencyUnit: .weekly)
         modelContext.insert(yetAnotherHabit)
+    }
+    
+    private func deleteHabit(_ habit: Habit) {
+        // 1. Remove from the local context
+        modelContext.delete(habit)
+        
+        // 2. Save the change
+        try? modelContext.save()
+        
+        // 3. Optional: Trigger haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+    }
+    
+    func debugPrintHabits() {
+        // 1. Create a FetchDescriptor to find all Habits
+        let descriptor = FetchDescriptor<Habit>()
+        
+        do {
+            // 2. Execute the fetch via the context
+            let allHabits = try modelContext.fetch(descriptor)
+            
+            print("--- ima Database Debug ---")
+            if allHabits.isEmpty {
+                print("The database is currently empty.")
+            } else {
+                for habit in allHabits {
+                    print("""
+                    ID: \(habit.id)
+                    Title: \(habit.title)
+                    Done Today: \(habit.countDoneToday)/\(habit.dailyGoal)
+                    Total: \(habit.totalCount)
+                    -----------------------
+                    """)
+                }
+            }
+        } catch {
+            print("Failed to fetch habits: \(error.localizedDescription)")
+        }
     }
 }
 

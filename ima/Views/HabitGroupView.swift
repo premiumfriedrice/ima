@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 struct HabitGroupView: View {
-    @Environment(\.modelContext) private var modelContext
     var habits: [Habit]
     var onAddTap: () -> Void
     
@@ -43,17 +42,4 @@ struct HabitGroupView: View {
         }
         .padding(.vertical, 10)
     }
-    
-    private func deleteHabit(_ habit: Habit) {
-        // 1. Remove from the local context
-        modelContext.delete(habit)
-        
-        // 2. Save the change
-        try? modelContext.save()
-        
-        // 3. Optional: Trigger haptic feedback
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-    }
-    
 }

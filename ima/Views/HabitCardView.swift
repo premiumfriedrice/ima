@@ -40,7 +40,7 @@ struct HabitCardView: View {
                     total: habit.frequencyCount,
                     color: statusColor
                 )
-                .frame(height: 5)
+                .frame(height: 6)
             }
             .foregroundStyle(.white)
             
@@ -59,7 +59,7 @@ struct HabitCardView: View {
                 }
             }) {
                 Image(systemName: isDoneForToday ? "square.fill" : "square")
-                    .font(.system(size: 28))
+                    .font(.system(size: 32))
                     .foregroundColor(statusColor)
             }
         }

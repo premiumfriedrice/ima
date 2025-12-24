@@ -12,60 +12,40 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Habit.title) private var habits: [Habit]
     @State private var selectedTab = 0
-
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             Color(red: 0, green: 0, blue: 0).ignoresSafeArea()
             
             VStack {
-                HStack {
-                    Text("Today's Work")
-                        .font(.largeTitle)
-                        .foregroundStyle(.white)
-                        .bold()
-                        .padding(15)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Button(action: addSampleHabit) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.blue)
-                            .padding()
-                    }
-                }
+                Text("Today's Work")
+                    .font(.largeTitle)
+                    .foregroundStyle(.white)
+                    .bold()
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
                 VStack {
                     if selectedTab == 0 {
                         ScrollView {
                             VStack{
-                                Text("Habits")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                                    .bold()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.leading)
-                                VStack(spacing: 16) {
-                                    ForEach(habits) { habit in
-                                        HabitCardView(habit: habit)
-                                    }
-                                }
-                                .padding(.top, 10)
-                                .padding(.bottom, 10)
+                                HabitGroupView(habits: habits, onAddTap: addSampleHabit)
                                 
                                 Spacer()
                                 
-                                Text("Tasks")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                                    .bold()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.leading)
-                                VStack(spacing: 16) {
-                                    ForEach(habits) { habit in
-                                        HabitCardView(habit: habit)
-                                    }
-                                }
-                                .padding(.top, 10)
-                                .padding(.bottom, 10)
+//                                Text("Tasks")
+//                                    .font(.title2)
+//                                    .foregroundStyle(.white)
+//                                    .bold()
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                    .padding(.leading)
+//                                VStack(spacing: 16) {
+//                                    ForEach(habits) { habit in
+//                                        HabitCardView(habit: habit)
+//                                    }
+//                                }
+//                                .padding(.top, 10)
+//                                .padding(.bottom, 10)
                                 
                             }
                             .padding(.bottom, 100)
@@ -76,17 +56,17 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
-
+                
             }
-
-            PillMenuBar(selectedIndex: $selectedTab, tabs: ["Habits", "Progress"], baseColor: .gray)
+            
+            PillMenuBar(selectedIndex: $selectedTab, tabs: ["Today", "Progress"], baseColor: .gray)
         }
         .onAppear {
             resetHabitsIfNeeded()
         }
     }
-
-
+    
+    
     func resetHabitsIfNeeded() {
         let lastResetDate = UserDefaults.standard.object(forKey: "LastResetDate") as? Date ?? Date.distantPast
         
@@ -97,7 +77,7 @@ struct ContentView: View {
             UserDefaults.standard.set(Date(), forKey: "LastResetDate")
         }
     }
-
+    
     private func addSampleHabit() {
         // Create different sample data
         let newHabit = Habit(title: "Pray", frequencyCount: 5, frequencyUnit: .daily)

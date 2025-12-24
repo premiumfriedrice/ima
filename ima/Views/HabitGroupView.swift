@@ -10,8 +10,8 @@ import SwiftData
 
 struct HabitGroupView: View {
     @Environment(\.modelContext) private var modelContext
+    @State private var showingCreateSheet = false
     var habits: [Habit]
-    var onAddTap: () -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -23,14 +23,19 @@ struct HabitGroupView: View {
                     .padding(.leading, 8)
                 
                 Spacer() // This pushes the button to the far right
-                
-                Button(action: onAddTap) {
+
+                // In your body...
+                Button(action: { showingCreateSheet = true }) {
                     Image(systemName: "plus")
                         .font(.title) // Uniform weight
                         .foregroundColor(.white)
                         .bold()
                 }
                 .padding(.trailing, 16)
+                .sheet(isPresented: $showingCreateSheet) {
+                    CreateSheetView()
+                }
+
             }
             .padding(.horizontal, 16) // Matches the "Today's Work" alignment
             .padding(.bottom, 16)    // Space before the first card

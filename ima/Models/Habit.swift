@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 final class Habit {
@@ -32,6 +33,19 @@ final class Habit {
     var frequency: (count: Int, unit: FrequencyUnit) {
         (frequencyCount, frequencyUnit)
     }
+    
+    var statusColor: Color {
+            let isDone = countDoneToday >= dailyGoal
+            if isDone {
+                return .green
+            } else if countDoneToday > 0 {
+                return .orange
+            } else {
+                return .white.opacity(0.3)
+            }
+    }
+    
+    var completionHistory: [String: Int] = [:]
 
     init(title: String, totalCount: Int = 0, countDoneToday: Int = 0, frequencyCount: Int, frequencyUnit: FrequencyUnit) {
         self.id = UUID()
@@ -41,6 +55,23 @@ final class Habit {
         self.frequencyCount = frequencyCount
         self.frequencyUnitRaw = frequencyUnit.rawValue
     }
+    
+    func colorFor(date: Date) -> Color {
+            let key = date.formatted(.iso8601.year().month().day())
+            let count = completionHistory[key] ?? 0
+            
+            if count >= frequencyCount {
+                return .green
+            } else if count > 0 {
+                return .orange
+            } else {
+                return .white.opacity(0.1)
+            }
+    }
+}
+
+private func calendarDay(for date: Date) -> Date {
+    Calendar.current.startOfDay(for: date)
 }
 
 enum FrequencyUnit: String, Codable, CaseIterable {

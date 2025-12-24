@@ -15,16 +15,6 @@ struct HabitCardView: View {
     var isDoneForToday: Bool {
         habit.countDoneToday >= habit.dailyGoal
     }
-    
-    var statusColor: Color {
-        if isDoneForToday {
-            return .green
-        } else if habit.countDoneToday > 0 {
-            return .orange
-        } else {
-            return .white.opacity(0.3)
-        }
-    }
 
     var body: some View {
         HStack {
@@ -39,7 +29,7 @@ struct HabitCardView: View {
                 SegmentedProgressBar(
                     value: habit.totalCount,
                     total: habit.frequencyCount,
-                    color: statusColor
+                    color: habit.statusColor
                 )
                 .frame(height: 6)
             }
@@ -48,14 +38,14 @@ struct HabitCardView: View {
             Spacer()
             
             Button(action: { showingEditSheet = true }) {
-                Image(systemName: "square.and.pencil")
-                    .font(.system(size: 28))
-                    .foregroundColor(statusColor)
+                Image(systemName: "chart.bar.doc.horizontal")
+                    .font(.system(size: 16))
+                    .foregroundColor(habit.statusColor)
                         }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 15).fill(statusColor.opacity(0.2)))
-        .overlay(RoundedRectangle(cornerRadius: 15).stroke(statusColor, lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 15).fill(habit.statusColor.opacity(0.2)))
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(habit.statusColor, lineWidth: 1))
         .opacity(isDoneForToday ? 0.3 : 1.0)
         .padding(.horizontal)
         .onTapGesture {
@@ -76,8 +66,8 @@ struct HabitCardView: View {
             
         }
         .sheet(isPresented: $showingEditSheet) {
-                    HabitEditView(habit: habit)
-                }
+            HabitInfoView(habit: habit)
+        }
 
     }
 }

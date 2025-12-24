@@ -31,9 +31,7 @@ struct ContentView: View {
                     if selectedTab == 0 {
                         ScrollView {
                             VStack{
-                                HabitGroupView(habits: habits,
-                                               onAddTap: addSampleHabit
-                                               )
+                                HabitGroupView(habits: habits)
                                 
                                 Spacer()
                                 

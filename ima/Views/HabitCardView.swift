@@ -10,6 +10,7 @@ import SwiftData
 
 struct HabitCardView: View {
     @Bindable var habit: Habit // Use Bindable for SwiftData objects
+    @State private var showingEditSheet: Bool = false // Renamed for clarity
     
     var isDoneForToday: Bool {
         habit.countDoneToday >= habit.dailyGoal
@@ -18,7 +19,7 @@ struct HabitCardView: View {
     var statusColor: Color {
         if isDoneForToday {
             return .green
-        } else if habit.countDoneToday > 0 || habit.totalCount > 0 {
+        } else if habit.countDoneToday > 0 {
             return .orange
         } else {
             return .white.opacity(0.3)
@@ -46,27 +47,37 @@ struct HabitCardView: View {
             
             Spacer()
             
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    if !isDoneForToday {
-                        habit.countDoneToday += 1
-                        habit.totalCount += 1
-                    } else {
-                        habit.totalCount -= habit.countDoneToday
-                        habit.countDoneToday = 0
-                    }
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                }
-            }) {
-                Image(systemName: isDoneForToday ? "square.fill" : "square")
-                    .font(.system(size: 32))
+            Button(action: { showingEditSheet = true }) {
+                Image(systemName: "square.and.pencil")
+                    .font(.system(size: 28))
                     .foregroundColor(statusColor)
-            }
+                        }
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 15).fill(statusColor.opacity(0.2)))
         .overlay(RoundedRectangle(cornerRadius: 15).stroke(statusColor, lineWidth: 1))
         .opacity(isDoneForToday ? 0.3 : 1.0)
         .padding(.horizontal)
+        .onTapGesture {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        // We use the logic directly here
+                        if habit.countDoneToday < habit.dailyGoal {
+                            habit.countDoneToday += 1
+                            habit.totalCount += 1
+                        } else {
+                            // Reset today's progress if already done
+                            habit.totalCount -= habit.countDoneToday
+                            habit.countDoneToday = 0
+                        }
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    }
+        }
+        .onLongPressGesture {
+            
+        }
+        .sheet(isPresented: $showingEditSheet) {
+                    HabitEditView(habit: habit)
+                }
+
     }
 }

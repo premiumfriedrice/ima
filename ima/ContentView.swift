@@ -16,16 +16,13 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             Color(red: 0.1, green: 0.1, blue: 0.1).ignoresSafeArea()
-            
             AnimatedRadialBackground()
-            
             VStack {
                 VStack {
                     if selectedTab == 0 {
                         VStack{
                             HabitGroupView(habits: habits)
                         }
-                        .padding(.bottom, 100)
                     } else {
                         Text("Tasks Coming Soon")
                             .foregroundColor(.white)
@@ -35,7 +32,6 @@ struct ContentView: View {
                 
             }
             
-            PillMenuBar(selectedIndex: $selectedTab, tabs: ["Habits", "Tasks"], baseColor: .gray)
         }
         .onAppear {
             resetHabitsIfNeeded()

@@ -20,7 +20,7 @@ struct CreateSheetView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            VStack(spacing: 0) { // Set spacing to 0 and use padding/ScrollView for better control
+            VStack(spacing: 0) {
                 // MARK: - Header
                 HStack {
                     Button("Cancel") { dismiss() }
@@ -38,8 +38,7 @@ struct CreateSheetView: View {
                 .padding(.horizontal, 25)
                 .padding(.top, 20)
                 .padding(.bottom, 20)
-                
-                // Wrap in ScrollView to match HabitInfoView structure
+
                 ScrollView {
                     VStack(spacing: 40) {
                         

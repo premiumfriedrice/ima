@@ -15,14 +15,16 @@ struct ContentView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color(red: 0, green: 0, blue: 0).ignoresSafeArea()
+            Color(red: 0.1, green: 0.1, blue: 0.1).ignoresSafeArea()
+            
+            AnimatedRadialBackground()
             
             VStack {
                 Text("Today's Work")
                     .font(.largeTitle)
                     .foregroundStyle(.white)
                     .bold()
-                    .padding(16)
+                    .padding(.leading, 16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 VStack {

@@ -1,5 +1,5 @@
 //
-//  PillBarMenu.swift
+//  PillMenuBar.swift
 //  ima
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/23/25.

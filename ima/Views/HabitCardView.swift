@@ -21,7 +21,7 @@ struct HabitCardView: View {
         } else if habit.countDoneToday > 0 || habit.totalCount > 0 {
             return .orange
         } else {
-            return .white.opacity(0.4)
+            return .white.opacity(0.3)
         }
     }
 
@@ -66,7 +66,7 @@ struct HabitCardView: View {
         .padding()
         .background(RoundedRectangle(cornerRadius: 15).fill(statusColor.opacity(0.2)))
         .overlay(RoundedRectangle(cornerRadius: 15).stroke(statusColor, lineWidth: 1))
-        .opacity(isDoneForToday ? 0.4 : 1.0)
+        .opacity(isDoneForToday ? 0.3 : 1.0)
         .padding(.horizontal)
     }
 }

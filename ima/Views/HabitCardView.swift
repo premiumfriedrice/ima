@@ -39,15 +39,16 @@ struct HabitCardView: View {
                     }
                 }
                 
+                
                 // Subtitle with tracking
-                Text("\(habit.totalCount)/\(habit.frequencyCount) \(habit.frequencyUnit == .daily ? "today" : "this week")")
+                Text("\(habit.totalCount)/\(habit.frequencyCount) \(timePeriodString)")
                     .font(.system(.caption, design: .rounded))
                     .fontWeight(.bold)
                     .textCase(.uppercase)
                     .kerning(1.0)
                     .opacity(0.5)
                     .foregroundStyle(.white)
-                
+
                 // Refined Progress Bar
                 SegmentedProgressBar(
                     value: habit.totalCount,
@@ -104,6 +105,17 @@ struct HabitCardView: View {
                 habit.countDoneToday = 0
             }
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+    }
+    
+    private var timePeriodString: String {
+        switch habit.frequencyUnit {
+        case .daily:
+            return "today"
+        case .weekly:
+            return "this week"
+        case .monthly:
+            return "this month"
         }
     }
 }

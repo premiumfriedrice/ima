@@ -56,6 +56,7 @@ final class Habit {
         self.frequencyUnitRaw = frequencyUnit.rawValue
     }
     
+    // For Calendar
     func colorFor(date: Date) -> Color {
             let key = date.formatted(.iso8601.year().month().day())
             let count = completionHistory[key] ?? 0

@@ -36,8 +36,8 @@ struct ContentView: View {
         .onAppear {
             resetHabitsIfNeeded()
         }
+//        .preferredColorScheme(.dark)
     }
-    
     
     func resetHabitsIfNeeded() {
         let lastResetDate = UserDefaults.standard.object(forKey: "LastResetDate") as? Date ?? Date.distantPast

@@ -31,7 +31,7 @@ struct HabitCardView: View {
                     // Stats Button with subtle background
                     Button(action: { showingEditSheet = true }) {
                         Image(systemName: "chart.bar.doc.horizontal")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(habit.statusColor)
                             .padding(8)
                             .background(habit.statusColor.opacity(0.15))

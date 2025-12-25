@@ -13,6 +13,8 @@ struct HabitInfoView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var habit: Habit
     
+    @State private var showingDeleteConfirmation = false
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -21,25 +23,31 @@ struct HabitInfoView: View {
             VStack(spacing: 0) {
                 // MARK: - Header
                 HStack {
-                    Button(role: .destructive) {
-                        modelContext.delete(habit)
+                    Button {
                         dismiss()
                     } label: {
-                        Text("Delete")
-                            .foregroundStyle(.red)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.6))
+                            .padding(12)
+                            .background(.white.opacity(0.1))
+                            .clipShape(Circle())
                     }
                     
                     Spacer()
                     
-                    Button("Done") {
-                        dismiss()
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.red.opacity(0.8))
+                            .padding(12)
+                            .background(.red.opacity(0.1))
+                            .clipShape(Circle())
                     }
-                    .fontWeight(.bold)
-                    .foregroundStyle(.blue)
                 }
-                .padding(.horizontal, 25)
-                .padding(.top, 20)
-                .padding(.bottom, 20)
+                .padding(25)
                 
                 ScrollView {
                     VStack(spacing: 32) {
@@ -61,8 +69,8 @@ struct HabitInfoView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
 
-                        // MARK: - Adjust Your Goal (Rolling Style)
-                        VStack(alignment: .leading, spacing: 15) {
+                        // MARK: - Adjust Goal
+                        VStack(alignment: .leading, spacing: 0) {
                             Text("ADJUST YOUR GOAL")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
@@ -97,7 +105,7 @@ struct HabitInfoView: View {
                                         Text(unit.rawValue.capitalized)
                                             .font(.system(size: 28, weight: .bold, design: .rounded))
                                             .foregroundStyle(.white)
-                                            .tag(unit.rawValue) // Whats the difference between unit and unit.rawValue?
+                                            .tag(unit.rawValue)
                                     }
                                 }
                                 .pickerStyle(.wheel)
@@ -107,6 +115,16 @@ struct HabitInfoView: View {
                             .frame(maxWidth: .infinity)
                         }
                         .padding(.horizontal, 25)
+                        
+                        Spacer()
+                        
+                        Text(habit.dateCreated.formatted(date: .abbreviated, time: .standard))
+                            .font(.system(.caption, design: .rounded))
+                            .fontWeight(.bold)
+                            .textCase(.uppercase)
+                            .kerning(1.0)
+                            .opacity(0.5)
+                            .foregroundStyle(.white)
                         
 //                        // MARK: - Calendar History
 //                        VStack(alignment: .leading, spacing: 15) {
@@ -118,7 +136,25 @@ struct HabitInfoView: View {
                 }
             }
             .foregroundStyle(.white)
-            
         }
+        .confirmationDialog(
+                    "Are you sure you want to delete '\(habit.title)'?",
+                    isPresented: $showingDeleteConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("Delete Habit", role: .destructive) {
+                        modelContext.delete(habit)
+                        dismiss()
+                    }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("This action cannot be undone.")
+                }
     }
+    
+}
+
+#Preview {
+    let habi = Habit(title: "LeetCode", frequencyCount: 2, frequencyUnit: .daily)
+    HabitInfoView(habit: habi)
 }

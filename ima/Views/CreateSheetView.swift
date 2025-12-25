@@ -24,21 +24,32 @@ struct CreateSheetView: View {
             VStack(spacing: 0) {
                 // MARK: - Header
                 HStack {
-                    Button("Cancel") { dismiss() }
-                        .foregroundStyle(.secondary)
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.6))
+                            .padding(12)
+                            .background(.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
                     
                     Spacer()
                     
-                    Button("Create") {
+                    Button {
                         saveHabit()
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(title.isEmpty ? .white.opacity(0.2) : .blue)
+                            .padding(12)
+                            .background(Circle().fill(title.isEmpty ? .white.opacity(0.05) : .blue.opacity(0.1)))
                     }
-                    .fontWeight(.bold)
-                    .foregroundStyle(title.isEmpty ? .gray : .blue)
                     .disabled(title.isEmpty)
+
                 }
-                .padding(.horizontal, 25)
-                .padding(.top, 20)
-                .padding(.bottom, 20)
+                .padding(25)
 
                 ScrollView {
                     VStack(spacing: 32) {
@@ -61,8 +72,8 @@ struct CreateSheetView: View {
                         .frame(maxWidth: .infinity, alignment: .leading) // Pushes text to the left
                         .padding(.horizontal, 25)
                         
-                        // MARK: - Adjust Your Goal (Rolling Style)
-                        VStack(alignment: .leading, spacing: 4) {
+                        // MARK: - Set Goal
+                        VStack(alignment: .leading, spacing: 0) {
                             Text("SET YOUR GOAL")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
@@ -105,11 +116,10 @@ struct CreateSheetView: View {
                             }
                             .frame(maxWidth: .infinity)
                         }
-                        .padding(.horizontal,25)
+                        .padding(.horizontal, 25)
                         
                     }
                     .padding(.top, 20)
-                    
                 }
             }
             .foregroundStyle(.white)

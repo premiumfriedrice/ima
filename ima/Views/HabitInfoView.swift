@@ -47,7 +47,10 @@ struct HabitInfoView: View {
                         // MARK: - Hero Title (Static)
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HABIT")
-                                .font(.caption).bold().opacity(0.3)
+                                .font(.caption)
+                                .bold()
+                                .opacity(0.3)
+                            
                             Text(habit.title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
@@ -58,7 +61,9 @@ struct HabitInfoView: View {
                         // MARK: - Adjust Your Goal (Rolling Style)
                         VStack(alignment: .leading, spacing: 15) {
                             Text("ADJUST YOUR GOAL")
-                                .font(.caption).bold().opacity(0.3)
+                                .font(.caption)
+                                .bold()
+                                .opacity(0.3)
                             
                             HStack(spacing: 0) {
                                 // Rolling Count

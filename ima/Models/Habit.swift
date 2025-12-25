@@ -41,7 +41,7 @@ final class Habit {
             } else if countDoneToday > 0 {
                 return .orange
             } else {
-                return .white.opacity(0.3)
+                return .white.opacity(0.4)
             }
     }
     

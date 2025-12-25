@@ -20,11 +20,11 @@ struct HabitCardView: View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
                 Text(habit.title)
-                    .font(.headline)
+                    .font(.title2.bold())
                 
                 Text("\(habit.totalCount)/\(habit.frequencyCount) \(habit.frequencyUnit == .daily ? "today" : "this week")")
-                    .font(.caption)
-                    .opacity(0.7)
+                    .font(.caption).bold()
+                    .opacity(0.3)
                 
                 SegmentedProgressBar(
                     value: habit.totalCount,
@@ -45,7 +45,7 @@ struct HabitCardView: View {
             .padding(6)
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 15).fill(habit.statusColor.opacity(0.2)))
+        .background(RoundedRectangle(cornerRadius: 15).fill(habit.statusColor.opacity(0.01)))
         .overlay(RoundedRectangle(cornerRadius: 15).stroke(habit.statusColor, lineWidth: 1))
         .opacity(isDoneForToday ? 0.3 : 1.0)
         .padding(.horizontal)

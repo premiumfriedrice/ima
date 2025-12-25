@@ -46,7 +46,9 @@ struct CreateSheetView: View {
                         // MARK: - Title Input
                         VStack(alignment: .leading, spacing: 12) {
                             Text("NAME YOUR HABIT")
-                                .font(.caption).bold().opacity(0.3)
+                                .font(.caption)
+                                .bold()
+                                .opacity(0.3)
                             
                             TextField("e.g., Read, Meditate...", text: $title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -59,7 +61,9 @@ struct CreateSheetView: View {
                         // MARK: - Adjust Your Goal (Rolling Style)
                         VStack(alignment: .leading, spacing: 4) {
                             Text("SET YOUR GOAL")
-                                .font(.caption).bold().opacity(0.3)
+                                .font(.caption)
+                                .bold()
+                                .opacity(0.3)
                             
                             HStack(spacing: 0) {
                                 Picker("Count", selection: $frequencyCount) {

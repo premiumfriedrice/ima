@@ -28,7 +28,7 @@ struct HabitGroupView: View {
                                 HabitCardView(habit: habit)
                             }
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 8)
                         .padding(.bottom, 150)
                     }
                     .transition(.opacity.combined(with: .move(edge: .bottom)))

@@ -15,7 +15,6 @@ struct ContentView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-//            Color(red: 0.1, green: 0.1, blue: 0.1).ignoresSafeArea()
             Color(.black).ignoresSafeArea()
             AnimatedRadialBackground()
             VStack {

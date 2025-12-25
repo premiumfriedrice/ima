@@ -81,7 +81,7 @@ struct HabitInfoView: View {
 
                                 // Dimmed Connector Text
                                 Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                    .font(.title3.bold())
+                                    .font(.title.bold())
                                     .foregroundStyle(.white.opacity(0.4))
                                     .padding(.horizontal, 8)
                                 

@@ -90,7 +90,7 @@ struct CreateSheetView: View {
                                         Text(unit.rawValue.capitalized)
                                             .font(.title.bold())
                                             .foregroundStyle(.white)
-                                            .tag(unit)
+                                            .tag(unit.rawValue)
                                     }
                                 }
                                 .pickerStyle(.wheel)

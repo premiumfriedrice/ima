@@ -17,58 +17,93 @@ struct HabitCardView: View {
     }
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(habit.title)
-                    .font(.title2.bold())
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 10) {
+                // Title and Icon Row
+                HStack {
+                    Text(habit.title)
+                        .font(.system(.title3, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                    
+                    Spacer()
+                    
+                    // Stats Button with subtle background
+                    Button(action: { showingEditSheet = true }) {
+                        Image(systemName: "chart.bar.doc.horizontal")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(habit.statusColor)
+                            .padding(8)
+                            .background(habit.statusColor.opacity(0.15))
+                            .clipShape(Circle())
+                    }
+                }
                 
+                // Subtitle with tracking
                 Text("\(habit.totalCount)/\(habit.frequencyCount) \(habit.frequencyUnit == .daily ? "today" : "this week")")
-                    .font(.caption).bold()
-                    .opacity(0.3)
+                    .font(.system(.caption, design: .rounded))
+                    .fontWeight(.bold)
+                    .textCase(.uppercase)
+                    .kerning(1.0)
+                    .opacity(0.5)
+                    .foregroundStyle(.white)
                 
+                // Refined Progress Bar
                 SegmentedProgressBar(
                     value: habit.totalCount,
                     total: habit.frequencyCount,
                     color: habit.statusColor
                 )
-                .frame(height: 6)
+                .frame(height: 8)
+                .shadow(color: habit.statusColor.opacity(0.3), radius: 4, x: 0, y: 2)
             }
-            .foregroundStyle(.white)
-            
-            Spacer()
-            
-            Button(action: { showingEditSheet = true }) {
-                Image(systemName: "chart.bar.doc.horizontal")
-                    .font(.system(size: 16))
-                    .foregroundColor(habit.statusColor)
-            }
-            .padding(6)
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 15).fill(habit.statusColor.opacity(0.01)))
-        .overlay(RoundedRectangle(cornerRadius: 15).stroke(habit.statusColor, lineWidth: 1))
-        .opacity(isDoneForToday ? 0.3 : 1.0)
-        .padding(.horizontal)
+        .padding(20)
+        .background {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.ultraThinMaterial.opacity(0.1))
+                // FIX: Place the black color inside another shape or use clipShape
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.black.opacity(0.4))
+                )
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            habit.statusColor.opacity(0.6),
+                            habit.statusColor.opacity(0.1),
+                            habit.statusColor.opacity(0.1)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
+        }
+        .opacity(isDoneForToday ? 0.4 : 1.0)
+        .scaleEffect(isDoneForToday ? 0.98 : 1.0) // Slight "recede" effect when done
+        .padding(.horizontal, 20)
         .onTapGesture {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        // We use the logic directly here
-                        if habit.countDoneToday < habit.dailyGoal {
-                            habit.countDoneToday += 1
-                            habit.totalCount += 1
-                        } else {
-                            // Reset today's progress if already done
-                            habit.totalCount -= habit.countDoneToday
-                            habit.countDoneToday = 0
-                        }
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    }
-        }
-        .onLongPressGesture {
-            
+            incrementHabit()
         }
         .sheet(isPresented: $showingEditSheet) {
             HabitInfoView(habit: habit)
         }
+    }
 
+    private func incrementHabit() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            if habit.countDoneToday < habit.dailyGoal {
+                habit.countDoneToday += 1
+                habit.totalCount += 1
+            } else {
+                habit.totalCount -= habit.countDoneToday
+                habit.countDoneToday = 0
+            }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
     }
 }

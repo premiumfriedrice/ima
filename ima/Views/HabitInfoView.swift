@@ -118,13 +118,13 @@ struct HabitInfoView: View {
                         
                         Spacer()
                         
-                        Text(habit.dateCreated.formatted(date: .abbreviated, time: .standard))
-                            .font(.system(.caption, design: .rounded))
-                            .fontWeight(.bold)
-                            .textCase(.uppercase)
-                            .kerning(1.0)
-                            .opacity(0.5)
-                            .foregroundStyle(.white)
+//                        Text(habit.dateCreated.formatted(date: .abbreviated, time: .standard))
+//                            .font(.system(.caption, design: .rounded))
+//                            .fontWeight(.bold)
+//                            .textCase(.uppercase)
+//                            .kerning(1.0)
+//                            .opacity(0.5)
+//                            .foregroundStyle(.white)
                         
 //                        // MARK: - Calendar History
 //                        VStack(alignment: .leading, spacing: 15) {

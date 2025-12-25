@@ -10,8 +10,11 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @Query(sort: \Habit.title) private var habits: [Habit]
     @State private var selectedTab = 0
+    
+    private let dayChanged = NotificationCenter.default.publisher(for: .NSCalendarDayChanged)
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -25,8 +28,12 @@ struct ContentView: View {
                         }
                     } else {
                         Text("Tasks Coming Soon")
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .font(.system(.caption, design: .rounded))
+                            .fontWeight(.bold)
+                            .textCase(.uppercase)
+                            .kerning(1.0)
+                            .opacity(0.5)
+                            .foregroundStyle(.white)
                     }
                 }
                 
@@ -34,21 +41,35 @@ struct ContentView: View {
             
         }
         .onAppear {
+            // Check 1: App launches from cold state
+            resetHabitsIfNeeded()
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            // Check 2: App comes from background to foreground
+            if newPhase == .active {
+                resetHabitsIfNeeded()
+            }
+        }
+        .onReceive(dayChanged) { _ in
+            // Check 3: User is staring at the screen at 12:00 AM
             resetHabitsIfNeeded()
         }
 //        .preferredColorScheme(.dark)
     }
     
     func resetHabitsIfNeeded() {
-        let lastResetDate = UserDefaults.standard.object(forKey: "LastResetDate") as? Date ?? Date.distantPast
-        
-        if !Calendar.current.isDateInToday(lastResetDate) {
-            for habit in habits {
-                habit.countDoneToday = 0 // Reset daily count
+            let lastResetDate = UserDefaults.standard.object(forKey: "LastResetDate") as? Date ?? Date.distantPast
+            
+            if !Calendar.current.isDateInToday(lastResetDate) {
+                print("Resetting habits for the new day...")
+                withAnimation {
+                    for habit in habits {
+                        habit.countDoneToday = 0
+                    }
+                }
+                UserDefaults.standard.set(Date(), forKey: "LastResetDate")
             }
-            UserDefaults.standard.set(Date(), forKey: "LastResetDate")
         }
-    }
     
     func debugPrintHabits() {
         // 1. Create a FetchDescriptor to find all Habits

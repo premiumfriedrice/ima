@@ -46,9 +46,12 @@ struct CreateSheetView: View {
                         // MARK: - Title Input
                         VStack(alignment: .leading, spacing: 12) {
                             Text("NAME YOUR HABIT")
-                                .font(.caption)
-                                .bold()
-                                .opacity(0.3)
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
                             
                             TextField("e.g., Read, Meditate...", text: $title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -61,15 +64,18 @@ struct CreateSheetView: View {
                         // MARK: - Adjust Your Goal (Rolling Style)
                         VStack(alignment: .leading, spacing: 4) {
                             Text("SET YOUR GOAL")
-                                .font(.caption)
-                                .bold()
-                                .opacity(0.3)
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
                             
                             HStack(spacing: 0) {
                                 Picker("Count", selection: $frequencyCount) {
                                     ForEach(1...50, id: \.self) { number in
                                         Text("\(number)")
-                                            .font(.title.bold())
+                                            .font(.system(size: 28, weight: .bold, design: .rounded))
                                             .foregroundStyle(.white)
                                             .tag(number)
                                     }
@@ -80,7 +86,7 @@ struct CreateSheetView: View {
 
                                 // Dimmed Connector Text
                                 Text(frequencyCount == 1 ? "time per" : "times per")
-                                    .font(.title.bold())
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.4))
                                     .padding(.horizontal, 8)
                                 
@@ -88,7 +94,7 @@ struct CreateSheetView: View {
                                 Picker("Frequency", selection: $frequencyUnit) {
                                     ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                         Text(unit.rawValue.capitalized)
-                                            .font(.title.bold())
+                                            .font(.system(size: 28, weight: .bold, design: .rounded))
                                             .foregroundStyle(.white)
                                             .tag(unit.rawValue)
                                     }
@@ -102,7 +108,7 @@ struct CreateSheetView: View {
                         .padding(.horizontal,25)
                         
                     }
-                    .padding(.top, 20) // Spacing from header to content
+                    .padding(.top, 20)
                     
                 }
             }

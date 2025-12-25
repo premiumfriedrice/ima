@@ -47,9 +47,12 @@ struct HabitInfoView: View {
                         // MARK: - Hero Title (Static)
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HABIT")
-                                .font(.caption)
-                                .bold()
-                                .opacity(0.3)
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
                             
                             Text(habit.title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -61,16 +64,19 @@ struct HabitInfoView: View {
                         // MARK: - Adjust Your Goal (Rolling Style)
                         VStack(alignment: .leading, spacing: 15) {
                             Text("ADJUST YOUR GOAL")
-                                .font(.caption)
-                                .bold()
-                                .opacity(0.3)
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
                             
                             HStack(spacing: 0) {
                                 // Rolling Count
                                 Picker("Count", selection: $habit.frequencyCount) {
                                     ForEach(1...50, id: \.self) { number in
                                         Text("\(number)")
-                                            .font(.title.bold())
+                                            .font(.system(size: 28, weight: .bold, design: .rounded))
                                             .foregroundStyle(.white)
                                             .tag(number)
                                     }
@@ -81,7 +87,7 @@ struct HabitInfoView: View {
 
                                 // Dimmed Connector Text
                                 Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                    .font(.title.bold())
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.4))
                                     .padding(.horizontal, 8)
                                 
@@ -89,7 +95,7 @@ struct HabitInfoView: View {
                                 Picker("Frequency", selection: $habit.frequencyUnitRaw) {
                                     ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                         Text(unit.rawValue.capitalized)
-                                            .font(.title.bold())
+                                            .font(.system(size: 28, weight: .bold, design: .rounded))
                                             .foregroundStyle(.white)
                                             .tag(unit.rawValue) // Whats the difference between unit and unit.rawValue?
                                     }
@@ -102,11 +108,11 @@ struct HabitInfoView: View {
                         }
                         .padding(.horizontal, 25)
                         
-                        // MARK: - Calendar History
-                        VStack(alignment: .leading, spacing: 15) {
-                            CalendarView(habit: habit)
-                        }
-                        .padding(.horizontal, 25)
+//                        // MARK: - Calendar History
+//                        VStack(alignment: .leading, spacing: 15) {
+//                            CalendarView(habit: habit)
+//                        }
+//                        .padding(.horizontal, 25)
                     }
                     .padding(.top, 20)
                 }

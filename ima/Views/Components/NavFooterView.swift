@@ -36,28 +36,28 @@ struct NavFooterView: View {
                     ForEach(AppTab.allCases) { tab in
                         HStack(spacing: 12) {
                             // Back indicator only on Tasks
-                            if tab == .tasks {
-                                Image(systemName: "chevron.left")
-                                    .font(.title3)
-                                    .foregroundStyle(.white.opacity(0.3))
-                                    .offset(x: animateArrow ? -6 : 0)
-                            }
+//                            if tab == .tasks {
+//                                Image(systemName: "chevron.left")
+//                                    .font(.title3)
+//                                    .foregroundStyle(.white.opacity(0.3))
+//                                    .offset(x: animateArrow ? -6 : 0)
+//                            }
                             
                             Text(tab.title)
-                                .font(.largeTitle.bold())
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                             
                             // Forward indicator only on Habits
-                            if tab == .habits {
-                                Image(systemName: "chevron.right")
-                                    .font(.title3)
-                                    .foregroundStyle(.white.opacity(0.3))
-                                    .offset(x: animateArrow ? 6 : 0)
-                            }
+//                            if tab == .habits {
+//                                Image(systemName: "chevron.right")
+//                                    .font(.title3)
+//                                    .foregroundStyle(.white.opacity(0.3))
+//                                    .offset(x: animateArrow ? 6 : 0)
+//                            }
                             
-                            Spacer() // Pushes content to the leading edge
+                            Spacer()
                         }
-                        .tag(tab) // Tags with the Enum case instead of Int
+                        .tag(tab)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
@@ -66,10 +66,10 @@ struct NavFooterView: View {
                 
                 Button(action: { showingCreateSheet = true }) {
                     Image(systemName: "plus")
-                        .font(.largeTitle)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                 }
-                .padding(.trailing, 8)
+                .padding(.trailing, 15)
             }
             .padding(.horizontal, 36)
             .padding(.top, 64)
@@ -81,8 +81,6 @@ struct NavFooterView: View {
                 stops: [
                     .init(color: Color(.black), location: 0.6),
                     .init(color: Color(.black).opacity(0), location: 1.0)
-//                    .init(color: Color(red: 0.1, green: 0.1, blue: 0.1), location: 0.6),
-//                    .init(color: Color(red: 0.1, green: 0.1, blue: 0.1).opacity(0), location: 1.0)
                 ],
                 startPoint: .bottom, // Kept your specific gradient direction
                 endPoint: .top

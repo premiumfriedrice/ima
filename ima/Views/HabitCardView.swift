@@ -22,7 +22,7 @@ struct HabitCardView: View {
                 // Title and Icon Row
                 HStack {
                     Text(habit.title)
-                        .font(.system(.title3, design: .rounded))
+                        .font(.system(.title2, design: .rounded))
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
                     
@@ -105,5 +105,14 @@ struct HabitCardView: View {
             }
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
+    }
+}
+
+#Preview {
+    let habi = Habit(title: "Habi", frequencyCount: 2, frequencyUnit: .daily)
+    
+    ZStack{
+        Color.black.ignoresSafeArea()
+        HabitCardView(habit: habi)
     }
 }

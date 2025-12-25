@@ -16,8 +16,9 @@ struct HabitInfoView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
+            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
-            VStack(spacing: 40) {
+            VStack(spacing: 0) {
                 // MARK: - Header
                 HStack {
                     Button(role: .destructive) {
@@ -38,66 +39,75 @@ struct HabitInfoView: View {
                 }
                 .padding(.horizontal, 25)
                 .padding(.top, 20)
+                .padding(.bottom, 20)
                 
                 ScrollView {
-                    VStack(spacing: 40) {
+                    VStack(spacing: 32) {
+                        
                         // MARK: - Hero Title (Static)
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HABIT")
-                                .font(.caption2).bold().opacity(0.4)
+                                .font(.caption).bold().opacity(0.3)
                             Text(habit.title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
-                        .padding(.top, 1)
-                        
-                        // MARK: - Frequency Sentence Builder
+
+                        // MARK: - Adjust Your Goal (Rolling Style)
                         VStack(alignment: .leading, spacing: 15) {
                             Text("ADJUST YOUR GOAL")
-                                .font(.caption2).bold().opacity(0.4)
+                                .font(.caption).bold().opacity(0.3)
                             
-                            VStack(spacing: 1) {
-                                HStack {
-                                    Stepper("\(habit.frequencyCount) times", value: $habit.frequencyCount, in: 1...100)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.blue)
-                                }
-                                .padding(20)
-                                .background(Color.white.opacity(0.05))
-                                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20))
-                                
-                                HStack {
-                                    Text("every")
-                                        .font(.headline)
-                                    Spacer()
-                                    Picker("Frequency", selection: $habit.frequencyUnitRaw) {
-                                        ForEach(FrequencyUnit.allCases, id: \.self) { unit in
-                                            Text(unit.rawValue).tag(unit.rawValue)
-                                        }
+                            HStack(spacing: 0) {
+                                // Rolling Count
+                                Picker("Count", selection: $habit.frequencyCount) {
+                                    ForEach(1...50, id: \.self) { number in
+                                        Text("\(number)")
+                                            .font(.title.bold())
+                                            .foregroundStyle(.white)
+                                            .tag(number)
                                     }
-                                    .pickerStyle(.menu)
-                                    .tint(.blue)
-                                    .fontWeight(.bold)
                                 }
-                                .padding(20)
-                                .background(Color.white.opacity(0.05))
-                                .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
+                                .pickerStyle(.wheel)
+                                .frame(width: 72, height: 128)
+                                .compositingGroup()
+
+                                // Dimmed Connector Text
+                                Text(habit.frequencyCount == 1 ? "time per" : "times per")
+                                    .font(.title3.bold())
+                                    .foregroundStyle(.white.opacity(0.4))
+                                    .padding(.horizontal, 8)
+                                
+                                // Rolling Frequency
+                                Picker("Frequency", selection: $habit.frequencyUnitRaw) {
+                                    ForEach(FrequencyUnit.allCases, id: \.self) { unit in
+                                        Text(unit.rawValue.capitalized)
+                                            .font(.title.bold())
+                                            .foregroundStyle(.white)
+                                            .tag(unit.rawValue) // Whats the difference between unit and unit.rawValue?
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 136, height: 128)
+                                .compositingGroup()
                             }
+                            .frame(maxWidth: .infinity)
                         }
                         .padding(.horizontal, 25)
                         
                         // MARK: - Calendar History
                         VStack(alignment: .leading, spacing: 15) {
-                            // Ensure your CalendarView is accessible here
                             CalendarView(habit: habit)
                         }
                         .padding(.horizontal, 25)
-                        .padding(.bottom, 30)
                     }
+                    .padding(.top, 20)
                 }
             }
             .foregroundStyle(.white)
+            
         }
     }
 }

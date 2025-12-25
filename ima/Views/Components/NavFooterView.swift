@@ -79,8 +79,10 @@ struct NavFooterView: View {
         .background(alignment: .top) {
             LinearGradient(
                 stops: [
-                    .init(color: Color(red: 0.1, green: 0.1, blue: 0.1), location: 0.6),
-                    .init(color: Color(red: 0.1, green: 0.1, blue: 0.1).opacity(0), location: 1.0)
+                    .init(color: Color(.black), location: 0.6),
+                    .init(color: Color(.black).opacity(0), location: 1.0)
+//                    .init(color: Color(red: 0.1, green: 0.1, blue: 0.1), location: 0.6),
+//                    .init(color: Color(red: 0.1, green: 0.1, blue: 0.1).opacity(0), location: 1.0)
                 ],
                 startPoint: .bottom, // Kept your specific gradient direction
                 endPoint: .top

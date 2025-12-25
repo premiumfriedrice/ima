@@ -18,7 +18,8 @@ struct CreateSheetView: View {
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(.black).ignoresSafeArea()
+            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
                 // MARK: - Header
@@ -40,12 +41,12 @@ struct CreateSheetView: View {
                 .padding(.bottom, 20)
 
                 ScrollView {
-                    VStack(spacing: 40) {
+                    VStack(spacing: 32) {
                         
                         // MARK: - Title Input
                         VStack(alignment: .leading, spacing: 12) {
                             Text("NAME YOUR HABIT")
-                                .font(.caption2).bold().opacity(0.4)
+                                .font(.caption).bold().opacity(0.3)
                             
                             TextField("e.g., Read, Meditate...", text: $title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -55,42 +56,50 @@ struct CreateSheetView: View {
                         .frame(maxWidth: .infinity, alignment: .leading) // Pushes text to the left
                         .padding(.horizontal, 25)
                         
-                        // MARK: - Frequency Sentence Builder
-                        VStack(alignment: .leading, spacing: 15) {
+                        // MARK: - Adjust Your Goal (Rolling Style)
+                        VStack(alignment: .leading, spacing: 4) {
                             Text("SET YOUR GOAL")
-                                .font(.caption2).bold().opacity(0.4)
+                                .font(.caption).bold().opacity(0.3)
                             
-                            VStack(spacing: 1) {
-                                HStack {
-                                    Stepper("\(frequencyCount) times", value: $frequencyCount, in: 1...100)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.blue)
-                                }
-                                .padding(20)
-                                .background(Color.white.opacity(0.05))
-                                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20))
-                                
-                                HStack {
-                                    Text("every")
-                                        .font(.headline)
-                                    Spacer()
-                                    Picker("Frequency", selection: $frequencyUnit) {
-                                        ForEach(FrequencyUnit.allCases, id: \.self) { unit in
-                                            Text(unit.rawValue).tag(unit)
-                                        }
+                            HStack(spacing: 0) {
+                                Picker("Count", selection: $frequencyCount) {
+                                    ForEach(1...50, id: \.self) { number in
+                                        Text("\(number)")
+                                            .font(.title.bold())
+                                            .foregroundStyle(.white)
+                                            .tag(number)
                                     }
-                                    .pickerStyle(.menu)
-                                    .tint(.blue)
-                                    .fontWeight(.bold)
                                 }
-                                .padding(20)
-                                .background(Color.white.opacity(0.05))
-                                .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
+                                .pickerStyle(.wheel)
+                                .frame(width: 72, height: 128)
+                                .compositingGroup()
+
+                                // Dimmed Connector Text
+                                Text(frequencyCount == 1 ? "time per" : "times per")
+                                    .font(.title.bold())
+                                    .foregroundStyle(.white.opacity(0.4))
+                                    .padding(.horizontal, 8)
+                                
+                                // Rolling Frequency
+                                Picker("Frequency", selection: $frequencyUnit) {
+                                    ForEach(FrequencyUnit.allCases, id: \.self) { unit in
+                                        Text(unit.rawValue.capitalized)
+                                            .font(.title.bold())
+                                            .foregroundStyle(.white)
+                                            .tag(unit)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 136, height: 128)
+                                .compositingGroup()
                             }
+                            .frame(maxWidth: .infinity)
                         }
-                        .padding(.horizontal, 25)
+                        .padding(.horizontal,25)
+                        
                     }
                     .padding(.top, 20) // Spacing from header to content
+                    
                 }
             }
             .foregroundStyle(.white)
@@ -107,4 +116,8 @@ struct CreateSheetView: View {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()
     }
+}
+
+#Preview {
+    CreateSheetView()
 }

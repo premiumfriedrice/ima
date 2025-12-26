@@ -118,13 +118,13 @@ struct HabitInfoView: View {
                         
                         Spacer()
                         
-//                        Text(habit.dateCreated.formatted(date: .abbreviated, time: .standard))
-//                            .font(.system(.caption, design: .rounded))
-//                            .fontWeight(.bold)
-//                            .textCase(.uppercase)
-//                            .kerning(1.0)
-//                            .opacity(0.5)
-//                            .foregroundStyle(.white)
+                        Text(habit.dateCreated.formatted(date: .abbreviated, time: .standard))
+                            .font(.system(.caption, design: .rounded))
+                            .fontWeight(.bold)
+                            .textCase(.uppercase)
+                            .kerning(1.0)
+                            .opacity(0.5)
+                            .foregroundStyle(.white)
                         
 //                        // MARK: - Calendar History
 //                        VStack(alignment: .leading, spacing: 15) {
@@ -136,6 +136,24 @@ struct HabitInfoView: View {
                 }
             }
             .foregroundStyle(.white)
+            .overlay {
+                    RoundedRectangle(cornerRadius: 40) // Matches standard iOS sheet corners
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.2), location: 0.0), // Shiny top
+                                    .init(color: .white.opacity(0.05), location: 0.2), // Fades quickly
+                                    .init(color: .clear, location: 0.5) // Invisible at bottom
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .ignoresSafeArea() // Ensures the stroke follows the sheet edge completely
+                        .allowsHitTesting(false) // Ensures you can still touch buttons underneath
+                }
+            
         }
         .confirmationDialog(
                     "Are you sure you want to delete '\(habit.title)'?",

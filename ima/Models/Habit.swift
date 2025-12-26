@@ -17,7 +17,7 @@ final class Habit {
     var countDoneToday: Int
     var frequencyCount: Int
     var frequencyUnitRaw: String
-//    var dateCreated: Date
+    var dateCreated: Date
     
     // Computed property to handle the Enum conversion
     var frequencyUnit: FrequencyUnit {
@@ -55,7 +55,7 @@ final class Habit {
         self.countDoneToday = countDoneToday
         self.frequencyCount = frequencyCount
         self.frequencyUnitRaw = frequencyUnit.rawValue
-//        self.dateCreated = Date()
+        self.dateCreated = Date()
     }
     
     // For Calendar

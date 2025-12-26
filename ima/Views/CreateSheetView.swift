@@ -123,6 +123,23 @@ struct CreateSheetView: View {
                 }
             }
             .foregroundStyle(.white)
+            .overlay {
+                    RoundedRectangle(cornerRadius: 40) // Matches standard iOS sheet corners
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.2), location: 0.0), // Shiny top
+                                    .init(color: .white.opacity(0.05), location: 0.2), // Fades quickly
+                                    .init(color: .clear, location: 0.5) // Invisible at bottom
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .ignoresSafeArea() // Ensures the stroke follows the sheet edge completely
+                        .allowsHitTesting(false) // Ensures you can still touch buttons underneath
+                }
         }
     }
     

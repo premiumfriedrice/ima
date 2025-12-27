@@ -14,7 +14,6 @@ struct HabitInfoView: View {
     @Bindable var habit: Habit
     
     @State private var showingDeleteConfirmation = false
-    @State private var showingResetConfirmation = false
     
     var body: some View {
         ZStack {
@@ -36,19 +35,6 @@ struct HabitInfoView: View {
                     }
                     
                     Spacer()
-                    
-                    Button(role: .destructive) {
-                        showingResetConfirmation = true
-//                        dismiss() // Optional: close sheet after reset
-                    } label: {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.6))
-                            .padding(12)
-                            .padding(.horizontal, 12)
-                            .background(.white.opacity(0.1))
-                            .clipShape(Circle())
-                    }
                     
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true
@@ -182,21 +168,8 @@ struct HabitInfoView: View {
                 } message: {
                     Text("This action cannot be undone.")
                 }
-                .confirmationDialog(
-                            "Are you sure you want to reset '\(habit.title)'?",
-                            isPresented: $showingResetConfirmation,
-                            titleVisibility: .visible
-                        ) {
-                            Button("Reset Progress", role: .destructive) {
-                                habit.resetProgress()
-                                dismiss()
-                            }
-                            Button("Cancel", role: .cancel) { }
-                        } message: {
-                            Text("This will reset your progress for the day for this habit.")
-                        }
-        
     }
+    
 }
 
 #Preview {

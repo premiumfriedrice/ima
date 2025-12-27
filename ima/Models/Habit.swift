@@ -18,7 +18,6 @@ final class Habit {
     var frequencyCount: Int
     var frequencyUnitRaw: String
     var dateCreated: Date
-    var dateLastReset: Date
     
     // Computed property to handle the Enum conversion
     var frequencyUnit: FrequencyUnit {
@@ -36,24 +35,15 @@ final class Habit {
         (frequencyCount, frequencyUnit)
     }
     
-    var isFullyDone: Bool {
-        if frequencyUnit == .daily {
-            // Daily habits depend on the daily reset
-            return countDoneToday >= dailyGoal
-        } else {
-            // Weekly/Monthly habits stay done once the total hits the goal
-            return totalCount >= frequencyCount
-        }
-    }
-
     var statusColor: Color {
-        if isFullyDone {
-            return .green
-        } else if countDoneToday > 0 || totalCount > 0 {
-            return .orange
-        } else {
-            return .white.opacity(0.4)
-        }
+            let isDone = countDoneToday >= dailyGoal
+            if isDone {
+                return .green
+            } else if countDoneToday > 0 {
+                return .orange
+            } else {
+                return .white.opacity(0.4)
+            }
     }
     
     var completionHistory: [String: Int] = [:]
@@ -66,34 +56,6 @@ final class Habit {
         self.frequencyCount = frequencyCount
         self.frequencyUnitRaw = frequencyUnit.rawValue
         self.dateCreated = Date()
-        self.dateLastReset = Date()
-    }
-    
-/// Logic to determine if the habit should reset based on its frequency
-//    func checkAndResetIfNeeded() {
-//        let calendar = Calendar.current
-//        let now = Date()
-//        
-//        let shouldReset: Bool
-//        
-//        switch frequencyUnit {
-//        case .daily:
-//            shouldReset = !calendar.isDate(dateLastReset, inSameDayAs: now)
-//        case .weekly:
-//            shouldReset = !calendar.isDate(dateLastReset, equalTo: now, toGranularity: .weekOfYear)
-//        case .monthly:
-//            shouldReset = !calendar.isDate(dateLastReset, equalTo: now, toGranularity: .month)
-//        }
-//        
-//        if shouldReset {
-//            resetProgress()
-//        }
-//    }
-//    
-    func resetProgress() {
-        totalCount -= countDoneToday
-        countDoneToday = 0
-        dateLastReset = Date()
     }
     
     // For Calendar

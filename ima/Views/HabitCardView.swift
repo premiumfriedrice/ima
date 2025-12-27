@@ -12,8 +12,12 @@ struct HabitCardView: View {
     @Bindable var habit: Habit // Use Bindable for SwiftData objects
     @State private var showingEditSheet: Bool = false // Renamed for clarity
     
-    var isDoneForToday: Bool {
-        habit.countDoneToday >= habit.dailyGoal
+//    var isDoneForToday: Bool {
+//        habit.countDoneToday >= habit.dailyGoal
+//    }
+    
+    var isDone: Bool {
+        habit.isFullyDone
     }
 
     var body: some View {
@@ -84,8 +88,10 @@ struct HabitCardView: View {
                     lineWidth: 1.5
                 )
         }
-        .opacity(isDoneForToday ? 0.4 : 1.0)
-        .scaleEffect(isDoneForToday ? 0.98 : 1.0) // Slight "recede" effect when done
+        .opacity(isDone ? 0.4 : 1.0)
+        .scaleEffect(isDone ? 0.98 : 1.0)
+//        .opacity(isDoneForToday ? 0.4 : 1.0)
+//        .scaleEffect(isDoneForToday ? 0.98 : 1.0) // Slight "recede" effect when done
         .padding(.horizontal, 20)
         .onTapGesture {
             incrementHabit()
@@ -96,15 +102,18 @@ struct HabitCardView: View {
     }
 
     private func incrementHabit() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-            if habit.countDoneToday < habit.dailyGoal {
-                habit.countDoneToday += 1
-                habit.totalCount += 1
-            } else {
-                habit.totalCount -= habit.countDoneToday
-                habit.countDoneToday = 0
+        if !habit.isFullyDone {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                if habit.countDoneToday < habit.dailyGoal {
+                    habit.countDoneToday += 1
+                    habit.totalCount += 1
+                    
+//                } else {
+//                    habit.totalCount -= habit.countDoneToday
+//                    habit.countDoneToday = 0
+//                }
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             }
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }
     

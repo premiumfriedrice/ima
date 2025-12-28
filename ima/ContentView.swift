@@ -41,18 +41,15 @@ struct ContentView: View {
             
         }
         .onAppear {
-            // Check 1: App launches from cold state
-            resetHabitsIfNeeded()
+            Habit.resetHabitsIfNeeded(habits: habits)
         }
-        .onChange(of: scenePhase) { oldPhase, newPhase in
-            // Check 2: App comes from background to foreground
+        .onChange(of: scenePhase) { oldPhase, newPhase in // iOS 17+ Syntax
             if newPhase == .active {
-                resetHabitsIfNeeded()
+                Habit.resetHabitsIfNeeded(habits: habits)
             }
         }
         .onReceive(dayChanged) { _ in
-            // Check 3: User is staring at the screen at 12:00 AM
-            resetHabitsIfNeeded()
+            Habit.resetHabitsIfNeeded(habits: habits)
         }
 //        .preferredColorScheme(.dark)
     }
@@ -64,7 +61,7 @@ struct ContentView: View {
                 print("Resetting habits for the new day...")
                 withAnimation {
                     for habit in habits {
-                        habit.countDoneToday = 0
+                        habit.resetProgress()
                     }
                 }
                 UserDefaults.standard.set(Date(), forKey: "LastResetDate")

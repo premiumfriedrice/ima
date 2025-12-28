@@ -97,13 +97,7 @@ struct HabitCardView: View {
 
     private func incrementHabit() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-            if habit.countDoneToday < habit.dailyGoal {
-                habit.countDoneToday += 1
-                habit.totalCount += 1
-            } else {
-                habit.totalCount -= habit.countDoneToday
-                habit.countDoneToday = 0
-            }
+            habit.increment()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }

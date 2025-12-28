@@ -14,6 +14,7 @@ struct HabitInfoView: View {
     @Bindable var habit: Habit
     
     @State private var showingDeleteConfirmation = false
+    @State private var showingResetConfirmation = false
     
     var body: some View {
         ZStack {
@@ -35,6 +36,17 @@ struct HabitInfoView: View {
                     }
                     
                     Spacer()
+                    
+                    Button {
+                        showingResetConfirmation = true
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.6))
+                            .padding(12)
+                            .background(.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
                     
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true
@@ -156,18 +168,75 @@ struct HabitInfoView: View {
             
         }
         .confirmationDialog(
+            "Are you sure you want to delete '\(habit.title)'?",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Habit", role: .destructive) {
+                // 1. Dismiss FIRST to trigger the slide-down animation
+                dismiss()
+                
+                // 2. Wait for the animation to finish before destroying the data
+                Task {
+                    try? await Task.sleep(for: .seconds(0.35)) // Standard sheet animation time
+                    modelContext.delete(habit)
+                }
+            }
+            Button("Cancel") { }
+        } message: {
+            Text("This action cannot be undone.")
+        }
+//        .confirmationDialog(
+//            "Are you sure you want to reset '\(habit.title)'?",
+//            isPresented: $showingResetConfirmation,
+//            titleVisibility: .visible
+//        ) {
+//            Button("Reset Progress", role: .destructive) {
+//                // 1. Update the UI immediately so the user sees "0"
+//                withAnimation {
+//                    habit.resetProgress()
+//                }
+//                
+//                // 2. Wait a split second so the user registers the change
+//                Task {
+//                    try? await Task.sleep(for: .seconds(0.4))
+//                    
+//                    // 3. Then slide the sheet down
+//                    dismiss()
+//                }
+//            }
+//            Button("Cancel") { }
+//        } message: {
+//            Text("This action will reset progress for this habit for today.")
+//        }
+        .confirmationDialog(
                     "Are you sure you want to delete '\(habit.title)'?",
                     isPresented: $showingDeleteConfirmation,
                     titleVisibility: .visible
                 ) {
                     Button("Delete Habit", role: .destructive) {
-                        modelContext.delete(habit)
                         dismiss()
+                        modelContext.delete(habit)
                     }
-                    Button("Cancel", role: .cancel) { }
+                    Button("Cancel") { }
                 } message: {
                     Text("This action cannot be undone.")
-                }
+                        }
+        .confirmationDialog(
+                    "Are you sure you want to reset '\(habit.title)'?",
+                    isPresented: $showingResetConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("Reset Progress", role: .destructive) {
+                        dismiss()
+                        withAnimation {
+                            habit.resetProgress()
+                        }
+                    }
+                    Button("Cancel") { }
+                } message: {
+                    Text("This action will reset progress for this habit for today.")
+                        }
     }
     
 }

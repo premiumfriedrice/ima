@@ -1,6 +1,6 @@
 //
 //  HabitCardView.swift
-//  ima
+//  ima/Views
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/23/25.
 //
@@ -12,10 +12,6 @@ struct HabitCardView: View {
     @Bindable var habit: Habit // Use Bindable for SwiftData objects
     @State private var showingEditSheet: Bool = false // Renamed for clarity
     
-    var isDoneForToday: Bool {
-        habit.countDoneToday >= habit.dailyGoal
-    }
-
     var body: some View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 10) {
@@ -84,8 +80,8 @@ struct HabitCardView: View {
                     lineWidth: 1.5
                 )
         }
-        .opacity(isDoneForToday ? 0.4 : 1.0)
-        .scaleEffect(isDoneForToday ? 0.98 : 1.0) // Slight "recede" effect when done
+        .opacity(habit.isFullyDone ? 0.4 : 1.0)
+        .scaleEffect(habit.isFullyDone ? 0.98 : 1.0) // Slight "recede" effect when done
         .padding(.horizontal, 20)
         .onTapGesture {
             incrementHabit()

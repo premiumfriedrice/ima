@@ -1,6 +1,6 @@
 //
 //  HabitGroupView.swift
-//  ima
+//  ima/Views
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/23/25.
 //

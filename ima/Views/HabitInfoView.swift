@@ -1,6 +1,6 @@
 //
 //  HabitInfoView.swift
-//  ima
+//  ima/Views
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/23/25.
 //
@@ -186,29 +186,6 @@ struct HabitInfoView: View {
         } message: {
             Text("This action cannot be undone.")
         }
-//        .confirmationDialog(
-//            "Are you sure you want to reset '\(habit.title)'?",
-//            isPresented: $showingResetConfirmation,
-//            titleVisibility: .visible
-//        ) {
-//            Button("Reset Progress", role: .destructive) {
-//                // 1. Update the UI immediately so the user sees "0"
-//                withAnimation {
-//                    habit.resetProgress()
-//                }
-//                
-//                // 2. Wait a split second so the user registers the change
-//                Task {
-//                    try? await Task.sleep(for: .seconds(0.4))
-//                    
-//                    // 3. Then slide the sheet down
-//                    dismiss()
-//                }
-//            }
-//            Button("Cancel") { }
-//        } message: {
-//            Text("This action will reset progress for this habit for today.")
-//        }
         .confirmationDialog(
                     "Are you sure you want to delete '\(habit.title)'?",
                     isPresented: $showingDeleteConfirmation,
@@ -227,10 +204,10 @@ struct HabitInfoView: View {
                     isPresented: $showingResetConfirmation,
                     titleVisibility: .visible
                 ) {
-                    Button("Reset Progress", role: .destructive) {
+                    Button("Reset Todays Progress", role: .destructive) {
                         dismiss()
                         withAnimation {
-                            habit.resetProgress()
+                            habit.resetCurrentProgress()
                         }
                     }
                     Button("Cancel") { }

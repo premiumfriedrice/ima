@@ -1,6 +1,6 @@
 //
 //  Habit.swift
-//  ima
+//  ima/Models
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/22/25.
 //
@@ -14,11 +14,10 @@ final class Habit {
     @Attribute(.unique) var id: UUID
     var title: String
     var totalCount: Int
-    var countDoneToday: Int
+    var currentCount: Int
     var frequencyCount: Int
     var frequencyUnitRaw: String
     var dateCreated: Date
-    var dateLastReset: Date
     
     // Computed property to handle the Enum conversion
     var frequencyUnit: FrequencyUnit {
@@ -26,21 +25,19 @@ final class Habit {
         set { frequencyUnitRaw = newValue.rawValue }
     }
 
-    // Defines if the habit is "finished" for today
-    var dailyGoal: Int {
-        frequencyUnit == .daily ? frequencyCount : 1
+    var progress: Double {
+        guard frequencyCount > 0 else { return 0.0 }
+        return Double(currentCount) / Double(frequencyCount)
     }
 
-    // A helper property to make View code cleaner
-    var frequency: (count: Int, unit: FrequencyUnit) {
-        (frequencyCount, frequencyUnit)
+    var isFullyDone: Bool {
+        currentCount >= frequencyCount
     }
-    
+
     var statusColor: Color {
-        let isDone = countDoneToday >= dailyGoal
-        if isDone {
+        if isFullyDone {
             return .green
-        } else if countDoneToday > 0 {
+        } else if currentCount > 0 {
             return .orange
         } else {
             return .white.opacity(0.4)
@@ -49,41 +46,40 @@ final class Habit {
     
     var completionHistory: [String: Int] = [:]
 
-    init(title: String, totalCount: Int = 0, countDoneToday: Int = 0, frequencyCount: Int, frequencyUnit: FrequencyUnit) {
+    init(title: String, totalCount: Int = 0, currentCount: Int = 0, frequencyCount: Int, frequencyUnit: FrequencyUnit) {
         self.id = UUID()
         self.title = title
         self.totalCount = totalCount
-        self.countDoneToday = countDoneToday
+        self.currentCount = currentCount
         self.frequencyCount = frequencyCount
         self.frequencyUnitRaw = frequencyUnit.rawValue
         self.dateCreated = Date()
-        self.dateLastReset = Date()
     }
     
     // MARK: - Instance Methods
     
     func increment() {
-        if countDoneToday < dailyGoal {
-            countDoneToday += 1
+        if !isFullyDone {
+            currentCount += 1
             totalCount += 1
             
-            // Log history for Calendar
+            // Log history for Calendar (We log the date it happened)
             let key = Date().formatted(.iso8601.year().month().day())
-            completionHistory[key] = countDoneToday
+            completionHistory[key] = currentCount
         }
     }
     
-    /// Called when the user wants to completely wipe progress (Undo)
-    func resetProgress() {
-        if countDoneToday > 0 {
-            totalCount -= countDoneToday // Undo the total count contribution
-            countDoneToday = 0
+    /// Called when the user wants to completely wipe progress (Undo button)
+    func resetCurrentProgress() {
+        if currentCount > 0 {
+            totalCount -= currentCount // Undo the total count contribution
+            currentCount = 0
         }
     }
     
-    /// Called automatically by the system for a new day (Keeps Total Count!)
-    func resetForNewDay() {
-        countDoneToday = 0
+    /// Called automatically by the system when the cycle (Day/Week/Month) flips
+    func resetForNewCycle() {
+        currentCount = 0
         // We do NOT subtract from totalCount here, preserving lifetime stats
     }
     
@@ -101,26 +97,44 @@ final class Habit {
         }
     }
     
-    // MARK: - Static Helpers (The Logic You Asked For)
+    // MARK: - Static Helpers (Context-Aware Reset)
     
-    /// Checks if it's a new day and resets all provided habits
+    /// Checks the calendar and resets habits based on their specific frequency
     @MainActor
-    static func resetHabitsIfNeeded(habits: [Habit]) {
+    static func resetHabitsIfNeeded(habits: [Habit], asOf currentDate: Date = Date()) {
+        let calendar = Calendar.current
         let lastResetDate = UserDefaults.standard.object(forKey: "LastResetDate") as? Date ?? Date.distantPast
         
-        if !Calendar.current.isDateInToday(lastResetDate) {
-            print("Resetting habits for the new day...")
+        // 1. Only run logic if at least one day has passed since last check
+        if !calendar.isDate(lastResetDate, inSameDayAs: currentDate) {
+            print("Date change detected. Checking all habits for necessary resets...")
             
             withAnimation {
                 for habit in habits {
-                    // Only reset daily habits automatically
-                    if habit.frequencyUnit == .daily {
-                        habit.resetForNewDay()
+                    let shouldReset: Bool
+                    
+                    switch habit.frequencyUnit {
+                    case .daily:
+                        // Always reset if the day changed
+                        shouldReset = true
+                        
+                    case .weekly:
+                        // Reset ONLY if the week changed (e.g. Sunday -> Monday)
+                        shouldReset = !calendar.isDate(lastResetDate, equalTo: currentDate, toGranularity: .weekOfYear)
+                        
+                    case .monthly:
+                        // Reset ONLY if the month changed (e.g. 31st -> 1st)
+                        shouldReset = !calendar.isDate(lastResetDate, equalTo: currentDate, toGranularity: .month)
+                    }
+                    
+                    if shouldReset {
+                        habit.resetForNewCycle()
                     }
                 }
             }
             
-            UserDefaults.standard.set(Date(), forKey: "LastResetDate")
+            // 2. Update the last reset date to "now"
+            UserDefaults.standard.set(currentDate, forKey: "LastResetDate")
         }
     }
 }

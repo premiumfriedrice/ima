@@ -35,25 +35,9 @@ struct NavFooterView: View {
                 TabView(selection: $selectedTab) {
                     ForEach(AppTab.allCases) { tab in
                         HStack(spacing: 12) {
-                            // Back indicator only on Tasks
-//                            if tab == .tasks {
-//                                Image(systemName: "chevron.left")
-//                                    .font(.title3)
-//                                    .foregroundStyle(.white.opacity(0.3))
-//                                    .offset(x: animateArrow ? -6 : 0)
-//                            }
-                            
                             Text(tab.title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
-                            
-                            // Forward indicator only on Habits
-//                            if tab == .habits {
-//                                Image(systemName: "chevron.right")
-//                                    .font(.title3)
-//                                    .foregroundStyle(.white.opacity(0.3))
-//                                    .offset(x: animateArrow ? 6 : 0)
-//                            }
                             
                             Spacer()
                         }
@@ -70,6 +54,7 @@ struct NavFooterView: View {
                         .foregroundColor(.white)
                 }
                 .padding(.trailing, 15)
+                .accessibilityIdentifier("AddHabitButton")
             }
             .padding(.horizontal, 36)
             .padding(.top, 64)

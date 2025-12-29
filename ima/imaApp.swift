@@ -14,7 +14,13 @@ struct imaApp: App {
         let schema = Schema([
             Habit.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let modelConfiguration: ModelConfiguration
+        
+        if ProcessInfo.processInfo.arguments.contains("-ui-testing") {
+            modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        } else {
+            modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        }
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])

@@ -34,5 +34,6 @@ struct SegmentedProgressBar: View {
             }
         }
         .clipShape(Capsule())
+        .accessibilityIdentifier("ProgressBar")
     }
 }

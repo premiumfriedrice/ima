@@ -34,6 +34,7 @@ struct HabitInfoView: View {
                             .background(.white.opacity(0.1))
                             .clipShape(Circle())
                     }
+                    .accessibilityIdentifier("CloseInfoViewButton")
                     
                     Spacer()
                     

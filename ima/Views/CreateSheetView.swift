@@ -47,6 +47,7 @@ struct CreateSheetView: View {
                             .background(Circle().fill(title.isEmpty ? .white.opacity(0.05) : .blue.opacity(0.1)))
                     }
                     .disabled(title.isEmpty)
+                    .accessibilityIdentifier("SaveHabitButton")
 
                 }
                 .padding(25)
@@ -68,6 +69,7 @@ struct CreateSheetView: View {
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .tint(.blue)
                                 .autocorrectionDisabled()
+                                .accessibilityIdentifier("HabitTitleInput")
                         }
                         .frame(maxWidth: .infinity, alignment: .leading) // Pushes text to the left
                         .padding(.horizontal, 25)

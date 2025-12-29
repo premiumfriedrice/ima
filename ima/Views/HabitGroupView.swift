@@ -45,6 +45,7 @@ struct HabitGroupView: View {
                 }
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)
+            .accessibilityIdentifier("HabitList")
             
             // MARK: - Floating Footer Navigation
             NavFooterView(showingCreateSheet: $showingCreateSheet, selectedTab: $selectedTab)

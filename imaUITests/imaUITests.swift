@@ -1,5 +1,5 @@
 //
-//  imaUITests.swift
+//  HabitFlowTests.swift
 //  imaUITests
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/22/25.
@@ -7,35 +7,88 @@
 
 import XCTest
 
-final class imaUITests: XCTestCase {
+final class HabitFlowTests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testCreateAndIncrementAndEditHabit() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["-ui-testing"]
         app.launch()
+        
+        let uniqueTitle = "Test Habit \(Int(Date().timeIntervalSince1970))"
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+        // 1. Open Add Sheet
+        let addButton = app.buttons["AddHabitButton"]
+        if addButton.exists {
+            addButton.tap()
+        } else {
+            app.navigationBars.buttons["Add"].tap()
         }
+
+        // 2. Type Title
+        let titleTextField = app.textFields["HabitTitleInput"]
+        XCTAssertTrue(titleTextField.waitForExistence(timeout: 2))
+        titleTextField.tap()
+        titleTextField.typeText(uniqueTitle)
+        
+        // Try tapping the "Return" key if available, or tapping outside
+        if app.keyboards.buttons["return"].exists {
+            app.keyboards.buttons["return"].tap()
+        }
+
+        // 3. Save
+        app.buttons["SaveHabitButton"].tap()
+
+        // 4. Find the Card
+        let specificHabitButton = app.buttons[uniqueTitle].firstMatch
+        XCTAssertTrue(specificHabitButton.waitForExistence(timeout: 2))
+        
+        // ASSERT INITIAL STATE: Check the value we set in the View
+        // Should be "0 out of 1" initially
+        // Note: XCUITest reads accessibility values as Strings
+        XCTAssertEqual(specificHabitButton.value as? String, "0 out of 1 today")
+
+        // 5. Tap to Increment
+        specificHabitButton.tap()
+
+        // 6. ASSERT NEW STATE
+        // We wait for the value to change (Animations take time)
+        let donePredicate = NSPredicate(format: "value == 'Done'") // Matches our View logic
+        
+        let expectation = XCTNSPredicateExpectation(predicate: donePredicate, object: specificHabitButton)
+        
+        // Wait up to 2 seconds for the animation/state update to finish
+        let result = XCTWaiter.wait(for: [expectation], timeout: 2.0)
+        
+        XCTAssertEqual(result, .completed, "Habit should be marked 'Done' after tapping")
+        
+        // Click on Info Button
+        let infoSheetButton = app.buttons["InfoSheetButton"]
+        infoSheetButton.tap()
+        
+        let countWheel = app.pickerWheels.element(boundBy: 0)
+        if countWheel.exists {
+            countWheel.adjust(toPickerWheelValue: "3")
+        }
+
+        // Adjust the Unit (Second Wheel) -> Scroll to "Weekly"
+        let unitWheel = app.pickerWheels.element(boundBy: 1)
+        if unitWheel.exists {
+            unitWheel.adjust(toPickerWheelValue: "Week")
+        }
+        
+        // 1. Close the Info/Edit Sheet
+        app.buttons["CloseInfoViewButton"].tap()
+
+        XCTAssertTrue(specificHabitButton.waitForExistence(timeout: 2))
+        
+        let updatedValue = specificHabitButton.value as? String ?? ""
+        
+        // Verify the Count AND the Period
+        XCTAssertTrue(updatedValue.contains("1 out of 3"), "Count should be updated")
+        XCTAssertTrue(updatedValue.contains("this week"), "Time period should be updated to 'this week'")
     }
 }

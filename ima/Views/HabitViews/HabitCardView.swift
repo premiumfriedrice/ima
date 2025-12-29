@@ -1,6 +1,6 @@
 //
 //  HabitCardView.swift
-//  ima/Views
+//  ima/Views/HabitViews
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/23/25.
 //

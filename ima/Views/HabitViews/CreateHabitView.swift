@@ -1,24 +1,24 @@
 //
-//  HabitInfoView.swift
-//  ima/Views
+//  CreateHabitView.swift
+//  ima/Views/HabitViews
 //
-//  Created by Lloyd Derryk Mudanza Alba on 12/23/25.
+//  Created by Lloyd Derryk Mudanza Alba on 12/24/25.
 //
 
 import SwiftUI
 import SwiftData
 
-struct HabitInfoView: View {
+struct CreateHabitView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Bindable var habit: Habit
     
-    @State private var showingDeleteConfirmation = false
-    @State private var showingResetConfirmation = false
+    @State private var title: String = ""
+    @State private var frequencyCount: Int = 1
+    @State private var frequencyUnit: FrequencyUnit = .daily
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(.black).ignoresSafeArea()
             AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
@@ -34,40 +34,30 @@ struct HabitInfoView: View {
                             .background(.white.opacity(0.1))
                             .clipShape(Circle())
                     }
-                    .accessibilityIdentifier("CloseInfoViewButton")
                     
                     Spacer()
                     
                     Button {
-                        showingResetConfirmation = true
+                        saveHabit()
                     } label: {
-                        Image(systemName: "arrow.clockwise")
+                        Image(systemName: "checkmark")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(title.isEmpty ? .white.opacity(0.2) : .blue)
                             .padding(12)
-                            .background(.white.opacity(0.1))
-                            .clipShape(Circle())
+                            .background(Circle().fill(title.isEmpty ? .white.opacity(0.05) : .blue.opacity(0.1)))
                     }
-                    
-                    Button(role: .destructive) {
-                        showingDeleteConfirmation = true
-                    } label: {
-                        Image(systemName: "trash")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(.red.opacity(0.8))
-                            .padding(12)
-                            .background(.red.opacity(0.1))
-                            .clipShape(Circle())
-                    }
+                    .disabled(title.isEmpty)
+                    .accessibilityIdentifier("SaveHabitButton")
+
                 }
                 .padding(25)
-                
+
                 ScrollView {
                     VStack(spacing: 32) {
                         
-                        // MARK: - Hero Title (Static)
+                        // MARK: - Title Input
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("HABIT")
+                            Text("NAME YOUR HABIT")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
                                 .textCase(.uppercase)
@@ -75,16 +65,18 @@ struct HabitInfoView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
-                            Text(habit.title)
+                            TextField("e.g., Read, Meditate...", text: $title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
+                                .tint(.blue)
+                                .autocorrectionDisabled()
+                                .accessibilityIdentifier("HabitTitleInput")
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading) // Pushes text to the left
                         .padding(.horizontal, 25)
-
-                        // MARK: - Adjust Goal
+                        
+                        // MARK: - Set Goal
                         VStack(alignment: .leading, spacing: 0) {
-                            Text("ADJUST YOUR GOAL")
+                            Text("SET YOUR GOAL")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
                                 .textCase(.uppercase)
@@ -93,8 +85,7 @@ struct HabitInfoView: View {
                                 .foregroundStyle(.white)
                             
                             HStack(spacing: 0) {
-                                // Rolling Count
-                                Picker("Count", selection: $habit.frequencyCount) {
+                                Picker("Count", selection: $frequencyCount) {
                                     ForEach(1...50, id: \.self) { number in
                                         Text("\(number)")
                                             .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -107,13 +98,13 @@ struct HabitInfoView: View {
                                 .compositingGroup()
 
                                 // Dimmed Connector Text
-                                Text(habit.frequencyCount == 1 ? "time per" : "times per")
+                                Text(frequencyCount == 1 ? "time per" : "times per")
                                     .font(.system(size: 28, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.4))
                                     .padding(.horizontal, 8)
                                 
                                 // Rolling Frequency
-                                Picker("Frequency", selection: $habit.frequencyUnitRaw) {
+                                Picker("Frequency", selection: $frequencyUnit) {
                                     ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                         Text(unit.rawValue.capitalized)
                                             .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -129,21 +120,6 @@ struct HabitInfoView: View {
                         }
                         .padding(.horizontal, 25)
                         
-                        Spacer()
-                        
-                        Text(habit.dateCreated.formatted(date: .abbreviated, time: .standard))
-                            .font(.system(.caption, design: .rounded))
-                            .fontWeight(.bold)
-                            .textCase(.uppercase)
-                            .kerning(1.0)
-                            .opacity(0.5)
-                            .foregroundStyle(.white)
-                        
-//                        // MARK: - Calendar History
-//                        VStack(alignment: .leading, spacing: 15) {
-//                            CalendarView(habit: habit)
-//                        }
-//                        .padding(.horizontal, 25)
                     }
                     .padding(.top, 20)
                 }
@@ -166,60 +142,21 @@ struct HabitInfoView: View {
                         .ignoresSafeArea() // Ensures the stroke follows the sheet edge completely
                         .allowsHitTesting(false) // Ensures you can still touch buttons underneath
                 }
-            
         }
-        .confirmationDialog(
-            "Are you sure you want to delete '\(habit.title)'?",
-            isPresented: $showingDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Delete Habit", role: .destructive) {
-                // 1. Dismiss FIRST to trigger the slide-down animation
-                dismiss()
-                
-                // 2. Wait for the animation to finish before destroying the data
-                Task {
-                    try? await Task.sleep(for: .seconds(0.35)) // Standard sheet animation time
-                    modelContext.delete(habit)
-                }
-            }
-            Button("Cancel") { }
-        } message: {
-            Text("This action cannot be undone.")
-        }
-        .confirmationDialog(
-                    "Are you sure you want to delete '\(habit.title)'?",
-                    isPresented: $showingDeleteConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Delete Habit", role: .destructive) {
-                        dismiss()
-                        modelContext.delete(habit)
-                    }
-                    Button("Cancel") { }
-                } message: {
-                    Text("This action cannot be undone.")
-                        }
-        .confirmationDialog(
-                    "Are you sure you want to reset '\(habit.title)'?",
-                    isPresented: $showingResetConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Reset Todays Progress", role: .destructive) {
-                        dismiss()
-                        withAnimation {
-                            habit.resetCurrentProgress()
-                        }
-                    }
-                    Button("Cancel") { }
-                } message: {
-                    Text("This action will reset progress for this habit for today.")
-                        }
     }
     
+    private func saveHabit() {
+        let newHabit = Habit(
+            title: title,
+            frequencyCount: frequencyCount,
+            frequencyUnit: frequencyUnit
+        )
+        modelContext.insert(newHabit)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        dismiss()
+    }
 }
 
 #Preview {
-    let habi = Habit(title: "LeetCode", frequencyCount: 2, frequencyUnit: .daily)
-    HabitInfoView(habit: habi)
+    CreateHabitView()
 }

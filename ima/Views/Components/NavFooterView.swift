@@ -10,14 +10,14 @@ import SwiftUI
 // Define the source of truth for your tabs
 enum AppTab: Int, CaseIterable, Identifiable {
     case habits = 0
-    case tasks = 1
+    case usertasks = 1
     
     var id: Int { self.rawValue }
     
     var title: String {
         switch self {
         case .habits: return "Habits"
-        case .tasks: return "Tasks"
+        case .usertasks: return "Tasks"
         }
     }
 }

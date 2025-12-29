@@ -1,6 +1,6 @@
 //
 //  AnimatedRadialBackground.swift
-//  ima
+//  ima/Views/Components
 //
 //  Created by Lloyd Derryk Mudanza Alba on 12/23/25.
 //

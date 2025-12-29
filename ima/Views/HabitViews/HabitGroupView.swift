@@ -10,8 +10,7 @@ import SwiftData
 
 struct HabitGroupView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var selectedTab: AppTab = .habits
-    
+
     var habits: [Habit]
     
 // MARK: - Date Formatters
@@ -31,81 +30,80 @@ struct HabitGroupView: View {
         ZStack(alignment: .bottom) {
             // MARK: - Main Content Area
             ScrollView {
-                // CHANGED: Use LazyVStack with pinnedViews for sticky headers
-                LazyVStack(spacing: 24, pinnedViews: [.sectionHeaders]) {
-                    
-                    // Keep your spacer for top safe area/nav bar
-                    Color.clear.frame(height: 0)
-                    
-                    // MARK: - Daily Section
-                    if !dailyHabits.isEmpty {
-                        Section(header: SectionHeader(
-                            title: "Daily",
-                            subtitle: dayFormatter.string(from: Date()),
-                            icon: "sun.max.fill",
-                            color: .orange)) {
-                            ForEach(dailyHabits) { habit in
-                                HabitCardView(habit: habit)
-                            }
-                        }
-                    }
-                    
-                    // MARK: - Weekly Section
-                    if !weeklyHabits.isEmpty {
-                        Section(header: SectionHeader(
-                            title: "Weekly",
-                            subtitle: currentWeekRange,
-                            icon: "calendar",
-                            color: .blue)) {
-                            ForEach(weeklyHabits) { habit in
-                                HabitCardView(habit: habit)
-                            }
-                        }
-                    }
-                    
-                    // MARK: - Monthly Section
-                    if !monthlyHabits.isEmpty {
-                        Section(header: SectionHeader(
-                            title: "Monthly",
-                            subtitle: monthFormatter.string(from: Date()),
-                            icon: "moon.stars.fill",
-                            color: .purple)) {
-                            ForEach(monthlyHabits) { habit in
-                                HabitCardView(habit: habit)
-                            }
-                        }
-                    }
-                    
-                    // Empty State
-                    if habits.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "tray")
-                                .font(.system(size: 60)) // Set icon size explicitly
-                                .foregroundStyle(.white.opacity(0.5)) // Match your opacity
+                if habits.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "tray")
+                            .font(.system(size: 60)) // Set icon size explicitly
+                            .foregroundStyle(.white.opacity(0.5)) // Match your opacity
+                        
+                        VStack {
+                            Text("No Habits Yet")
+                                .font(.system(.title2, design: .rounded)) // Explicitly Rounded
+                                .fontWeight(.bold)
                             
-                            VStack {
-                                Text("No Habits Yet")
-                                    .font(.system(.title2, design: .rounded)) // Explicitly Rounded
-                                    .fontWeight(.bold)
-                                
-                                Text("Tap the + button to create your first habit.")
-                                    .font(.system(.body, design: .rounded))
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 40)
+                            Text("Tap the + button to create your first habit.")
+                                .font(.system(.body, design: .rounded))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                    }
+                    .padding(.top, 40)
+                    .font(.system(.caption, design: .rounded))
+                    .kerning(1.0)
+                    .opacity(0.5)
+                    .foregroundStyle(.white)
+                }
+                else {
+                    LazyVStack(spacing: 24, pinnedViews: [.sectionHeaders]) {
+                        
+                        // Keep your spacer for top safe area/nav bar
+                        Color.clear.frame(height: 0)
+                        
+                        // MARK: - Daily Section
+                        if !dailyHabits.isEmpty {
+                            Section(header: SectionHeader(
+                                title: "Daily",
+                                subtitle: dayFormatter.string(from: Date()),
+                                icon: "sun.max.fill",
+                                color: .orange)) {
+                                ForEach(dailyHabits) { habit in
+                                    HabitCardView(habit: habit)
+                                }
                             }
                         }
-                        .padding(.top, 40)
-                        .font(.system(.caption, design: .rounded))
-                        .kerning(1.0)
-                        .opacity(0.5)
-                        .foregroundStyle(.white)
+                        
+                        // MARK: - Weekly Section
+                        if !weeklyHabits.isEmpty {
+                            Section(header: SectionHeader(
+                                title: "Weekly",
+                                subtitle: currentWeekRange,
+                                icon: "calendar",
+                                color: .blue)) {
+                                ForEach(weeklyHabits) { habit in
+                                    HabitCardView(habit: habit)
+                                }
+                            }
+                        }
+                        
+                        // MARK: - Monthly Section
+                        if !monthlyHabits.isEmpty {
+                            Section(header: SectionHeader(
+                                title: "Monthly",
+                                subtitle: monthFormatter.string(from: Date()),
+                                icon: "moon.stars.fill",
+                                color: .purple)) {
+                                ForEach(monthlyHabits) { habit in
+                                    HabitCardView(habit: habit)
+                                }
+                            }
+                        }
                     }
+                    .padding(.horizontal, 16) // Increased slightly for the headers
+                    
+                    Color.clear
+                            .frame(height: 160)
+                            .accessibilityHidden(true)
                 }
-                .padding(.horizontal, 16) // Increased slightly for the headers
-                
-                Color.clear
-                        .frame(height: 160)
-                        .accessibilityHidden(true)
             }
         }
     }

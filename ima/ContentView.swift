@@ -13,7 +13,6 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query(sort: \Habit.title) private var habits: [Habit]
     
-    
     @State private var selectedTab: AppTab = .habits
     @State private var showingCreateSheet = false
     
@@ -21,49 +20,47 @@ struct ContentView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
+            // 1. Background
             Color(.black).ignoresSafeArea()
             AnimatedRadialBackground()
+            
+            // 2. Main Content
             VStack {
-                Group {
-                    switch selectedTab {
-                    case .habits:
-                        VStack{
-                            HabitGroupView(habits: habits)
-                                .accessibilityIdentifier("HabitList")
-                        }
+                switch selectedTab {
+                case .habits:
+                    HabitGroupView(habits: habits)
+                        .accessibilityIdentifier("HabitList")
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
-                        
-                    case .usertasks:
-                        Text("Tasks Coming Soon")
-                            .font(.system(.caption, design: .rounded))
-                            .fontWeight(.bold)
-                            .textCase(.uppercase)
-                            .kerning(1.0)
-                            .opacity(0.5)
-                            .foregroundStyle(.white)
-                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    
+                case .usertasks: // Make sure this matches your enum case name (usertasks vs tasks)
+                    VStack {
+                        UserTaskGroupView()
                     }
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
-                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)
-                
-                NavFooterView(showingCreateSheet: $showingCreateSheet, selectedTab: $selectedTab)
-                
+            }
+            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)
+
+            // Adds invisible padding at the bottom equal to the footer's height
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 100)
             }
             
+            // 3. Footer (Floats on top)
+            NavFooterView(showingCreateSheet: $showingCreateSheet, selectedTab: $selectedTab)
         }
         .sheet(isPresented: $showingCreateSheet) {
             if selectedTab == .habits {
                 CreateHabitView()
-            }
-            else if selectedTab == .usertasks {
-                Text("Create Sheet Here")
+            } else {
+                Text("Create Task Sheet")
                     .presentationDetents([.fraction(0.7)])
             }
         }
         .onAppear {
             Habit.resetHabitsIfNeeded(habits: habits)
         }
-        .onChange(of: scenePhase) { oldPhase, newPhase in // iOS 17+ Syntax
+        .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active {
                 Habit.resetHabitsIfNeeded(habits: habits)
             }
@@ -71,7 +68,6 @@ struct ContentView: View {
         .onReceive(dayChanged) { _ in
             Habit.resetHabitsIfNeeded(habits: habits)
         }
-//        .preferredColorScheme(.dark)
     }
 }
 

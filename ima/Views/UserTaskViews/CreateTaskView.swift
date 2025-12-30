@@ -16,22 +16,21 @@ struct CreateTaskView: View {
     @State private var title: String = ""
     @State private var priority: TaskPriority = .medium
     
-    // NEW: Date Logic
+    // Date Logic
     @State private var hasDueDate: Bool = false
     @State private var dueDate: Date = Date()
     
     @State private var tempSubtasks: [String] = []
     @State private var newSubtaskInput: String = ""
+    @State private var newDetailsInput: String = ""
     
     @FocusState private var isInputFocused: Bool
     @FocusState private var isTitleFocused: Bool
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
-            Rectangle()
-                .fill(.white.opacity(0.05))
-                .ignoresSafeArea()
+            Color(.black).ignoresSafeArea()
+            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
                 // MARK: - Header
@@ -87,10 +86,91 @@ struct CreateTaskView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
-                        
-                        // MARK: - Priority Picker
+
+                        // MARK: - Sentence Row (Priority & Due Date)
+                        VStack(alignment: .leading, spacing: 0) {
+                            
+                            // Row 1: Priority + Text + (Optional "No Date" button)
+                            HStack(spacing: 0) {
+                                // 1. Scroll Picker (Styled as Pill)
+                                Picker("Priority", selection: $priority) {
+                                    ForEach(TaskPriority.allCases) { p in
+                                        Text("\(p.title)")
+                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .foregroundStyle(.white)
+                                            .tag(p)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 96, height: 84) // Keep this tall for scrolling touch area
+                                .compositingGroup()
+                                .overlay {
+                                    // The "Window" Border
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [priority.color],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1.5
+                                        )
+                                        .frame(width: 78, height: 34) // <--- THIS forces the border to only frame the center item
+                                        .allowsHitTesting(false) // Allows touches to pass through to the picker
+                                }
+                                
+                                // 2. Connecting text
+                                Text("priority due")
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white.opacity(0.4))
+                                    .padding(.leading, 12)
+                                
+                                // 3. "No Date" Button
+                                if !hasDueDate {
+                                    Button {
+                                        withAnimation {
+                                            hasDueDate = true
+                                            dueDate = Date()
+                                        }
+                                    } label: {
+                                        Text("no date")
+                                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                                            .foregroundStyle(.white.opacity(0.5))
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 14)
+                                            .background(.white.opacity(0.1))
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    }
+                                    .padding(.leading, 12)
+                                }
+                            }
+                            
+                            // Row 2: Date Picker
+                            if hasDueDate {
+                                HStack(spacing: 8) {
+                                    DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                        .colorScheme(.dark)
+                                    
+                                    Button {
+                                        withAnimation { hasDueDate = false }
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 20))
+                                            .foregroundStyle(.white.opacity(0.3))
+                                    }
+                                }
+                                .padding(.top, 0)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 25)
+
+                        // MARK: - Details Section
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("PRIORITY")
+                            Text("DETAILS")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
                                 .textCase(.uppercase)
@@ -98,97 +178,13 @@ struct CreateTaskView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
-                            HStack(spacing: 12) {
-                                ForEach(TaskPriority.allCases) { p in
-                                    Button {
-                                        withAnimation(.snappy) { priority = p }
-                                    } label: {
-                                        HStack {
-                                            if priority == p {
-                                                Image(systemName: "checkmark")
-                                                    .font(.caption.bold())
-                                            }
-                                            Text(p.title)
-                                                .font(.system(.subheadline, design: .rounded))
-                                                .fontWeight(.bold)
-                                        }
-                                        .foregroundStyle(priority == p ? .black : .white)
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal, 16)
-                                        .background(Capsule().fill(priority == p ? p.color : .white.opacity(0.1)))
-                                        .overlay(Capsule().stroke(p.color.opacity(0.5), lineWidth: 1))
-                                    }
-                                }
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 25)
-
-                        // MARK: - Due Date Section (NEW)
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("DUE DATE")
-                                    .font(.system(.caption, design: .rounded))
-                                    .fontWeight(.bold)
-                                    .textCase(.uppercase)
-                                    .kerning(1.0)
-                                    .opacity(0.5)
-                                    .foregroundStyle(.white)
-                                
-                                Spacer()
-                                
-                                // Enable/Disable Toggle
-                                Toggle("", isOn: $hasDueDate.animation())
-                                    .labelsHidden()
-                                    .tint(.blue)
-                            }
-                            
-                            if hasDueDate {
-                                VStack(spacing: 16) {
-                                    // 1. Smart Chips (Today/Tomorrow)
-                                    HStack(spacing: 12) {
-                                        Button {
-                                            dueDate = Date()
-                                        } label: {
-                                            Text("Today")
-                                                .font(.system(.subheadline, design: .rounded))
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(Calendar.current.isDateInToday(dueDate) ? .black : .white)
-                                                .padding(.vertical, 8)
-                                                .padding(.horizontal, 16)
-                                                .background(Calendar.current.isDateInToday(dueDate) ? .white : .white.opacity(0.1))
-                                                .clipShape(Capsule())
-                                        }
-                                        
-                                        Button {
-                                            if let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
-                                                dueDate = tomorrow
-                                            }
-                                        } label: {
-                                            Text("Tomorrow")
-                                                .font(.system(.subheadline, design: .rounded))
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(Calendar.current.isDateInTomorrow(dueDate) ? .black : .white)
-                                                .padding(.vertical, 8)
-                                                .padding(.horizontal, 16)
-                                                .background(Calendar.current.isDateInTomorrow(dueDate) ? .white : .white.opacity(0.1))
-                                                .clipShape(Capsule())
-                                        }
-                                        
-                                        Spacer()
-                                    }
-                                    
-                                    // 2. The Compact Picker
-                                    DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
-                                        .datePickerStyle(.compact)
-                                        .labelsHidden() // Hide label to align left
-                                        .colorScheme(.dark) // Forces white text inside picker
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                }
+                            TextField("Add notes, context, or descriptions...", text: $newDetailsInput, axis: .vertical)
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white)
                                 .padding(16)
                                 .background(.white.opacity(0.05))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                            }
+                                .lineLimit(3...6)
                         }
                         .padding(.horizontal, 25)
 
@@ -315,6 +311,7 @@ struct CreateTaskView: View {
     private func createTask() {
         let newTask = UserTask(
             title: title,
+            details: newDetailsInput,
             // Only set dueDate if the toggle was ON
             dueDate: hasDueDate ? dueDate : nil,
             priority: priority

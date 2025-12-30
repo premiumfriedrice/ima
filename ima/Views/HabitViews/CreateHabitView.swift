@@ -40,11 +40,18 @@ struct CreateHabitView: View {
                     Button {
                         saveHabit()
                     } label: {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(title.isEmpty ? .white.opacity(0.2) : .blue)
-                            .padding(12)
-                            .background(Circle().fill(title.isEmpty ? .white.opacity(0.05) : .blue.opacity(0.1)))
+                        HStack(spacing: 6) {
+                            Text("CREATE")
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 16, weight: .bold))
+                        }
+                        .foregroundStyle(!title.isEmpty ? .black : .white.opacity(0.3))
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16)
+                        .background(!title.isEmpty ? .white : .white.opacity(0.1))
+                        .clipShape(Capsule())
                     }
                     .disabled(title.isEmpty)
                     .accessibilityIdentifier("SaveHabitButton")

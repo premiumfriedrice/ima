@@ -13,6 +13,7 @@ struct imaApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Habit.self,
+            UserTask.self,
         ])
         let modelConfiguration: ModelConfiguration
         

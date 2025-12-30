@@ -12,6 +12,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Query(sort: \Habit.title) private var habits: [Habit]
+    @Query(sort: \UserTask.dateCreated) private var tasks: [UserTask]
     
     @State private var selectedTab: AppTab = .habits
     @State private var showingCreateSheet = false
@@ -33,9 +34,7 @@ struct ContentView: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                     
                 case .usertasks: // Make sure this matches your enum case name (usertasks vs tasks)
-                    VStack {
-                        UserTaskGroupView()
-                    }
+                    UserTaskGroupView(userTasks: tasks)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
@@ -52,9 +51,9 @@ struct ContentView: View {
         .sheet(isPresented: $showingCreateSheet) {
             if selectedTab == .habits {
                 CreateHabitView()
-            } else {
-                Text("Create Task Sheet")
-                    .presentationDetents([.fraction(0.7)])
+            }
+            else if selectedTab == .usertasks {
+                CreateTaskView()
             }
         }
         .onAppear {
@@ -73,5 +72,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Habit.self, inMemory: true)
+        .modelContainer(for: [Habit.self, UserTask.self], inMemory: true)
 }

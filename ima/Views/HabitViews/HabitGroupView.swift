@@ -33,12 +33,12 @@ struct HabitGroupView: View {
                 if habits.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "tray")
-                            .font(.system(size: 60)) // Set icon size explicitly
-                            .foregroundStyle(.white.opacity(0.5)) // Match your opacity
+                            .font(.system(size: 60))
+                            .foregroundStyle(.white.opacity(0.5))
                         
                         VStack {
                             Text("No Habits Yet")
-                                .font(.system(.title2, design: .rounded)) // Explicitly Rounded
+                                .font(.system(.title2, design: .rounded))
                                 .fontWeight(.bold)
                             
                             Text("Tap the + button to create your first habit.")
@@ -98,7 +98,7 @@ struct HabitGroupView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 16) // Increased slightly for the headers
+                    .padding(.horizontal, 16)
                     
                     Color.clear
                             .frame(height: 160)
@@ -177,7 +177,7 @@ struct SectionHeader: View {
         .fontWeight(.bold)
         .textCase(.uppercase)
         .kerning(1.0)
-        .opacity(0.5)
+        .opacity(0.7)
         .foregroundStyle(.white)
         .padding(.leading, 16)
     }

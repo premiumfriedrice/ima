@@ -46,7 +46,13 @@ final class Habit {
     
     var completionHistory: [String: Int] = [:]
 
-    init(title: String, totalCount: Int = 0, currentCount: Int = 0, frequencyCount: Int, frequencyUnit: FrequencyUnit) {
+    init(
+        title: String,
+        totalCount: Int = 0,
+        currentCount: Int = 0,
+        frequencyCount: Int,
+        frequencyUnit: FrequencyUnit
+    ) {
         self.id = UUID()
         self.title = title
         self.totalCount = totalCount

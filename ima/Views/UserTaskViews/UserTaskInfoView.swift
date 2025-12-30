@@ -76,6 +76,85 @@ struct UserTaskInfoView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
+                        
+                        // MARK: - Due Date Section (Added)
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("DUE DATE")
+                                    .font(.system(.caption, design: .rounded))
+                                    .fontWeight(.bold)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+                                
+                                Spacer()
+                                
+                                // Toggle Logic:
+                                // If userTask.dueDate is NOT nil, toggle is ON.
+                                // If user sets ON, we give it Date(). If OFF, we set nil.
+                                Toggle("", isOn: Binding(
+                                    get: { userTask.dueDate != nil },
+                                    set: { if $0 { userTask.dueDate = Date() } else { userTask.dueDate = nil } }
+                                ))
+                                .labelsHidden()
+                                .tint(.blue)
+                            }
+                            
+                            // Show Controls if Date Exists
+                            if let currentDueDate = userTask.dueDate {
+                                VStack(spacing: 16) {
+                                    // 1. Smart Chips
+                                    HStack(spacing: 12) {
+                                        Button {
+                                            userTask.dueDate = Date()
+                                        } label: {
+                                            Text("Today")
+                                                .font(.system(.subheadline, design: .rounded))
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(Calendar.current.isDateInToday(currentDueDate) ? .black : .white)
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 16)
+                                                .background(Calendar.current.isDateInToday(currentDueDate) ? .white : .white.opacity(0.1))
+                                                .clipShape(Capsule())
+                                        }
+                                        
+                                        Button {
+                                            if let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
+                                                userTask.dueDate = tomorrow
+                                            }
+                                        } label: {
+                                            Text("Tomorrow")
+                                                .font(.system(.subheadline, design: .rounded))
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(Calendar.current.isDateInTomorrow(currentDueDate) ? .black : .white)
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 16)
+                                                .background(Calendar.current.isDateInTomorrow(currentDueDate) ? .white : .white.opacity(0.1))
+                                                .clipShape(Capsule())
+                                        }
+                                        
+                                        Spacer()
+                                    }
+                                    
+                                    // 2. Date Picker
+                                    // We force unwrap or provide default because we are inside `if let`
+                                    // But to bind, we use a custom binding to satisfy the type system.
+                                    DatePicker("", selection: Binding(
+                                        get: { userTask.dueDate ?? Date() },
+                                        set: { userTask.dueDate = $0 }
+                                    ), displayedComponents: [.date, .hourAndMinute])
+                                    .datePickerStyle(.compact)
+                                    .labelsHidden()
+                                    .colorScheme(.dark) // White text for dark mode
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(16)
+                                .background(.white.opacity(0.05))
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                            }
+                        }
+                        .padding(.horizontal, 25)
 
                         // MARK: - Subtasks Section
                         VStack(alignment: .leading, spacing: 15) {
@@ -261,4 +340,3 @@ struct SubTaskRowView: View {
     
     UserTaskInfoView(userTask: task)
 }
-

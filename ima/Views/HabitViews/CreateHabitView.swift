@@ -64,7 +64,7 @@ struct CreateHabitView: View {
                         
                         // MARK: - Title Input
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("NAME YOUR HABIT")
+                            Text("NEW HABIT")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
                                 .textCase(.uppercase)

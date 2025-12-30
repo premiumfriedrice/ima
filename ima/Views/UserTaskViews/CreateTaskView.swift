@@ -15,7 +15,12 @@ struct CreateTaskView: View {
     // MARK: - Form State
     @State private var title: String = ""
     @State private var priority: TaskPriority = .medium
-    @State private var tempSubtasks: [String] = [] // Store strings temporarily
+    
+    // NEW: Date Logic
+    @State private var hasDueDate: Bool = false
+    @State private var dueDate: Date = Date()
+    
+    @State private var tempSubtasks: [String] = []
     @State private var newSubtaskInput: String = ""
     
     @FocusState private var isInputFocused: Bool
@@ -23,9 +28,7 @@ struct CreateTaskView: View {
 
     var body: some View {
         ZStack {
-            Color(.black).ignoresSafeArea()
-            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
-            
+            Color.black.ignoresSafeArea()
             Rectangle()
                 .fill(.white.opacity(0.05))
                 .ignoresSafeArea()
@@ -33,10 +36,7 @@ struct CreateTaskView: View {
             VStack(spacing: 0) {
                 // MARK: - Header
                 HStack {
-                    // Cancel Button
-                    Button {
-                        dismiss()
-                    } label: {
+                    Button { dismiss() } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white.opacity(0.6))
@@ -47,10 +47,7 @@ struct CreateTaskView: View {
                     
                     Spacer()
                     
-                    // Create Button
-                    Button {
-                        createTask()
-                    } label: {
+                    Button { createTask() } label: {
                         HStack(spacing: 6) {
                             Text("CREATE")
                                 .font(.system(.caption, design: .rounded))
@@ -58,20 +55,20 @@ struct CreateTaskView: View {
                             Image(systemName: "arrow.up")
                                 .font(.system(size: 14, weight: .bold))
                         }
-                        .foregroundStyle(!title.isEmpty ? .black : .white.opacity(0.3))
+                        .foregroundStyle(canCreate ? .black : .white.opacity(0.3))
                         .padding(.vertical, 10)
                         .padding(.horizontal, 16)
-                        .background(!title.isEmpty ? .white : .white.opacity(0.1))
+                        .background(canCreate ? .white : .white.opacity(0.1))
                         .clipShape(Capsule())
                     }
-                    .disabled(title.isEmpty)
+                    .disabled(!canCreate)
                 }
                 .padding(25)
                 
                 ScrollView {
                     VStack(spacing: 32) {
                         
-                        // MARK: - Hero Title Input
+                        // MARK: - Title Input
                         VStack(alignment: .leading, spacing: 12) {
                             Text("NEW TASK")
                                 .font(.system(.caption, design: .rounded))
@@ -104,9 +101,7 @@ struct CreateTaskView: View {
                             HStack(spacing: 12) {
                                 ForEach(TaskPriority.allCases) { p in
                                     Button {
-                                        withAnimation(.snappy) {
-                                            priority = p
-                                        }
+                                        withAnimation(.snappy) { priority = p }
                                     } label: {
                                         HStack {
                                             if priority == p {
@@ -120,19 +115,81 @@ struct CreateTaskView: View {
                                         .foregroundStyle(priority == p ? .black : .white)
                                         .padding(.vertical, 10)
                                         .padding(.horizontal, 16)
-                                        .background(
-                                            Capsule()
-                                                .fill(priority == p ? p.color : .white.opacity(0.1))
-                                        )
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(p.color.opacity(0.5), lineWidth: 1)
-                                        )
+                                        .background(Capsule().fill(priority == p ? p.color : .white.opacity(0.1)))
+                                        .overlay(Capsule().stroke(p.color.opacity(0.5), lineWidth: 1))
                                     }
                                 }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 25)
+
+                        // MARK: - Due Date Section (NEW)
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("DUE DATE")
+                                    .font(.system(.caption, design: .rounded))
+                                    .fontWeight(.bold)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+                                
+                                Spacer()
+                                
+                                // Enable/Disable Toggle
+                                Toggle("", isOn: $hasDueDate.animation())
+                                    .labelsHidden()
+                                    .tint(.blue)
+                            }
+                            
+                            if hasDueDate {
+                                VStack(spacing: 16) {
+                                    // 1. Smart Chips (Today/Tomorrow)
+                                    HStack(spacing: 12) {
+                                        Button {
+                                            dueDate = Date()
+                                        } label: {
+                                            Text("Today")
+                                                .font(.system(.subheadline, design: .rounded))
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(Calendar.current.isDateInToday(dueDate) ? .black : .white)
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 16)
+                                                .background(Calendar.current.isDateInToday(dueDate) ? .white : .white.opacity(0.1))
+                                                .clipShape(Capsule())
+                                        }
+                                        
+                                        Button {
+                                            if let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
+                                                dueDate = tomorrow
+                                            }
+                                        } label: {
+                                            Text("Tomorrow")
+                                                .font(.system(.subheadline, design: .rounded))
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(Calendar.current.isDateInTomorrow(dueDate) ? .black : .white)
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 16)
+                                                .background(Calendar.current.isDateInTomorrow(dueDate) ? .white : .white.opacity(0.1))
+                                                .clipShape(Capsule())
+                                        }
+                                        
+                                        Spacer()
+                                    }
+                                    
+                                    // 2. The Compact Picker
+                                    DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden() // Hide label to align left
+                                        .colorScheme(.dark) // Forces white text inside picker
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(16)
+                                .background(.white.opacity(0.05))
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                            }
+                        }
                         .padding(.horizontal, 25)
 
                         // MARK: - Subtasks Section
@@ -146,7 +203,6 @@ struct CreateTaskView: View {
                                 .foregroundStyle(.white)
                             
                             VStack(spacing: 12) {
-                                // 1. List of Temporary Subtasks
                                 ForEach(Array(tempSubtasks.enumerated()), id: \.offset) { index, subtaskTitle in
                                     HStack(spacing: 12) {
                                         Image(systemName: "circle")
@@ -159,9 +215,7 @@ struct CreateTaskView: View {
                                         
                                         Spacer()
                                         
-                                        Button {
-                                            deleteTempSubtask(at: index)
-                                        } label: {
+                                        Button { deleteTempSubtask(at: index) } label: {
                                             Image(systemName: "xmark")
                                                 .font(.system(size: 12, weight: .bold))
                                                 .foregroundStyle(.white.opacity(0.3))
@@ -175,7 +229,6 @@ struct CreateTaskView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 16))
                                 }
                                 
-                                // 2. Add Subtask Input
                                 HStack(spacing: 12) {
                                     Image(systemName: "plus")
                                         .font(.system(size: 16, weight: .bold))
@@ -186,14 +239,10 @@ struct CreateTaskView: View {
                                         .foregroundStyle(.white)
                                         .submitLabel(.done)
                                         .focused($isInputFocused)
-                                        .onSubmit {
-                                            addTempSubtask()
-                                        }
+                                        .onSubmit { addTempSubtask() }
                                     
                                     if !newSubtaskInput.isEmpty {
-                                        Button {
-                                            addTempSubtask()
-                                        } label: {
+                                        Button { addTempSubtask() } label: {
                                             Image(systemName: "arrow.up.circle.fill")
                                                 .font(.system(size: 24))
                                                 .symbolRenderingMode(.hierarchical)
@@ -215,11 +264,11 @@ struct CreateTaskView: View {
                         Spacer()
                     }
                     .padding(.top, 20)
+                    .padding(.bottom, 50)
                 }
             }
             .foregroundStyle(.white)
             .overlay {
-                // Shiny Border Overlay
                 RoundedRectangle(cornerRadius: 40)
                     .stroke(
                         LinearGradient(
@@ -253,7 +302,7 @@ struct CreateTaskView: View {
         withAnimation {
             tempSubtasks.append(newSubtaskInput)
             newSubtaskInput = ""
-            isInputFocused = true // Keep focus to add multiple
+            isInputFocused = true
         }
     }
     
@@ -264,19 +313,17 @@ struct CreateTaskView: View {
     }
     
     private func createTask() {
-        // 1. Create the Task
-        let newTask = UserTask(title: title, priority: priority)
+        let newTask = UserTask(
+            title: title,
+            // Only set dueDate if the toggle was ON
+            dueDate: hasDueDate ? dueDate : nil,
+            priority: priority
+        )
         
-        // 2. Convert temp strings to actual Subtask objects
         let subtaskObjects = tempSubtasks.map { Subtask(title: $0) }
-        
-        // 3. Assign subtasks (SwiftData handles the inverse relationship)
         newTask.subtasks = subtaskObjects
         
-        // 4. Save
         modelContext.insert(newTask)
-        
-        // 5. Close
         dismiss()
     }
 }

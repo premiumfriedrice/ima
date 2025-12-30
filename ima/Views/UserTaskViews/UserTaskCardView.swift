@@ -32,11 +32,11 @@ struct UserTaskCardView: View {
             VStack(alignment: .leading, spacing: 10) {
                 // Title Row
                 HStack(spacing: 12) {
-                    // Checkbox Indicator
-                    Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(task.isCompleted ? task.priority.color : .gray.opacity(0.5))
-                        .contentTransition(.symbolEffect(.replace)) // iOS 17 animation
+//                    // Checkbox Indicator
+//                    Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+//                        .font(.system(size: 24, weight: .bold))
+//                        .foregroundStyle(task.isCompleted ? task.priority.color : .gray.opacity(0.5))
+//                        .contentTransition(.symbolEffect(.replace)) // iOS 17 animation
                     
                     Text(task.title)
                         .font(.system(.title3, design: .rounded)) // Slightly smaller than Habit title
@@ -52,8 +52,13 @@ struct UserTaskCardView: View {
                 HStack {
                     if let date = task.dueDate {
                         Text(date.formatted(.dateTime.month().day()))
+                        // Divider Dot
+                        Circle()
+                            .fill(.white.opacity(0.5))
+                            .frame(width: 3, height: 3)
+                        Text("\(Int(subtaskProgress))/\(Int(totalSubtasks)) Subtasks")
                     } else {
-                        Text(task.subtasks.isEmpty ? "No Deadline" : "\(Int(subtaskProgress))/\(Int(totalSubtasks)) Subtasks")
+                        Text("\(Int(subtaskProgress))/\(Int(totalSubtasks)) Subtasks")
                     }
                 }
                 .font(.system(.caption, design: .rounded))

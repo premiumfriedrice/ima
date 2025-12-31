@@ -101,7 +101,7 @@ struct CreateHabitView: View {
                                     }
                                 }
                                 .pickerStyle(.wheel)
-                                .frame(width: 72, height: 128)
+                                .frame(width: 72, height: 96)
                                 .compositingGroup()
 
                                 // Dimmed Connector Text
@@ -120,7 +120,7 @@ struct CreateHabitView: View {
                                     }
                                 }
                                 .pickerStyle(.wheel)
-                                .frame(width: 136, height: 128)
+                                .frame(width: 136, height: 96)
                                 .compositingGroup()
                             }
                             .frame(maxWidth: .infinity)

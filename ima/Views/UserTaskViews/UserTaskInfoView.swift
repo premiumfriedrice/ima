@@ -19,10 +19,12 @@ struct UserTaskInfoView: View {
     @State private var newSubtaskTitle: String = ""
     @FocusState private var isInputFocused: Bool
     
+    // State for the calendar animation
+    @State private var isCalendarVisible: Bool = false
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            // Assuming this is your custom view
             AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
@@ -42,7 +44,7 @@ struct UserTaskInfoView: View {
                     
                     Spacer()
                     
-                    // Only Delete button needed for a generic Task
+                    // Delete button
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true
                     } label: {
@@ -77,85 +79,162 @@ struct UserTaskInfoView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
                         
-                        // MARK: - Due Date Section (Added)
+                        // MARK: - Sentence Row (Priority & Due Date)
                         VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("DUE DATE")
-                                    .font(.system(.caption, design: .rounded))
-                                    .fontWeight(.bold)
-                                    .textCase(.uppercase)
-                                    .kerning(1.0)
-                                    .opacity(0.5)
-                                    .foregroundStyle(.white)
-                                
-                                Spacer()
-                                
-                                // Toggle Logic:
-                                // If userTask.dueDate is NOT nil, toggle is ON.
-                                // If user sets ON, we give it Date(). If OFF, we set nil.
-                                Toggle("", isOn: Binding(
-                                    get: { userTask.dueDate != nil },
-                                    set: { if $0 { userTask.dueDate = Date() } else { userTask.dueDate = nil } }
-                                ))
-                                .labelsHidden()
-                                .tint(.blue)
-                            }
+                            Text("PRIORITY and DUE DATE")
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
+                                .padding(.leading, 25)
                             
-                            // Show Controls if Date Exists
-                            if let currentDueDate = userTask.dueDate {
-                                VStack(spacing: 16) {
-                                    // 1. Smart Chips
-                                    HStack(spacing: 12) {
-                                        Button {
+                            // Row 1: The entire sentence on one line
+                            HStack(spacing: 0) {
+                                // 1. Priority Picker
+                                Picker("Priority", selection: $userTask.priority) {
+                                    ForEach(TaskPriority.allCases) { p in
+                                        Text("\(p.title)")
+                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .foregroundStyle(.white)
+                                            .tag(p)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 96, height: 84)
+                                .compositingGroup()
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [userTask.priority.color],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1.5
+                                        )
+                                        .frame(width: 78, height: 34)
+                                        .allowsHitTesting(false)
+                                }
+                                
+                                // 2. Connecting text
+                                Text("priority due")
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white.opacity(0.4))
+                                    .padding(0)
+                                    .lineLimit(1)
+                                    .layoutPriority(1)
+                                
+                                // 3. Date Logic
+                                if userTask.dueDate == nil {
+                                    // State A: "no date"
+                                    Button {
+                                        withAnimation(.snappy) {
                                             userTask.dueDate = Date()
-                                        } label: {
-                                            Text("Today")
-                                                .font(.system(.subheadline, design: .rounded))
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(Calendar.current.isDateInToday(currentDueDate) ? .black : .white)
-                                                .padding(.vertical, 8)
-                                                .padding(.horizontal, 16)
-                                                .background(Calendar.current.isDateInToday(currentDueDate) ? .white : .white.opacity(0.1))
-                                                .clipShape(Capsule())
+                                            isCalendarVisible = true
                                         }
-                                        
+                                    } label: {
+                                        Text("no date")
+                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .foregroundStyle(.white.opacity(0.8))
+                                            .lineLimit(1)
+                                            .layoutPriority(1)
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 10)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
+                                            )
+                                    }
+                                    .padding(.leading, 8)
+                                    
+                                } else {
+                                    // State B: "Dec 30, 2025" + Close
+                                    HStack(spacing: 6) {
                                         Button {
-                                            if let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
-                                                userTask.dueDate = tomorrow
+                                            withAnimation(.snappy) { isCalendarVisible.toggle() }
+                                        } label: {
+                                            Text(userTask.dueDate!.formatted(date: .abbreviated, time: .omitted))
+                                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                                .foregroundStyle(.white.opacity(0.8))
+                                                .lineLimit(1)
+                                                .layoutPriority(1)
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 10)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(isCalendarVisible ? .white.opacity(1) : .white.opacity(0.3), lineWidth: 1.5)
+                                                )
+                                        }
+                                        .padding(.leading, 8)
+                                        
+                                        // Close Button (Remove Date)
+                                        Button {
+                                            withAnimation(.snappy) {
+                                                userTask.dueDate = nil
+                                                isCalendarVisible = false
                                             }
                                         } label: {
-                                            Text("Tomorrow")
-                                                .font(.system(.subheadline, design: .rounded))
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(Calendar.current.isDateInTomorrow(currentDueDate) ? .black : .white)
-                                                .padding(.vertical, 8)
-                                                .padding(.horizontal, 16)
-                                                .background(Calendar.current.isDateInTomorrow(currentDueDate) ? .white : .white.opacity(0.1))
-                                                .clipShape(Capsule())
+                                            Image(systemName: "xmark")
+                                                .font(.system(size: 10, weight: .bold))
+                                                .foregroundStyle(.white.opacity(0.6))
+                                                .padding(6)
+                                                .background(.white.opacity(0.1))
+                                                .clipShape(Circle())
                                         }
-                                        
-                                        Spacer()
                                     }
-                                    
-                                    // 2. Date Picker
-                                    // We force unwrap or provide default because we are inside `if let`
-                                    // But to bind, we use a custom binding to satisfy the type system.
-                                    DatePicker("", selection: Binding(
-                                        get: { userTask.dueDate ?? Date() },
-                                        set: { userTask.dueDate = $0 }
-                                    ), displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(.compact)
-                                    .labelsHidden()
-                                    .colorScheme(.dark) // White text for dark mode
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .transition(.opacity.combined(with: .scale))
                                 }
+                            }
+                            // 1. Force the HStack to fill width, but align content Left
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            // 2. Add normal margin
+                            .padding(.leading, 20)
+                            // 3. Reserve extra space on the right (25 normal + 20 buffer = 45pt empty space)
+                            .padding(.trailing, 25)
+                            
+                            // Row 2: The Calendar
+                            if userTask.dueDate != nil && isCalendarVisible {
+                                DatePicker("", selection: Binding(
+                                    get: { userTask.dueDate ?? Date() },
+                                    set: { userTask.dueDate = $0 }
+                                ), displayedComponents: [.date])
+                                .datePickerStyle(.graphical)
+                                .colorScheme(.dark)
+                                .tint(.white)
+                                .padding()
+                                .background(.white.opacity(0.05))
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal, 25)
+                            }
+                        }
+                        
+                        // MARK: - Details Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("DETAILS")
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
+                            
+                            TextField("Add notes, context, or descriptions...", text: $userTask.details, axis: .vertical)
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white)
                                 .padding(16)
                                 .background(.white.opacity(0.05))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                            }
+                                .lineLimit(3...6)
+                                .autocorrectionDisabled()
                         }
                         .padding(.horizontal, 25)
-
+                        
                         // MARK: - Subtasks Section
                         VStack(alignment: .leading, spacing: 15) {
                             Text("SUBTASKS")
@@ -166,34 +245,64 @@ struct UserTaskInfoView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
-                            // 1. List of Existing Subtasks
                             VStack(spacing: 12) {
+                                // 1. List of Subtasks
+                                // We iterate over the object directly.
                                 ForEach(userTask.subtasks) { subtask in
-                                    SubTaskRowView(subtask: subtask) {
-                                        // Delete Logic
-                                        withAnimation {
-                                            // Delete from context and the array updates automatically via relationship
-                                            modelContext.delete(subtask)
+                                    HStack(spacing: 12) {
+                                        // Checkbox
+                                        Button {
+                                            withAnimation(.snappy) {
+                                                subtask.isCompleted.toggle()
+                                            }
+                                        } label: {
+                                            Image(systemName: subtask.isCompleted ? "checkmark.circle.fill" : "circle")
+                                                .font(.system(size: 24))
+                                                .foregroundStyle(subtask.isCompleted ? .green : .white.opacity(0.3))
+                                        }
+                                        
+                                        // Text Input (Editable)
+                                        // Bindable(subtask) allows us to create a binding to a SwiftData object's property inside a loop
+                                        TextField("Subtask", text: Bindable(subtask).title)
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .strikethrough(subtask.isCompleted)
+                                            .foregroundStyle(subtask.isCompleted ? .white.opacity(0.5) : .white)
+                                        
+                                        Spacer()
+                                        
+                                        // Delete Button
+                                        Button {
+                                            withAnimation {
+                                                modelContext.delete(subtask)
+                                            }
+                                        } label: {
+                                            Image(systemName: "xmark")
+                                                .font(.system(size: 12, weight: .bold))
+                                                .foregroundStyle(.white.opacity(0.3))
+                                                .padding(8)
+                                                .background(.white.opacity(0.05))
+                                                .clipShape(Circle())
                                         }
                                     }
+                                    .padding(16)
+                                    .background(.white.opacity(0.05))
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
                                 }
                                 
                                 // 2. Add Subtask Input
                                 HStack(spacing: 12) {
-                                    Image(systemName: "plus")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundStyle(.white.opacity(0.5))
+                                    Image(systemName: "circle")
+                                        .font(.system(size: 24))
+                                        .foregroundStyle(.white.opacity(0.3))
                                     
                                     TextField("Add a subtask...", text: $newSubtaskTitle)
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
                                         .foregroundStyle(.white)
                                         .submitLabel(.done)
                                         .focused($isInputFocused)
-                                        .onSubmit {
-                                            addSubtask()
-                                        }
+                                        .onSubmit { addSubtask() }
+                                        .autocorrectionDisabled()
                                     
-                                    // Show arrow button only if typing
                                     if !newSubtaskTitle.isEmpty {
                                         Button {
                                             addSubtask()
@@ -219,7 +328,6 @@ struct UserTaskInfoView: View {
                         Spacer()
                         
                         // MARK: - Footer Info
-                        // Fixed: Removed the '$' from userTask.dateCreated
                         Text("Created " + userTask.dateCreated.formatted(date: .abbreviated, time: .shortened))
                             .font(.system(.caption, design: .rounded))
                             .fontWeight(.bold)
@@ -283,50 +391,6 @@ struct UserTaskInfoView: View {
             newSubtaskTitle = ""
             isInputFocused = false
         }
-    }
-}
-
-// MARK: - SubTask Row Component
-struct SubTaskRowView: View {
-    @Bindable var subtask: Subtask
-    var onDelete: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            // Checkbox
-            Button {
-                withAnimation(.snappy) {
-                    subtask.isCompleted.toggle()
-                }
-            } label: {
-                Image(systemName: subtask.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24))
-                    .foregroundStyle(subtask.isCompleted ? .green : .white.opacity(0.3))
-            }
-            
-            // Text
-            TextField("Subtask", text: $subtask.title)
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-                .strikethrough(subtask.isCompleted)
-                .foregroundStyle(subtask.isCompleted ? .white.opacity(0.5) : .white)
-            
-            Spacer()
-            
-            // Delete X
-            Button {
-                onDelete()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.3))
-                    .padding(8)
-                    .background(.white.opacity(0.05))
-                    .clipShape(Circle())
-            }
-        }
-        .padding(16)
-        .background(.white.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 

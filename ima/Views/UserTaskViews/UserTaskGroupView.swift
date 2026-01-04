@@ -81,7 +81,7 @@ struct UserTaskGroupView: View {
                                 title: "Low Priority",
                                 count: lowPriorityTasks.count,
                                 icon: "arrow.down.circle.fill",
-                                color: .green)) {
+                                color: .gray)) {
                                 ForEach(lowPriorityTasks) { task in
                                     UserTaskCardView(task: task)
                                         .onTapGesture { selectedTask = task }

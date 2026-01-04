@@ -195,6 +195,7 @@ struct UserTaskInfoView: View {
                             .padding(.leading, 20)
                             // 3. Reserve extra space on the right (25 normal + 20 buffer = 45pt empty space)
                             .padding(.trailing, 25)
+                            .padding(.vertical, -10)
                             
                             // Row 2: The Calendar
                             if userTask.dueDate != nil && isCalendarVisible {

@@ -47,21 +47,83 @@ struct CreateTaskView: View {
                     
                     Spacer()
                     
+                    
+                    // Option 1
                     Button { createTask() } label: {
                         HStack(spacing: 6) {
                             Text("CREATE")
                                 .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+                                .fontWeight(.black) // Extra bold for impact
+                            
                             Image(systemName: "arrow.up")
                                 .font(.system(size: 14, weight: .bold))
                         }
-                        .foregroundStyle(canCreate ? .black : .white.opacity(0.3))
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 16)
-                        .background(canCreate ? .white : .white.opacity(0.1))
+                        .foregroundStyle( !canCreate ? .white.opacity(0.6) :  .white )
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(
+                            ZStack {
+                                if canCreate {
+                                    // Gradient when active
+                                    LinearGradient(
+                                        colors: [Color.blue, Color.purple],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                } else {
+                                    // Subtle gray stroke when disabled
+                                    Color.white.opacity(0.1)
+                                }
+                            }
+                        )
                         .clipShape(Capsule())
+                        // Add a glow when active
+                        .shadow(color: canCreate ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
+                        .animation(.smooth, value: canCreate)
                     }
                     .disabled(!canCreate)
+                    
+                    // Option 2
+//                    Button { createTask() } label: {
+//                        HStack(spacing: 8) {
+//                            Text("CREATE")
+//                                .font(.system(size: 14, weight: .bold, design: .rounded))
+//                                .kerning(1) // Adds letter spacing for a premium feel
+//                            
+//                            Image(systemName: "arrow.up")
+//                                .font(.system(size: 14, weight: .bold))
+//                        }
+//                        // Text is White when active, gray when disabled
+//                        .foregroundStyle(canCreate ? .black : .white.opacity(0.3))
+//                        .padding(.vertical, 12)
+//                        .padding(.horizontal, 24)
+//                        .background(
+//                            Capsule()
+//                                .fill(canCreate ? .white : .white.opacity(0.1))
+//                                .shadow(color: canCreate ? .white.opacity(0.4) : .clear, radius: 8, y: 0) // White glow
+//                        )
+//                        .scaleEffect(canCreate ? 1.0 : 0.95) // Slight shrink when disabled
+//                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: canCreate)
+//                    }
+//                    .disabled(!canCreate)
+                    
+                    // Option 3
+//                    Button { createTask() } label: {
+//                        HStack(spacing: 6) {
+//                            Text("CREATE")
+//                                .font(.system(.caption, design: .rounded))
+//                                .fontWeight(.bold)
+//                            Image(systemName: "arrow.up")
+//                        }
+//                        .foregroundStyle(canCreate ? .white : .white.opacity(0.3))
+//                        .padding(.vertical, 10)
+//                        .padding(.horizontal, 18)
+//                        .background(
+//                            Capsule()
+//                                .stroke(canCreate ? .white : .white.opacity(0.1), lineWidth: 1.5)
+//                        )
+//                    }
+//                    .disabled(!canCreate)
                 }
                 .padding(25)
                 
@@ -70,7 +132,7 @@ struct CreateTaskView: View {
                         
                         // MARK: - Title Input
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("NEW TASK")
+                            Text("TASK")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
                                 .textCase(.uppercase)
@@ -78,7 +140,7 @@ struct CreateTaskView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
-                            TextField("Task Title...", text: $title)
+                            TextField("e.g., Shopping, Laundry", text: $title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .tint(.white)
@@ -151,7 +213,7 @@ struct CreateTaskView: View {
                                             .lineLimit(1)
                                             .layoutPriority(1)
                                             .padding(.vertical, 8)
-                                            .padding(.horizontal, 10)
+                                            .padding(.horizontal, 8)
                                             .clipShape(RoundedRectangle(cornerRadius: 12))
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 12)
@@ -173,7 +235,7 @@ struct CreateTaskView: View {
                                                 .lineLimit(1)
                                                 .layoutPriority(1)
                                                 .padding(.vertical, 8)
-                                                .padding(.horizontal, 10)
+                                                .padding(.horizontal, 8)
                                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                                 .overlay(
                                                     RoundedRectangle(cornerRadius: 12)
@@ -206,6 +268,7 @@ struct CreateTaskView: View {
                             .padding(.leading, 20)
                             // 3. Reserve extra space on the right (25 normal + 20 buffer = 45pt empty space)
                             .padding(.trailing, 25)
+                            .padding(.vertical, -10)
                             
                             // Row 2: The Calendar
                             if hasDueDate && isCalendarVisible {

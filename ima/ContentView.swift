@@ -14,7 +14,7 @@ struct ContentView: View {
     @Query(sort: \Habit.title) private var habits: [Habit]
     @Query(sort: \UserTask.dateCreated) private var tasks: [UserTask]
     
-    @State private var selectedTab: AppTab = .habits
+    @State private var selectedTab: AppTab = .home
     @State private var showingCreateSheet = false
     
     private let dayChanged = NotificationCenter.default.publisher(for: .NSCalendarDayChanged)
@@ -28,6 +28,9 @@ struct ContentView: View {
             // 2. Main Content
             VStack {
                 switch selectedTab {
+                case .home:
+                    HomeView()
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                 case .habits:
                     HabitGroupView(habits: habits)
                         .accessibilityIdentifier("HabitList")

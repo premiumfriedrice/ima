@@ -9,13 +9,15 @@ import SwiftUI
 
 // Define the source of truth for your tabs
 enum AppTab: Int, CaseIterable, Identifiable {
-    case habits = 0
-    case usertasks = 1
+    case home = 0
+    case habits = 1
+    case usertasks = 2
     
     var id: Int { self.rawValue }
     
     var title: String {
         switch self {
+        case.home: return "Home"
         case .habits: return "Habits"
         case .usertasks: return "Tasks"
         }
@@ -48,13 +50,15 @@ struct NavFooterView: View {
                 .frame(height: 36)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Button(action: { showingCreateSheet = true }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                if selectedTab != .home {
+                    Button(action: { showingCreateSheet = true }) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.trailing, 15)
+                    .accessibilityIdentifier("AddHabitButton")
                 }
-                .padding(.trailing, 15)
-                .accessibilityIdentifier("AddHabitButton")
             }
             .padding(.horizontal, 36)
             .padding(.top, 64)

@@ -169,13 +169,21 @@ struct SectionLabel: View {
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: UserTask.self, Habit.self, configurations: config)
-    
-    // Add dummy data...
-    let habit1 = Habit(title: "Leetcode", frequencyCount: 1, frequencyUnit: .daily)
-    let task1 = UserTask(title: "Submit Report", priority: .high)
-    container.mainContext.insert(habit1)
-    container.mainContext.insert(task1)
-    
+
+    // Seed data helper to avoid non-View statements as the last expression
+    func seed(_ context: ModelContext) {
+        let habit1 = Habit(title: "Leetcode", frequencyCount: 2, frequencyUnit: .daily)
+        let habit2 = Habit(title: "Cardio", frequencyCount: 3, frequencyUnit: .weekly)
+        let task1 = UserTask(title: "Submit Report", priority: .high)
+        let task2 = UserTask(title: "Clean motorcycle chain", priority: .low)
+        context.insert(habit1)
+        context.insert(habit2)
+        context.insert(task1)
+        context.insert(task2)
+    }
+
+    seed(container.mainContext)
+
     return ZStack {
         Color.black.ignoresSafeArea()
         AnimatedRadial(color: .blue.opacity(0.1), startPoint: .topLeading, endPoint: .bottomTrailing)

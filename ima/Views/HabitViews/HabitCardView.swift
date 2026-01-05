@@ -15,7 +15,7 @@ struct HabitCardView: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             
-            // MARK: - Layer 1: The Main Card (Increments on Tap)
+            // MARK: - Layer 1: The Main Card (Opens Detail Sheet)
             VStack(alignment: .leading, spacing: 10) {
                 // Title Row
                 HStack {
@@ -29,7 +29,6 @@ struct HabitCardView: View {
                 }
                 
                 // Subtitle with tracking
-                // FIX: Used currentCount instead of totalCount so it resets correctly
                 Text("\(habit.currentCount)/\(habit.frequencyCount) \(timePeriodString)")
                     .font(.system(.caption, design: .rounded))
                     .fontWeight(.bold)
@@ -40,7 +39,7 @@ struct HabitCardView: View {
 
                 // Refined Progress Bar
                 SegmentedProgressBar(
-                    value: habit.currentCount, // FIX: Track current progress
+                    value: habit.currentCount,
                     total: habit.frequencyCount,
                     color: habit.statusColor
                 )
@@ -76,19 +75,20 @@ struct HabitCardView: View {
             .padding(.horizontal, 20)
             // MARK: - Interaction & Accessibility (Main Card)
             .onTapGesture {
-                incrementHabit()
+                // CHANGE: Card tap now opens the sheet
+                showingEditSheet = true
             }
             .accessibilityIdentifier("HabitCard_\(habit.title)")
             .accessibilityAddTraits(.isButton)
             .accessibilityValue(habit.isFullyDone ? "Done" : "\(habit.currentCount) out of \(habit.frequencyCount) \(timePeriodString)")
 
             
-            // MARK: - Layer 2: The Info Button (Floating on Top)
-            // This sits visually in the corner but is a separate sibling element
-            Button(action: { showingEditSheet = true }) {
-                Image(systemName: "chart.bar.doc.horizontal")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(habit.statusColor)
+            // MARK: - Layer 2: The Increment Button (Floating on Top)
+            // CHANGE: This button now Increments instead of showing info
+            Button(action: { incrementHabit() }) {
+                Image(systemName: "plus") // CHANGE: Icon to Plus
+                    .font(.system(size: 18, weight: .bold)) // Slightly larger for tap target
+                    .foregroundColor(habit.isFullyDone ? habit.statusColor.opacity(0.4) : habit.statusColor)
                     .padding(8)
                     .background(habit.statusColor.opacity(0.15))
                     .clipShape(Circle())
@@ -97,7 +97,7 @@ struct HabitCardView: View {
             // 20 (outer padding) + 20 (inner card padding) = 40 roughly, adjusted for visual balance
             .padding(.top, 20)
             .padding(.trailing, 40)
-            .accessibilityIdentifier("InfoSheetButton")
+            .accessibilityIdentifier("IncrementButton")
         }
         .sheet(isPresented: $showingEditSheet) {
             HabitInfoView(habit: habit)

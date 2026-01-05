@@ -81,7 +81,62 @@ struct HabitInfoView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
-
+                        
+                        // MARK: - Today's Progress
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("TODAY'S PROGRESS")
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
+                            
+                            HStack(spacing: 20) {
+                                // 1. Decrement Button
+                                Button {
+                                    decrementProgress()
+                                } label: {
+                                    Image(systemName: "minus")
+                                        .font(.system(size: 24, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .frame(width: 60, height: 60)
+                                        .background(.white.opacity(0.1))
+                                        .clipShape(Circle())
+                                }
+                                
+                                // 2. Main Counter (Big)
+                                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                    // Current Count - REMOVED $
+                                    Text("\(habit.currentCount)")
+                                        .font(.system(size: 64, weight: .black, design: .rounded))
+                                        .foregroundStyle(.white)
+                                        .contentTransition(.numericText(value: Double(habit.currentCount)))
+                                    
+                                    // Target - REMOVED $
+                                    Text("/ \(habit.frequencyCount)")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.5))
+                                }
+                                .frame(maxWidth: .infinity)
+                                
+                                // 3. Increment Button (Prominent)
+                                Button {
+                                    incrementProgress()
+                                } label: {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 24, weight: .bold))
+                                        .foregroundStyle(.black)
+                                        .frame(width: 60, height: 60)
+                                        .background(.white)
+                                        .clipShape(Circle())
+                                        .shadow(color: .white.opacity(0.2), radius: 10, x: 0, y: 0)
+                                }
+                            }
+                            .padding(.vertical, 10)
+                        }
+                        .padding(.horizontal, 25)
+                        
                         // MARK: - Adjust Goal
                         VStack(alignment: .leading, spacing: 0) {
                             Text("ADJUST YOUR GOAL")
@@ -105,8 +160,7 @@ struct HabitInfoView: View {
                                 .pickerStyle(.wheel)
                                 .frame(width: 72, height: 128)
                                 .compositingGroup()
-
-                                // Dimmed Connector Text
+                                
                                 Text(habit.frequencyCount == 1 ? "time per" : "times per")
                                     .font(.system(size: 28, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.4))
@@ -131,42 +185,36 @@ struct HabitInfoView: View {
                         
                         Spacer()
                         
-                        Text(habit.dateCreated.formatted(date: .abbreviated, time: .standard))
+                        Text("Created " + habit.dateCreated.formatted(date: .abbreviated, time: .shortened))
                             .font(.system(.caption, design: .rounded))
                             .fontWeight(.bold)
                             .textCase(.uppercase)
                             .kerning(1.0)
                             .opacity(0.5)
                             .foregroundStyle(.white)
-                        
-//                        // MARK: - Calendar History
-//                        VStack(alignment: .leading, spacing: 15) {
-//                            CalendarView(habit: habit)
-//                        }
-//                        .padding(.horizontal, 25)
+                            .padding(.bottom, 20)
                     }
                     .padding(.top, 20)
                 }
             }
             .foregroundStyle(.white)
             .overlay {
-                    RoundedRectangle(cornerRadius: 40) // Matches standard iOS sheet corners
-                        .stroke(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .white.opacity(0.2), location: 0.0), // Shiny top
-                                    .init(color: .white.opacity(0.05), location: 0.2), // Fades quickly
-                                    .init(color: .clear, location: 0.5) // Invisible at bottom
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1.5
-                        )
-                        .ignoresSafeArea() // Ensures the stroke follows the sheet edge completely
-                        .allowsHitTesting(false) // Ensures you can still touch buttons underneath
-                }
-            
+                RoundedRectangle(cornerRadius: 40)
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.2), location: 0.0),
+                                .init(color: .white.opacity(0.05), location: 0.2),
+                                .init(color: .clear, location: 0.5)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
         }
         .confirmationDialog(
             "Are you sure you want to delete '\(habit.title)'?",
@@ -174,12 +222,9 @@ struct HabitInfoView: View {
             titleVisibility: .visible
         ) {
             Button("Delete Habit", role: .destructive) {
-                // 1. Dismiss FIRST to trigger the slide-down animation
                 dismiss()
-                
-                // 2. Wait for the animation to finish before destroying the data
                 Task {
-                    try? await Task.sleep(for: .seconds(0.35)) // Standard sheet animation time
+                    try? await Task.sleep(for: .seconds(0.35))
                     modelContext.delete(habit)
                 }
             }
@@ -188,38 +233,45 @@ struct HabitInfoView: View {
             Text("This action cannot be undone.")
         }
         .confirmationDialog(
-                    "Are you sure you want to delete '\(habit.title)'?",
-                    isPresented: $showingDeleteConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Delete Habit", role: .destructive) {
-                        dismiss()
-                        modelContext.delete(habit)
-                    }
-                    Button("Cancel") { }
-                } message: {
-                    Text("This action cannot be undone.")
-                        }
-        .confirmationDialog(
-                    "Are you sure you want to reset '\(habit.title)'?",
-                    isPresented: $showingResetConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Reset Todays Progress", role: .destructive) {
-                        dismiss()
-                        withAnimation {
-                            habit.resetCurrentProgress()
-                        }
-                    }
-                    Button("Cancel") { }
-                } message: {
-                    Text("This action will reset progress for this habit for today.")
-                        }
+            "Are you sure you want to reset '\(habit.title)'?",
+            isPresented: $showingResetConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Reset Todays Progress", role: .destructive) {
+                dismiss()
+                withAnimation {
+                    habit.resetCurrentProgress()
+                }
+            }
+            Button("Cancel") { }
+        } message: {
+            Text("This action will reset progress for this habit for today.")
+        }
     }
     
+    // MARK: - Logic
+    
+    private func incrementProgress() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            habit.increment()
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
+    }
+    
+    private func decrementProgress() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            habit.decrement()
+        }
+    }
 }
 
 #Preview {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Habit.self, configurations: config)
+    
     let habi = Habit(title: "LeetCode", frequencyCount: 2, frequencyUnit: .daily)
-    HabitInfoView(habit: habi)
+    container.mainContext.insert(habi)
+    
+    return HabitInfoView(habit: habi)
+        .modelContainer(container)
 }

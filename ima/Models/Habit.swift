@@ -74,6 +74,10 @@ final class Habit {
             completionHistory[key] = currentCount
         }
     }
+    func decrement() {
+            currentCount -= 1
+            totalCount -= 1
+    }
     
     /// Called when the user wants to completely wipe progress (Undo button)
     func resetCurrentProgress() {

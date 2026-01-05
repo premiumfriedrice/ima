@@ -11,15 +11,19 @@ import SwiftData
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     
-    // Fetch all items (sorted by creation date)
+    // Fetch all items
     @Query(sort: \UserTask.dateCreated, order: .reverse) private var tasks: [UserTask]
     @Query private var habits: [Habit]
     
+    // MARK: - State for Collapsible Section
+    @State private var showCompleted: Bool = false
+    
     // MARK: - Computed Filters
     
-    // 1. MUST DO: Daily Habits + High Priority Tasks + Tasks Due Today (or overdue)
+    // 1. MUST DO
+    // Now excludes completed habits
     private var mustDoHabits: [Habit] {
-        habits.filter { $0.frequencyUnit == .daily }
+        habits.filter { $0.frequencyUnit == .daily && !$0.isFullyDone }
     }
     
     private var mustDoTasks: [UserTask] {
@@ -27,7 +31,6 @@ struct HomeView: View {
             guard !task.isCompleted else { return false }
             
             let isHighPriority = task.priority == .high
-            // Check if due date exists and is today or earlier
             let isDueTodayOrPast = task.dueDate.map {
                 Calendar.current.startOfDay(for: $0) <= Calendar.current.startOfDay(for: Date())
             } ?? false
@@ -36,16 +39,16 @@ struct HomeView: View {
         }
     }
     
-    // 2. CAN DO: Weekly/Monthly Habits + Low/Med Tasks with No Due Date (or future dates)
+    // 2. CAN DO
+    // Now excludes completed habits
     private var canDoHabits: [Habit] {
-        habits.filter { $0.frequencyUnit != .daily }
+        habits.filter { $0.frequencyUnit != .daily && !$0.isFullyDone }
     }
     
     private var canDoTasks: [UserTask] {
         tasks.filter { task in
             guard !task.isCompleted else { return false }
             
-            // Logic: If it's NOT in "Must Do", it belongs here
             let isHighPriority = task.priority == .high
             let isDueTodayOrPast = task.dueDate.map {
                 Calendar.current.startOfDay(for: $0) <= Calendar.current.startOfDay(for: Date())
@@ -53,6 +56,21 @@ struct HomeView: View {
             
             return !isHighPriority && !isDueTodayOrPast
         }
+    }
+    
+    // 3. COMPLETED
+    // Now includes fully done habits
+    private var completedHabits: [Habit] {
+        habits.filter { $0.isFullyDone }
+    }
+    
+    private var completedTasks: [UserTask] {
+        tasks.filter { $0.isCompleted }
+    }
+    
+    // Helper for the count badge
+    private var totalCompletedCount: Int {
+        completedHabits.count + completedTasks.count
     }
     
     var body: some View {
@@ -69,12 +87,9 @@ struct HomeView: View {
                             SectionLabel(title: "Must Do", icon: "flame.fill", color: .orange)
                             
                             LazyVStack(spacing: 12) {
-                                // 1. Habits
                                 ForEach(mustDoHabits) { habit in
                                     HabitCardView(habit: habit)
                                 }
-                                
-                                // 2. Tasks (Using your existing Card View)
                                 ForEach(mustDoTasks) { task in
                                     UserTaskCardView(task: task)
                                 }
@@ -89,12 +104,9 @@ struct HomeView: View {
                             SectionLabel(title: "Can Do", icon: "calendar.badge.clock", color: .blue)
                             
                             LazyVStack(spacing: 12) {
-                                // 1. Habits
                                 ForEach(canDoHabits) { habit in
                                     HabitCardView(habit: habit)
                                 }
-                                
-                                // 2. Tasks
                                 ForEach(canDoTasks) { task in
                                     UserTaskCardView(task: task)
                                 }
@@ -103,8 +115,65 @@ struct HomeView: View {
                         .padding(.horizontal, 20)
                     }
                     
-                    // Empty State if nothing exists
-                    if mustDoHabits.isEmpty && mustDoTasks.isEmpty && canDoHabits.isEmpty && canDoTasks.isEmpty {
+                    // MARK: - COMPLETED SECTION (Collapsible)
+                    if totalCompletedCount > 0 {
+                        VStack(alignment: .leading, spacing: 16) {
+                            // Collapsible Header Button
+                            Button(action: {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                    showCompleted.toggle()
+                                }
+                            }) {
+                                HStack {
+                                    SectionLabel(title: "Completed", icon: "checkmark.circle.fill", color: .green)
+                                    
+                                    Spacer()
+                                    
+                                    // Count Badge
+                                    Text("\(totalCompletedCount)")
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.3))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(.white.opacity(0.1))
+                                        .clipShape(Capsule())
+                                    
+                                    // Rotating Chevron
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(.white.opacity(0.5))
+                                        .rotationEffect(.degrees(showCompleted ? 90 : 0))
+                                        .padding(.trailing, 25)
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            
+                            // The List (Only shown if expanded)
+                            if showCompleted {
+                                LazyVStack(spacing: 12) {
+                                    // 1. Completed Habits
+                                    ForEach(completedHabits) { habit in
+                                        HabitCardView(habit: habit)
+                                            .transition(.move(edge: .top).combined(with: .opacity))
+                                    }
+                                    
+                                    // 2. Completed Tasks
+                                    ForEach(completedTasks) { task in
+                                        UserTaskCardView(task: task)
+                                            .transition(.move(edge: .top).combined(with: .opacity))
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    
+                    // Empty State
+                    if mustDoHabits.isEmpty && mustDoTasks.isEmpty &&
+                       canDoHabits.isEmpty && canDoTasks.isEmpty &&
+                       totalCompletedCount == 0 {
+                        
                         ContentUnavailableView(
                             "No Active Items",
                             systemImage: "checkmark.circle.badge.questionmark",
@@ -114,7 +183,7 @@ struct HomeView: View {
                         .padding(.top, 50)
                     }
                     
-                    // Bottom Padding for scroll
+                    // Bottom Spacer
                     Color.clear.frame(height: 100)
                 }
                 .padding(.top, 20)
@@ -122,8 +191,8 @@ struct HomeView: View {
             .scrollIndicators(.hidden)
             
             Color.clear
-                    .frame(height: 160)
-                    .accessibilityHidden(true)
+                .frame(height: 160)
+                .accessibilityHidden(true)
         }
     }
 }
@@ -133,7 +202,6 @@ struct HomeView: View {
 struct HeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-//            Text(Date().formatted(date: .complete, time: .omitted).uppercased())
             Text(Date().formatted(.dateTime.year().month().day()))
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .fontWeight(.bold)

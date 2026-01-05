@@ -9,26 +9,26 @@ import SwiftUI
 import SwiftData
 
 struct HabitCardView: View {
-    @Bindable var habit: Habit // Use Bindable for SwiftData objects
-    @State private var showingEditSheet: Bool = false // Renamed for clarity
+    @Bindable var habit: Habit
+    @State private var showingInfoSheet: Bool = false
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
             
-            // MARK: - Layer 1: The Main Card (Opens Detail Sheet)
+            // MARK: - Layer 1: The Main Card
             VStack(alignment: .leading, spacing: 10) {
                 // Title Row
-                HStack {
+                HStack(spacing: 12) {
                     Text(habit.title)
-                        .font(.system(.title2, design: .rounded))
+                        .font(.system(.title3, design: .rounded))
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
+                        .lineLimit(1)
                     
                     Spacer()
-                    // Info button removed from here to separate touch targets
                 }
                 
-                // Subtitle with tracking
+                // Subtitle Row (Count & Frequency)
                 Text("\(habit.currentCount)/\(habit.frequencyCount) \(timePeriodString)")
                     .font(.system(.caption, design: .rounded))
                     .fontWeight(.bold)
@@ -36,15 +36,24 @@ struct HabitCardView: View {
                     .kerning(1.0)
                     .opacity(0.5)
                     .foregroundStyle(.white)
-
-                // Refined Progress Bar
-                SegmentedProgressBar(
-                    value: habit.currentCount,
-                    total: habit.frequencyCount,
-                    color: habit.statusColor
-                )
-                .frame(height: 8)
-                .shadow(color: habit.statusColor.opacity(0.3), radius: 4, x: 0, y: 2)
+                
+                // Progress Line (Bottom)
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Track
+                        Capsule()
+                            .fill(Color.white.opacity(0.1))
+                            .frame(height: 4)
+                        
+                        // Indicator
+                        Capsule()
+                            .fill(Color.green) // Habits are Green
+                            .frame(width: CGFloat(min(habit.progress, 1.0)) * geometry.size.width, height: 4)
+                            .shadow(color: Color.green.opacity(0.5), radius: 4, x: 0, y: 2)
+                    }
+                }
+                .frame(height: 4)
+                .animation(.spring(response: 0.5, dampingFraction: 0.7), value: habit.currentCount)
             }
             .padding(20)
             .background {
@@ -60,9 +69,9 @@ struct HabitCardView: View {
                     .stroke(
                         LinearGradient(
                             colors: [
-                                habit.statusColor.opacity(0.6),
-                                habit.statusColor.opacity(0.1),
-                                habit.statusColor.opacity(0.1)
+                                .green.opacity(0.6),
+                                .green.opacity(0.1),
+                                .green.opacity(0.1)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -70,36 +79,44 @@ struct HabitCardView: View {
                         lineWidth: 1.5
                     )
             }
-            .opacity(habit.isFullyDone ? 0.4 : 1.0)
+            // Visual feedback when completed
+            .opacity(habit.isFullyDone ? 0.6 : 1.0)
             .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
             .padding(.horizontal, 20)
-            // MARK: - Interaction & Accessibility (Main Card)
-            .onTapGesture {
-                // CHANGE: Card tap now opens the sheet
-                showingEditSheet = true
-            }
-            .accessibilityIdentifier("HabitCard_\(habit.title)")
-            .accessibilityAddTraits(.isButton)
-            .accessibilityValue(habit.isFullyDone ? "Done" : "\(habit.currentCount) out of \(habit.frequencyCount) \(timePeriodString)")
-
             
-            // MARK: - Layer 2: The Increment Button (Floating on Top)
-            // CHANGE: This button now Increments instead of showing info
-            Button(action: { incrementHabit() }) {
-                Image(systemName: "plus") // CHANGE: Icon to Plus
-                    .font(.system(size: 18, weight: .bold)) // Slightly larger for tap target
-                    .foregroundColor(habit.isFullyDone ? habit.statusColor.opacity(0.4) : habit.statusColor)
-                    .padding(8)
-                    .background(habit.statusColor.opacity(0.15))
-                    .clipShape(Circle())
+            // MARK: - Interaction (Tap to Increment)
+            .onTapGesture {
+                showingInfoSheet = true
             }
-            // Add padding to position it correctly relative to the card
-            // 20 (outer padding) + 20 (inner card padding) = 40 roughly, adjusted for visual balance
-            .padding(.top, 20)
-            .padding(.trailing, 40)
-            .accessibilityIdentifier("IncrementButton")
+            
+            // Right Side: Progress Ring
+            ZStack {
+                Circle()
+                    .stroke(Color.white.opacity(0.15), lineWidth: 3)
+                Circle()
+                    .trim(from: 0, to: CGFloat(habit.progress))
+                    .stroke(
+                        .white,
+                        style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
+
+                Button(action: { incrementHabit() }) {
+                    Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(habit.isFullyDone ? .black : .white)
+                        .frame(width: 32, height: 32)
+                        .background(habit.isFullyDone ? .white : .clear)
+                        .clipShape(Circle())
+                }
+                .accessibilityIdentifier("IncrementButton")
+            }
+            .frame(width: 44, height: 44)
+            .padding(.top, 15)
+            .padding(.trailing, 35)
         }
-        .sheet(isPresented: $showingEditSheet) {
+        .sheet(isPresented: $showingInfoSheet) {
             HabitInfoView(habit: habit)
         }
     }
@@ -113,20 +130,18 @@ struct HabitCardView: View {
     
     private var timePeriodString: String {
         switch habit.frequencyUnit {
-        case .daily:
-            return "today"
-        case .weekly:
-            return "this week"
-        case .monthly:
-            return "this month"
+        case .daily: return "TODAY"
+        case .weekly: return "THIS WEEK"
+        case .monthly: return "THIS MONTH"
         }
     }
 }
 
 #Preview {
-    let habi = Habit(title: "Habi", frequencyCount: 2, frequencyUnit: .daily)
+    let habi = Habit(title: "Meditate", frequencyCount: 3, frequencyUnit: .daily)
+    habi.currentCount = 1
     
-    ZStack{
+    return ZStack {
         Color.black.ignoresSafeArea()
         HabitCardView(habit: habi)
     }

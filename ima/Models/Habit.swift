@@ -58,26 +58,51 @@ final class Habit {
     }
     
     // MARK: - Instance Methods
-    
-    func increment() {
-        if !isFullyDone {
-            currentCount += 1
-            totalCount += 1
-            
-            let key = Date().formatted(.iso8601.year().month().day())
-            completionHistory[key] = currentCount
+        
+        // Helper to get a consistent LOCAL date string key
+        private func getLocalKey(for date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.timeZone = .current // Forces local time
+            return formatter.string(from: date)
         }
-    }
 
-    func decrement() {
-        if currentCount > 0 {
-            currentCount -= 1
-            totalCount -= 1
-            
-            let key = Date().formatted(.iso8601.year().month().day())
-            completionHistory[key] = currentCount
+        func increment() {
+            if !isFullyDone {
+                currentCount += 1
+                totalCount += 1
+                
+                // FIX: Use local key generation
+                let key = getLocalKey(for: Date())
+                completionHistory[key] = currentCount
+            }
         }
-    }
+
+        func decrement() {
+            if currentCount > 0 {
+                currentCount -= 1
+                totalCount -= 1
+                
+                // FIX: Use local key generation
+                let key = getLocalKey(for: Date())
+                completionHistory[key] = currentCount
+            }
+        }
+        
+        // For Calendar
+        func colorFor(date: Date) -> Color {
+            // FIX: Use the same local key generator for lookups
+            let key = getLocalKey(for: date)
+            let count = completionHistory[key] ?? 0
+            
+            if count >= frequencyCount {
+                return .green
+            } else if count > 0 {
+                return .green.opacity(0.5)
+            } else {
+                return .white.opacity(0.05)
+            }
+        }
     
     func resetCurrentProgress() {
         if currentCount > 0 {
@@ -88,20 +113,6 @@ final class Habit {
     
     func resetForNewCycle() {
         currentCount = 0
-    }
-    
-    // For Calendar - Uses opacity instead of different colors
-    func colorFor(date: Date) -> Color {
-        let key = date.formatted(.iso8601.year().month().day())
-        let count = completionHistory[key] ?? 0
-        
-        if count >= frequencyCount {
-            return .green // Full opacity
-        } else if count > 0 {
-            return .green.opacity(0.5) // Lower opacity for partial
-        } else {
-            return .white.opacity(0.05)
-        }
     }
     
     // MARK: - Static Helpers

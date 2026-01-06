@@ -119,7 +119,12 @@ struct HistoryHeatmap : View {
     // 0 = Transparent (handled in view)
     // 1...Goal = Scales from 0.3 to 1.0 opacity
     private func getOpacityFor(date: Date) -> Double {
-        let key = date.formatted(.iso8601.year().month().day())
+        // MATCH THE MODEL'S KEY LOGIC
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+        let key = formatter.string(from: date)
+        
         let count = habit.completionHistory[key] ?? 0
         
         if count == 0 { return 0 }
@@ -127,12 +132,7 @@ struct HistoryHeatmap : View {
         let target = Double(habit.frequencyCount)
         let current = Double(count)
         
-        // Calculate ratio (e.g., 1/2 = 0.5)
-        let ratio = current / target
-        
-        // Clamp between 0.3 (so it's visible) and 1.0 (fully bright)
-        // Even 1 completion should be visible, hence the max(0.3, ...)
-        return max(0.3, min(1.0, ratio))
+        return max(0.3, min(1.0, current / target))
     }
     
 // Generates dates for the current year (Jan 1 - Dec 31), padded to start on Sunday

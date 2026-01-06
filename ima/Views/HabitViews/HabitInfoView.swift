@@ -102,19 +102,33 @@ struct HabitInfoView: View {
                                         .background(.white.opacity(0.1))
                                         .clipShape(Circle())
                                 }
-                                
+
                                 ZStack {
-                                    Circle().stroke(Color.white.opacity(0.1), lineWidth: 15)
+                                    // 1. Background Track
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.1), lineWidth: 15)
+                                    
+                                    // 2. Progress Indicator
                                     Circle()
                                         .trim(from: 0, to: CGFloat(habit.progress))
-                                        .stroke(habit.statusColor, style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                                        .stroke(
+                                            habit.statusColor,
+                                            style: StrokeStyle(lineWidth: 15, lineCap: .round)
+                                        )
                                         .rotationEffect(.degrees(-90))
+                                        // The animation line you already have:
                                         .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
+                                        
+                                        // ✨ NEW FIX: Fade out when count is 0 to hide the "dot"
+                                        .opacity(habit.currentCount > 0 ? 1.0 : 0.0)
+                                    
+                                    // 3. Text Inside
                                     VStack(spacing: 0) {
                                         Text("\(habit.currentCount)")
                                             .font(.system(size: 48, weight: .black, design: .rounded))
                                             .foregroundStyle(.white)
                                             .contentTransition(.numericText(value: Double(habit.currentCount)))
+                                        
                                         Text("/ \(habit.frequencyCount)")
                                             .font(.system(size: 18, weight: .bold, design: .rounded))
                                             .foregroundStyle(.white.opacity(0.5))
@@ -244,14 +258,14 @@ struct HabitInfoView: View {
     
     // MARK: - Logic
     private func incrementProgress() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 12)) {
             habit.increment()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }
     
     private func decrementProgress() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 1)) {
             habit.decrement()
         }
     }
@@ -263,15 +277,15 @@ struct HabitInfoView: View {
 
     let habi = Habit(title: "LeetCode", frequencyCount: 2, frequencyUnit: .daily)
     
-    // 1. Log Today as Completed (Value matches or exceeds frequencyCount)
-    let todayKey = Date().formatted(.iso8601.year().month().day())
-    habi.completionHistory[todayKey] = 2
+//    // 1. Log Today as Completed (Value matches or exceeds frequencyCount)
+//    let todayKey = Date().formatted(.iso8601.year().month().day())
+//    habi.completionHistory[todayKey] = 2
 
     // 2. Log Yesterday as Partially Done
     let calendar = Calendar.current
     if let yesterday = calendar.date(byAdding: .day, value: -1, to: Date()) {
         let yesterdayKey = yesterday.formatted(.iso8601.year().month().day())
-        habi.completionHistory[yesterdayKey] = 1
+        habi.completionHistory[yesterdayKey] = 0
     }
     
     container.mainContext.insert(habi)

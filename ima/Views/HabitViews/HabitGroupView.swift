@@ -54,7 +54,7 @@ struct HabitGroupView: View {
                     .foregroundStyle(.white)
                 }
                 else {
-                    LazyVStack(spacing: 24, pinnedViews: [.sectionHeaders]) {
+                    LazyVStack(spacing: 12, pinnedViews: [.sectionHeaders]) {
                         
                         // Keep your spacer for top safe area/nav bar
                         Color.clear.frame(height: 0)
@@ -98,7 +98,7 @@ struct HabitGroupView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 16)
+//                    .padding(.horizontal, 16)
                     
                     Color.clear
                             .frame(height: 160)
@@ -179,7 +179,7 @@ struct SectionHeader: View {
         .kerning(1.0)
         .opacity(0.7)
         .foregroundStyle(.white)
-        .padding(.leading, 16)
+        .padding( 16)
     }
 }
 

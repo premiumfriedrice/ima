@@ -19,22 +19,20 @@ struct HabitInfoView: View {
     
     var body: some View {
         ZStack {
+            // Background
             Color.black.ignoresSafeArea()
-            // Ensure you have this view or replace with Color.black
-            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
+                
+                // MARK: - Swipe Pill
+                Capsule()
+                    .fill(Color.white.opacity(0.5))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 10)
+                
                 // MARK: - Header
                 HStack {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.6))
-                            .padding(12)
-                            .background(.white.opacity(0.1))
-                            .clipShape(Circle())
-                    }
-                    Spacer()
+                    // Edit Button
                     Button {
                         withAnimation(.snappy) { isEditing.toggle() }
                     } label: {
@@ -45,6 +43,8 @@ struct HabitInfoView: View {
                             .background(isEditing ? .white : .white.opacity(0.1))
                             .clipShape(Circle())
                     }
+                    
+                    // Reset Button
                     Button { showingResetConfirmation = true } label: {
                         Image(systemName: "arrow.clockwise")
                             .font(.system(size: 16, weight: .bold))
@@ -53,6 +53,10 @@ struct HabitInfoView: View {
                             .background(.white.opacity(0.1))
                             .clipShape(Circle())
                     }
+                    
+                    Spacer()
+                    
+                    // Delete Button
                     Button(role: .destructive) { showingDeleteConfirmation = true } label: {
                         Image(systemName: "trash")
                             .font(.system(size: 16, weight: .medium))
@@ -62,11 +66,13 @@ struct HabitInfoView: View {
                             .clipShape(Circle())
                     }
                 }
-                .padding(25)
-                
+                .padding(.horizontal, 25)
+                .padding(.bottom, 10)
+                .padding(.top, 10)
+               
                 ScrollView {
                     VStack(spacing: 32) {
-                        
+                       
                         // MARK: - Hero Title
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HABIT")
@@ -82,9 +88,9 @@ struct HabitInfoView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
-                        
+                       
                         // MARK: - Today's Progress (Circular)
-                        VStack(alignment: .leading, spacing: 20) {
+                        VStack(alignment: .leading, spacing: 25) {
                             Text("TODAY'S PROGRESS")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.bold)
@@ -92,7 +98,7 @@ struct HabitInfoView: View {
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
-                            
+                           
                             HStack(spacing: 30) {
                                 Button { decrementProgress() } label: {
                                     Image(systemName: "minus")
@@ -107,7 +113,7 @@ struct HabitInfoView: View {
                                     // 1. Background Track
                                     Circle()
                                         .stroke(Color.white.opacity(0.1), lineWidth: 15)
-                                    
+                                   
                                     // 2. Progress Indicator
                                     Circle()
                                         .trim(from: 0, to: CGFloat(habit.progress))
@@ -116,12 +122,9 @@ struct HabitInfoView: View {
                                             style: StrokeStyle(lineWidth: 15, lineCap: .round)
                                         )
                                         .rotationEffect(.degrees(-90))
-                                        // The animation line you already have:
                                         .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
-                                        
-                                        // ✨ NEW FIX: Fade out when count is 0 to hide the "dot"
                                         .opacity(habit.currentCount > 0 ? 1.0 : 0.0)
-                                    
+                                   
                                     // 3. Text Inside
                                     VStack(spacing: 0) {
                                         Text("\(habit.currentCount)")
@@ -134,13 +137,12 @@ struct HabitInfoView: View {
                                             .foregroundStyle(.white.opacity(0.5))
                                     }
                                 }
-                                .frame(width: 160, height: 160)
                                 
                                 Button { incrementProgress() } label: {
                                     Image(systemName: "plus")
-                                        .font(.system(size: 24, weight: .bold))
+                                        .font(.system(size: 16, weight: .bold))
                                         .foregroundStyle(.black)
-                                        .frame(width: 50, height: 50)
+                                        .padding(12)
                                         .background(.white)
                                         .clipShape(Circle())
                                         .shadow(color: .white.opacity(0.2), radius: 10, x: 0, y: 0)
@@ -148,8 +150,8 @@ struct HabitInfoView: View {
                             }
                         }
                         .padding(.horizontal, 25)
-                        
-                        // MARK: - Adjust Goal
+                       
+                        // MARK: - History Heatmap
                         HistoryHeatmap(habit: habit)
 
                         // MARK: - Adjust Goal
@@ -162,7 +164,7 @@ struct HabitInfoView: View {
                                     .kerning(1.0)
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
-                                
+                               
                                 HStack(spacing: 0) {
                                     // Rolling Count
                                     Picker("Count", selection: $habit.frequencyCount) {
@@ -176,12 +178,12 @@ struct HabitInfoView: View {
                                     .pickerStyle(.wheel)
                                     .frame(width: 72, height: 128)
                                     .compositingGroup()
-                                    
+                                   
                                     Text(habit.frequencyCount == 1 ? "time per" : "times per")
                                         .font(.system(size: 28, weight: .bold, design: .rounded))
                                         .foregroundStyle(.white.opacity(0.4))
                                         .padding(.horizontal, 8)
-                                    
+                                   
                                     // Rolling Frequency
                                     Picker("Frequency", selection: $habit.frequencyUnitRaw) {
                                         ForEach(FrequencyUnit.allCases, id: \.self) { unit in
@@ -200,9 +202,9 @@ struct HabitInfoView: View {
                             .padding(.horizontal, 25)
                             .transition(.move(edge: .top).combined(with: .opacity))
                         }
-                        
+                       
                         Spacer()
-                        
+                       
                         Text("Created " + habit.dateCreated.formatted(date: .abbreviated, time: .shortened))
                             .font(.system(.caption, design: .rounded))
                             .fontWeight(.bold)
@@ -223,6 +225,13 @@ struct HabitInfoView: View {
                     .allowsHitTesting(false)
             }
         }
+        // MARK: - Presentation Logic
+        .presentationDetents([.medium, .large]) // 1. Allows Halfway + Full Screen
+        .presentationDragIndicator(.hidden)     // 2. Hide system pill (we made our own)
+        .presentationBackground(.ultraThinMaterial.opacity(0.1))         // 3. Remove system background so our Black ZStack shows
+        .presentationCornerRadius(40)           // 4. Match the corner radius of our design
+        
+        // MARK: - Alerts
         .confirmationDialog(
                     "Are you sure you want to delete '\(habit.title)'?",
                     isPresented: $showingDeleteConfirmation,
@@ -290,6 +299,9 @@ struct HabitInfoView: View {
     
     container.mainContext.insert(habi)
 
-    return HabitInfoView(habit: habi)
+    return Text("Parent View")
+        .sheet(isPresented: .constant(true)) {
+            HabitInfoView(habit: habi)
+        }
         .modelContainer(container)
 }

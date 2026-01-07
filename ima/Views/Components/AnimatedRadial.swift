@@ -24,7 +24,7 @@ struct AnimatedRadial: View {
             )
             .ignoresSafeArea()
             .onAppear {
-                withAnimation(.easeInOut(duration: 30).repeatForever(autoreverses: true)) {
+                withAnimation(.easeInOut(duration: 45).repeatForever(autoreverses: true)) {
                     animate.toggle()
                 }
             }

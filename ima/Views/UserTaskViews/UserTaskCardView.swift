@@ -127,14 +127,28 @@ struct UserTaskCardView: View {
                 handleTapInteraction()
             }
             
-            // MARK: - Layer 2: Edit Button (Top Right)
-            Button(action: { showingEditSheet = true }) {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(task.priority.color)
-                    .padding(12)
-                    .contentShape(Rectangle())
+//            // MARK: - Layer 2: Edit Button (Top Right)
+//            Button(action: { showingEditSheet = true }) {
+//                Image(systemName: "ellipsis")
+//                    .font(.system(size: 16, weight: .bold))
+//                    .foregroundColor(task.priority.color)
+//                    .padding(12)
+//                    .contentShape(Rectangle())
+//            }
+//            .padding(.top, 15)
+//            .padding(.trailing, 35)
+            ZStack {
+                Button(action: { toggleTaskCompletion() }) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(task.isCompleted ? .clear : .white)
+                        .frame(width: 32, height: 32)
+                        .background(task.isCompleted ? task.priority.color : .clear)
+                        .clipShape(Circle())
+                }
+                .accessibilityIdentifier("IncrementButton")
             }
+            .frame(width: 44, height: 44)
             .padding(.top, 15)
             .padding(.trailing, 35)
         }

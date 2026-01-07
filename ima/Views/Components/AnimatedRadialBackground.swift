@@ -11,8 +11,8 @@ struct AnimatedRadialBackground: View {
     @State private var animate = false
     
     var body: some View {
-        AnimatedRadial(color: Color.blue.opacity(0.1),
-                       startPoint: .bottomTrailing,
+        AnimatedRadial(color: Color.blue.opacity(0.05),
+                       startPoint: .topTrailing,
                        endPoint: .bottomLeading)
 //        AnimatedRadial(color: Color.white.opacity(0.1),
 //                       startPoint: .topLeading,

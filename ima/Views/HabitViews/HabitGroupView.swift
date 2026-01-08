@@ -108,17 +108,25 @@ struct HabitGroupView: View {
         }
     }
     
-    // MARK: - Filtering Logic
+    // MARK: - Filtering & Sorting Logic
+    // We add .sorted to push completed habits (isFullyDone == true) to the end
+    
     private var dailyHabits: [Habit] {
-        habits.filter { $0.frequencyUnit == .daily }
+        habits
+            .filter { $0.frequencyUnit == .daily }
+            .sorted { !$0.isFullyDone && $1.isFullyDone }
     }
     
     private var weeklyHabits: [Habit] {
-        habits.filter { $0.frequencyUnit == .weekly }
+        habits
+            .filter { $0.frequencyUnit == .weekly }
+            .sorted { !$0.isFullyDone && $1.isFullyDone }
     }
     
     private var monthlyHabits: [Habit] {
-        habits.filter { $0.frequencyUnit == .monthly }
+        habits
+            .filter { $0.frequencyUnit == .monthly }
+            .sorted { !$0.isFullyDone && $1.isFullyDone }
     }
     
 // MARK: - Date Range Calculation
@@ -197,7 +205,6 @@ struct SectionHeader: View {
     
     ZStack {
         Color(.black).ignoresSafeArea()
-        AnimatedRadialBackground()
         HabitGroupView(habits: habits)
     }
         

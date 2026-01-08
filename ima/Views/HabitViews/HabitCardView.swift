@@ -43,124 +43,19 @@ struct HabitCardView: View {
             
             Spacer()
             
-            // MARK: - Right Side: Segmented Ring + Button
-//            ZStack {
-//                // Shared geometry for the segments
-//                let ringLineWidth: CGFloat = 3.5
-//                let totalSegments = max(habit.frequencyCount, 1)
-//                let gap: CGFloat = totalSegments > 1 ? 0.035 : 0.0
-//                
-//                // 1. Background Track (Gray Segments)
-//                ForEach(0..<totalSegments, id: \.self) { index in
-//                    let segmentLength = 1.0 / CGFloat(totalSegments)
-//                    let start = (CGFloat(index) * segmentLength) + (gap / 2)
-//                    let end = (CGFloat(index + 1) * segmentLength) - (gap / 2)
-//                    
-//                    Circle()
-//                        .trim(from: start, to: end)
-//                        .stroke(
-//                            Color.white.opacity(0.15),
-//                            style: StrokeStyle(lineWidth: ringLineWidth, lineCap: .round)
-//                        )
-//                        .rotationEffect(.degrees(-90))
-//                }
-//                
-//                // 2. Active Fill (Color Segments with Mask Animation)
-//                ZStack {
-//                    ForEach(0..<totalSegments, id: \.self) { index in
-//                        let segmentLength = 1.0 / CGFloat(totalSegments)
-//                        let start = (CGFloat(index) * segmentLength) + (gap / 2)
-//                        let end = (CGFloat(index + 1) * segmentLength) - (gap / 2)
-//                        
-//                        Circle()
-//                            .trim(from: start, to: end)
-//                            .stroke(
-//                                habit.statusColor,
-//                                style: StrokeStyle(lineWidth: ringLineWidth, lineCap: .round)
-//                            )
-//                            .rotationEffect(.degrees(-90))
-//                    }
-//                }
-//                // The Mask: Grows to reveal the segments underneath
-//                .mask {
-//                    Circle()
-//                        .trim(from: 0, to: CGFloat(habit.progress))
-//                        .stroke(Color.white, lineWidth: ringLineWidth)
-//                        .rotationEffect(.degrees(-90))
-//                        .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
-//                }
-//                
-//                // 3. Button Icon
-//                Button(action: { incrementHabit() }) {
-//                    Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
-//                        .font(.system(size: 16, weight: .bold))
-//                        .foregroundColor(habit.isFullyDone ? .black : .white)
-//                        .frame(width: 32, height: 32)
-//                        .background(habit.isFullyDone ? habit.statusColor : .clear)
-//                        .clipShape(Circle())
-//                }
-//                .accessibilityIdentifier("IncrementButton")
-//            }
-//            .frame(width: 44, height: 44)
-
             // MARK: - Right Side: Continuous Ring + Incrementation Dots
-                        ZStack {
-                            let ringRadius: CGFloat = 20
-                            let dotRadius: CGFloat = 26
-                            let dotSize: CGFloat = 3.5
-                            let ringLineWidth: CGFloat = 3.0
-                            
-                            let totalSteps = max(habit.frequencyCount, 1)
-                            
-                            // 1. Continuous Background Track
-                            Circle()
-                                .stroke(
-                                    Color.white.opacity(0.1),
-                                    lineWidth: ringLineWidth
-                                )
-                                .frame(width: ringRadius * 2, height: ringRadius * 2)
-                            
-                            // 2. Continuous Active Progress Line
-                            Circle()
-                                .trim(from: 0, to: CGFloat(habit.progress))
-                                .stroke(
-                                    habit.statusColor,
-                                    style: StrokeStyle(lineWidth: ringLineWidth, lineCap: .round)
-                                )
-                                .rotationEffect(.degrees(-90))
-                                .frame(width: ringRadius * 2, height: ringRadius * 2)
-                                .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
-                            
-                            // 3. Incrementation Dots (Hovering Outside)
-                            ForEach(0..<totalSteps, id: \.self) { index in
-                                // Calculate angle for this dot
-                                let anglePerStep = 360.0 / Double(totalSteps)
-                                
-                                // CHANGE: Use (index + 1) to place dots at the END of the segment
-                                let angle = anglePerStep * Double(index + 1) - 90
-                                
-                                let isCompleted = index < habit.currentCount
-                                
-                                Circle()
-                                    .fill(isCompleted ? habit.statusColor : Color.white.opacity(0.2))
-                                    .frame(width: dotSize, height: dotSize)
-                                    .offset(x: dotRadius * cos(angle.degreesToRadians),
-                                            y: dotRadius * sin(angle.degreesToRadians))
-                                    .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(index) * 0.03), value: habit.currentCount)
-                            }
-
-                            // 4. Button Icon
-                            Button(action: { incrementHabit() }) {
-                                Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(habit.isFullyDone ? .black : .white)
-                                    .frame(width: 28, height: 28)
-                                    .background(habit.isFullyDone ? habit.statusColor : .clear)
-                                    .clipShape(Circle())
-                            }
-                            .accessibilityIdentifier("IncrementButton")
-                        }
-                        .frame(width: 55, height: 55)
+            ProgressRingWithDots(habit: habit, fillFactor: 1.0) {
+                Button(action: { incrementHabit() }) {
+                    Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
+                        .font(.system(size: 14, weight: .bold)) // Fixed font size for small card
+                        .foregroundColor(habit.isFullyDone ? .black : .white)
+                        .frame(width: 28, height: 28) // Fixed button size for small card
+                        .background(habit.isFullyDone ? habit.statusColor : .clear)
+                        .clipShape(Circle())
+                }
+            }
+            .frame(width: 55, height: 55) // The reference size
+            
         }
         .padding(20)
         .background {

@@ -17,6 +17,9 @@ struct HabitInfoView: View {
     @State private var showingResetConfirmation = false
     @State private var isEditing = false
     
+    // 1. Add state to control the sheet size
+    @State private var currentDetent: PresentationDetent = .medium
+    
     var body: some View {
         ZStack {
             // Background
@@ -34,7 +37,13 @@ struct HabitInfoView: View {
                 HStack {
                     // Edit Button
                     Button {
-                        withAnimation(.snappy) { isEditing.toggle() }
+                        withAnimation(.snappy) {
+                            isEditing.toggle()
+                            // If we are entering edit mode, force the sheet to expand
+                            if isEditing {
+                                currentDetent = .large
+                            }
+                        }
                     } label: {
                         Image(systemName: isEditing ? "checkmark" : "square.and.pencil")
                             .font(.system(size: 16, weight: .bold))
@@ -69,212 +78,223 @@ struct HabitInfoView: View {
                 .padding(.horizontal, 25)
                 .padding(.bottom, 10)
                 .padding(.top, 10)
-               
-                ScrollView {
-                    VStack(spacing: 32) {
-                       
-                        // MARK: - Hero Title
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("HABIT")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
-                                .textCase(.uppercase)
-                                .kerning(1.0)
-                                .opacity(0.5)
-                                .foregroundStyle(.white)
-                            Text(habit.title)
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 25)
-                       
-                        // MARK: - Today's Progress (Circular)
-                        VStack(alignment: .leading, spacing: 25) {
-                            Text("TODAY'S PROGRESS")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
-                                .textCase(.uppercase)
-                                .kerning(1.0)
-                                .opacity(0.5)
-                                .foregroundStyle(.white)
-                           
-                            HStack(spacing: 30) {
-                                Button { decrementProgress() } label: {
-                                    Image(systemName: "minus")
-                                        .font(.system(size: 24, weight: .bold))
-                                        .foregroundStyle(.white)
-                                        .frame(width: 50, height: 50)
-                                        .background(.white.opacity(0.1))
-                                        .clipShape(Circle())
-                                }
-
-                                ZStack {
-                                    // 1. Background Track
-                                    Circle()
-                                        .stroke(Color.white.opacity(0.1), lineWidth: 15)
-                                   
-                                    // 2. Progress Indicator
-                                    Circle()
-                                        .trim(from: 0, to: CGFloat(habit.progress))
-                                        .stroke(
-                                            habit.statusColor,
-                                            style: StrokeStyle(lineWidth: 15, lineCap: .round)
-                                        )
-                                        .rotationEffect(.degrees(-90))
-                                        .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
-                                        .opacity(habit.currentCount > 0 ? 1.0 : 0.0)
-                                   
-                                    // 3. Text Inside
-                                    VStack(spacing: 0) {
-                                        Text("\(habit.currentCount)")
-                                            .font(.system(size: 48, weight: .black, design: .rounded))
-                                            .foregroundStyle(.white)
-                                            .contentTransition(.numericText(value: Double(habit.currentCount)))
-                                        
-                                        Text("/ \(habit.frequencyCount)")
-                                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.white.opacity(0.5))
-                                    }
-                                }
-                                
-                                Button { incrementProgress() } label: {
-                                    Image(systemName: "plus")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundStyle(.black)
-                                        .padding(12)
-                                        .background(.white)
-                                        .clipShape(Circle())
-                                        .shadow(color: .white.opacity(0.2), radius: 10, x: 0, y: 0)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 25)
-                       
-                        // MARK: - History Heatmap
-                        HistoryHeatmap(habit: habit)
-
-                        // MARK: - Adjust Goal
-                        if isEditing {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text("ADJUST YOUR GOAL")
+                
+                // 2. Wrap ScrollView in ScrollViewReader to enable scrolling
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 32) {
+                            
+                            // MARK: - Hero Title
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("HABIT")
                                     .font(.system(.caption, design: .rounded))
                                     .fontWeight(.bold)
                                     .textCase(.uppercase)
                                     .kerning(1.0)
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
-                               
-                                HStack(spacing: 0) {
-                                    // Rolling Count
-                                    Picker("Count", selection: $habit.frequencyCount) {
-                                        ForEach(1...50, id: \.self) { number in
-                                            Text("\(number)")
-                                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                                .foregroundStyle(.white)
-                                                .tag(number)
+                                Text(habit.title)
+                                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 25)
+                            
+                            // MARK: - Today's Progress (Responsive)
+                            VStack(alignment: .leading, spacing: 20) {
+                                Text("TODAY'S PROGRESS")
+                                    .font(.system(.caption, design: .rounded))
+                                    .fontWeight(.bold)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+                                
+                                HStack(spacing: 20) {
+                                    // 1. Decrement Button
+                                    Button { decrementProgress() } label: {
+                                        Image(systemName: "minus")
+                                            .font(.system(size: 24, weight: .bold))
+                                            .foregroundStyle(.white)
+                                            .frame(width: 50, height: 50)
+                                            .background(.white.opacity(0.1))
+                                            .clipShape(Circle())
+                                    }
+                                    .padding(.bottom, 25)
+                                    
+                                    GeometryReader { geo in
+                                        let size = min(geo.size.width, geo.size.height)
+                                        
+                                        ProgressRingWithDots(habit: habit, fillFactor: 0.9) {
+                                            VStack(spacing: 0) {
+                                                // Scale font relative to the size to keep proportions
+                                                Text("\(habit.currentCount)")
+                                                    .font(.system(size: size * 0.2, weight: .black, design: .rounded))
+                                                    .foregroundStyle(.white)
+                                                    .contentTransition(.numericText(value: Double(habit.currentCount)))
+                                                
+                                                Text("/ \(habit.frequencyCount)")
+                                                    .font(.system(size: size * 0.1, weight: .bold, design: .rounded))
+                                                    .foregroundStyle(.white.opacity(0.5))
+                                            }
                                         }
                                     }
-                                    .pickerStyle(.wheel)
-                                    .frame(width: 72, height: 128)
-                                    .compositingGroup()
-                                   
-                                    Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                                        .foregroundStyle(.white.opacity(0.4))
-                                        .padding(.horizontal, 8)
-                                   
-                                    // Rolling Frequency
-                                    Picker("Frequency", selection: $habit.frequencyUnitRaw) {
-                                        ForEach(FrequencyUnit.allCases, id: \.self) { unit in
-                                            Text(unit.rawValue.capitalized)
-                                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                                .foregroundStyle(.white)
-                                                .tag(unit.rawValue)
-                                        }
+                                    .frame(height: 250)
+                                    
+                                    // 3. Increment Button
+                                    Button { incrementProgress() } label: {
+                                        Image(systemName: "plus")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundStyle(.black)
+                                            .frame(width: 50, height: 50)
+                                            .background(.white)
+                                            .clipShape(Circle())
+                                            .shadow(color: .white.opacity(0.2), radius: 10, x: 0, y: 0)
                                     }
-                                    .pickerStyle(.wheel)
-                                    .frame(width: 136, height: 128)
-                                    .compositingGroup()
+                                    .padding(.bottom, 25)
                                 }
-                                .frame(maxWidth: .infinity)
                             }
                             .padding(.horizontal, 25)
-                            .transition(.move(edge: .top).combined(with: .opacity))
+                            
+                            // MARK: - History Heatmap
+                            HistoryHeatmap(habit: habit)
+                            
+                            // MARK: - Adjust Goal
+                            if isEditing {
+                                VStack(alignment: .leading, spacing: 0) {
+                                    Text("ADJUST YOUR GOAL")
+                                        .font(.system(.caption, design: .rounded))
+                                        .fontWeight(.bold)
+                                        .textCase(.uppercase)
+                                        .kerning(1.0)
+                                        .opacity(0.5)
+                                        .foregroundStyle(.white)
+                                    
+                                    HStack(spacing: 0) {
+                                        // Rolling Count
+                                        Picker("Count", selection: $habit.frequencyCount) {
+                                            ForEach(1...50, id: \.self) { number in
+                                                Text("\(number)")
+                                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                                    .foregroundStyle(.white)
+                                                    .tag(number)
+                                            }
+                                        }
+                                        .pickerStyle(.wheel)
+                                        .frame(width: 72, height: 128)
+                                        .compositingGroup()
+                                        
+                                        Text(habit.frequencyCount == 1 ? "time per" : "times per")
+                                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                                            .foregroundStyle(.white.opacity(0.4))
+                                            .padding(.horizontal, 8)
+                                        
+                                        // Rolling Frequency
+                                        Picker("Frequency", selection: $habit.frequencyUnitRaw) {
+                                            ForEach(FrequencyUnit.allCases, id: \.self) { unit in
+                                                Text(unit.rawValue.capitalized)
+                                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                                    .foregroundStyle(.white)
+                                                    .tag(unit.rawValue)
+                                            }
+                                        }
+                                        .pickerStyle(.wheel)
+                                        .frame(width: 136, height: 128)
+                                        .compositingGroup()
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .padding(.horizontal, 25)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                                // 3. Add an ID so we can scroll to it
+                                .id("AdjustGoalSection")
+                            }
+                            
+                            Spacer()
+                            
+                            Text("Created " + habit.dateCreated.formatted(date: .abbreviated, time: .shortened))
+                                .font(.system(.caption, design: .rounded))
+                                .fontWeight(.bold)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
+                                .padding(.bottom, 20)
                         }
-                       
-                        Spacer()
-                       
-                        Text("Created " + habit.dateCreated.formatted(date: .abbreviated, time: .shortened))
-                            .font(.system(.caption, design: .rounded))
-                            .fontWeight(.bold)
-                            .textCase(.uppercase)
-                            .kerning(1.0)
-                            .opacity(0.5)
-                            .foregroundStyle(.white)
-                            .padding(.bottom, 20)
+                        .padding(.top, 20)
                     }
-                    .padding(.top, 20)
+                    // 4. Watch for edit state changes to trigger scroll
+                    .onChange(of: isEditing) { _, newValue in
+                        if newValue {
+                            // Delay slightly to allow the sheet to expand to .large before scrolling
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                    proxy.scrollTo("AdjustGoalSection", anchor: .center)
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            .foregroundStyle(.white)
-            .overlay {
-                RoundedRectangle(cornerRadius: 40)
-                    .stroke(LinearGradient(stops: [.init(color: .white.opacity(0.2), location: 0.0), .init(color: .white.opacity(0.05), location: 0.2), .init(color: .clear, location: 0.5)], startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-            }
+        }
+        .foregroundStyle(.white)
+        .overlay {
+            RoundedRectangle(cornerRadius: 40)
+                .stroke(LinearGradient(stops: [.init(color: .white.opacity(0.2), location: 0.0), .init(color: .white.opacity(0.05), location: 0.2), .init(color: .clear, location: 0.5)], startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
         }
         // MARK: - Presentation Logic
-        .presentationDetents([.medium, .large]) // 1. Allows Halfway + Full Screen
-        .presentationDragIndicator(.hidden)     // 2. Hide system pill (we made our own)
-        .presentationBackground(.ultraThinMaterial.opacity(0.1))         // 3. Remove system background so our Black ZStack shows
-        .presentationCornerRadius(40)           // 4. Match the corner radius of our design
+        // 5. Bind the detents to the state variable
+        .presentationDetents([.medium, .large], selection: $currentDetent)
+        .presentationDragIndicator(.hidden)
+        .presentationBackground(.ultraThinMaterial.opacity(0.1))
+        .presentationCornerRadius(40)
         
         // MARK: - Alerts
         .confirmationDialog(
-                    "Are you sure you want to delete '\(habit.title)'?",
-                    isPresented: $showingDeleteConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Delete Habit", role: .destructive) {
-                        dismiss()
-                        Task {
-                            try? await Task.sleep(for: .seconds(0.35))
-                            modelContext.delete(habit)
-                        }
-                    }
-                    Button("Cancel") { }
-                } message: {
-                    Text("This action cannot be undone.")
+            "Are you sure you want to delete '\(habit.title)'?",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Habit", role: .destructive) {
+                dismiss()
+                Task {
+                    try? await Task.sleep(for: .seconds(0.35))
+                    modelContext.delete(habit)
                 }
-                .confirmationDialog(
-                    "Are you sure you want to reset '\(habit.title)'?",
-                    isPresented: $showingResetConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Reset Todays Progress", role: .destructive) {
-                        dismiss()
-                        withAnimation {
-                            habit.resetCurrentProgress()
-                        }
-                    }
-                    Button("Cancel") { }
-                } message: {
-                    Text("This action will reset progress for this habit for today.")
+            }
+            Button("Cancel") { }
+        } message: {
+            Text("This action cannot be undone.")
+        }
+        .confirmationDialog(
+            "Are you sure you want to reset '\(habit.title)'?",
+            isPresented: $showingResetConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Reset Todays Progress", role: .destructive) {
+                dismiss()
+                withAnimation {
+                    habit.resetCurrentProgress()
                 }
+            }
+            Button("Cancel") { }
+        } message: {
+            Text("This action will reset progress for this habit for today.")
+        }
     }
     
     // MARK: - Logic
     private func incrementProgress() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 12)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             habit.increment()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }
     
     private func decrementProgress() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 1)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             habit.decrement()
         }
     }

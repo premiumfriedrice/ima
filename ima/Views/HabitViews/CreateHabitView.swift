@@ -19,7 +19,6 @@ struct CreateHabitView: View {
     var body: some View {
         ZStack {
             Color(.black).ignoresSafeArea()
-            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
                 // MARK: - Header

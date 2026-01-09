@@ -28,20 +28,11 @@ struct HabitGroupView: View {
     
     var body: some View {
         VStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Habits")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            
             ZStack(alignment: .bottom) {
                 // MARK: - Main Content Area
                 ScrollView {
                     if habits.isEmpty {
-                        VStack(spacing: 12) {
+                        VStack(spacing: 10) {
                             Image(systemName: "tray")
                                 .font(.system(size: 60))
                                 .foregroundStyle(.white.opacity(0.5))
@@ -64,7 +55,7 @@ struct HabitGroupView: View {
                         .foregroundStyle(.white)
                     }
                     else {
-                        LazyVStack(spacing: 12, pinnedViews: [.sectionHeaders]) {
+                        LazyVStack(spacing: 10, /*pinnedViews: [.sectionHeaders]*/) {
                             
                             // Keep your spacer for top safe area/nav bar
                             Color.clear.frame(height: 0)
@@ -165,7 +156,7 @@ struct SectionHeader: View {
     let color: Color
     
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.headline)
                 .foregroundStyle(color)
@@ -196,7 +187,8 @@ struct SectionHeader: View {
         .kerning(1.0)
         .opacity(0.7)
         .foregroundStyle(.white)
-        .padding( 16)
+        .padding(.leading, 25)
+        .padding(.vertical, 10)
     }
 }
 

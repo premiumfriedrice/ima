@@ -23,72 +23,37 @@ struct CreateHabitView: View {
             VStack(spacing: 0) {
                 // MARK: - Header
                 HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.6))
-                            .padding(12)
-                            .background(.white.opacity(0.1))
-                            .clipShape(Circle())
-                    }
+                    // Removed X Button as requested
                     
                     Spacer()
                     
-//                    Button {
-//                        saveHabit()
-//                    } label: {
-//                        HStack(spacing: 6) {
-//                            Text("CREATE")
-//                                .font(.system(.caption, design: .rounded))
-//                                .fontWeight(.bold)
-//                            Image(systemName: "arrow.up")
-//                                .font(.system(size: 16, weight: .bold))
-//                        }
-//                        .foregroundStyle(!title.isEmpty ? .black : .white.opacity(0.3))
-//                        .padding(.vertical, 10)
-//                        .padding(.horizontal, 16)
-//                        .background(!title.isEmpty ? .white : .white.opacity(0.1))
-//                        .clipShape(Capsule())
-//                    }
-//                    .disabled(title.isEmpty)
-//                    .accessibilityIdentifier("SaveHabitButton")
-                    
-                    // Option 2
+                    // Create Button (Checkmark)
                     Button {
                         saveHabit()
                     } label: {
-                        HStack(spacing: 6) {
-                            Text("CREATE")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.black) // Extra bold for impact
-                            
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 14, weight: .bold))
-                        }
-                        .foregroundStyle(!title.isEmpty ? .white :.white.opacity(0.6))
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
-                        .background(
-                            ZStack {
-                                if !title.isEmpty {
-                                    // Gradient when active
-                                    LinearGradient(
-                                        colors: [Color.blue, Color.purple],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                } else {
-                                    // Subtle gray stroke when disabled
-                                    Color.white.opacity(0.1)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(!title.isEmpty ? .white : .white.opacity(0.3))
+                            .frame(width: 50, height: 50) // Fixed size for a perfect circle
+                            .background(
+                                ZStack {
+                                    if !title.isEmpty {
+                                        // Gradient when active
+                                        LinearGradient(
+                                            colors: [Color.blue, Color.purple],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    } else {
+                                        // Subtle gray background when disabled
+                                        Color.white.opacity(0.1)
+                                    }
                                 }
-                            }
-                        )
-                        .clipShape(Capsule())
-                        // Add a glow when active
-                        .shadow(color: !title.isEmpty ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
-                        .animation(.smooth, value: !title.isEmpty)
+                            )
+                            .clipShape(Circle())
+                            // Add a glow when active
+                            .shadow(color: !title.isEmpty ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
+                            .animation(.smooth, value: !title.isEmpty)
                     }
                     .disabled(title.isEmpty)
                     .accessibilityIdentifier("SaveHabitButton")
@@ -170,23 +135,26 @@ struct CreateHabitView: View {
             }
             .foregroundStyle(.white)
             .overlay {
-                    RoundedRectangle(cornerRadius: 40) // Matches standard iOS sheet corners
-                        .stroke(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .white.opacity(0.2), location: 0.0), // Shiny top
-                                    .init(color: .white.opacity(0.05), location: 0.2), // Fades quickly
-                                    .init(color: .clear, location: 0.5) // Invisible at bottom
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1.5
-                        )
-                        .ignoresSafeArea() // Ensures the stroke follows the sheet edge completely
-                        .allowsHitTesting(false) // Ensures you can still touch buttons underneath
-                }
+                RoundedRectangle(cornerRadius: 40) // Matches standard iOS sheet corners
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.2), location: 0.0), // Shiny top
+                                .init(color: .white.opacity(0.05), location: 0.2), // Fades quickly
+                                .init(color: .clear, location: 0.5) // Invisible at bottom
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .ignoresSafeArea() // Ensures the stroke follows the sheet edge completely
+                    .allowsHitTesting(false) // Ensures you can still touch buttons underneath
+            }
         }
+        // MARK: - Sheet Configuration
+        .presentationDetents([.medium]) // Locks sheet to half height
+        .presentationDragIndicator(.visible) // Adds standard drag handle
     }
     
     private func saveHabit() {

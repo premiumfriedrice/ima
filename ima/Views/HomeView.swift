@@ -20,8 +20,7 @@ struct HomeView: View {
     
     // MARK: - Computed Filters
     
-    // 1. MUST DO
-    // Now excludes completed habits
+    // 1. MUST DO (Daily Habits + High Priority/Due Tasks)
     private var mustDoHabits: [Habit] {
         habits.filter { $0.frequencyUnit == .daily && !$0.isFullyDone }
     }
@@ -39,8 +38,7 @@ struct HomeView: View {
         }
     }
     
-    // 2. CAN DO
-    // Now excludes completed habits
+    // 2. CAN DO (Weekly/Monthly Habits + Low Priority Tasks)
     private var canDoHabits: [Habit] {
         habits.filter { $0.frequencyUnit != .daily && !$0.isFullyDone }
     }
@@ -59,7 +57,6 @@ struct HomeView: View {
     }
     
     // 3. COMPLETED
-    // Now includes fully done habits
     private var completedHabits: [Habit] {
         habits.filter { $0.isFullyDone }
     }
@@ -74,105 +71,24 @@ struct HomeView: View {
     }
     
     var body: some View {
-        ZStack {
-            ScrollView {
-                VStack(spacing: 35) {
-                    
-                    // MARK: - Header
-                    HeaderView()
-                    
-                    // MARK: - MUST DO SECTION
-                    if !mustDoHabits.isEmpty || !mustDoTasks.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            SectionLabel(title: "Must Do", icon: "flame.fill", color: .orange)
-                            
-                            LazyVStack(spacing: 12) {
-                                ForEach(mustDoHabits) { habit in
-                                    HabitCardView(habit: habit)
-                                }
-                                ForEach(mustDoTasks) { task in
-                                    UserTaskCardView(task: task)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
+        VStack {
+            ZStack(alignment: .bottom) {
+                // MARK: - Main Content Area
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 4) {
+                        // Header Date
+                        Text(Date().formatted(.dateTime.year().month().day()))
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
                     
-                    // MARK: - CAN DO SECTION
-                    if !canDoHabits.isEmpty || !canDoTasks.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            SectionLabel(title: "Can Do", icon: "calendar.badge.clock", color: .blue)
-                            
-                            LazyVStack(spacing: 12) {
-                                ForEach(canDoHabits) { habit in
-                                    HabitCardView(habit: habit)
-                                }
-                                ForEach(canDoTasks) { task in
-                                    UserTaskCardView(task: task)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    
-                    // MARK: - COMPLETED SECTION (Collapsible)
-                    if totalCompletedCount > 0 {
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Collapsible Header Button
-                            Button(action: {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                    showCompleted.toggle()
-                                }
-                            }) {
-                                HStack {
-                                    SectionLabel(title: "Completed", icon: "checkmark.circle.fill", color: .green)
-                                    
-                                    Spacer()
-                                    
-                                    // Count Badge
-                                    Text("\(totalCompletedCount)")
-                                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                                        .foregroundStyle(.white.opacity(0.3))
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(.white.opacity(0.1))
-                                        .clipShape(Capsule())
-                                    
-                                    // Rotating Chevron
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundStyle(.white.opacity(0.5))
-                                        .rotationEffect(.degrees(showCompleted ? 90 : 0))
-                                        .padding(.trailing, 25)
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            
-                            // The List (Only shown if expanded)
-                            if showCompleted {
-                                LazyVStack(spacing: 12) {
-                                    // 1. Completed Habits
-                                    ForEach(completedHabits) { habit in
-                                        HabitCardView(habit: habit)
-                                            .transition(.move(edge: .top).combined(with: .opacity))
-                                    }
-                                    
-                                    // 2. Completed Tasks
-                                    ForEach(completedTasks) { task in
-                                        UserTaskCardView(task: task)
-                                            .transition(.move(edge: .top).combined(with: .opacity))
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    
-                    // Empty State
+                    // Empty State Check
                     if mustDoHabits.isEmpty && mustDoTasks.isEmpty &&
-                       canDoHabits.isEmpty && canDoTasks.isEmpty &&
-                       totalCompletedCount == 0 {
+                        canDoHabits.isEmpty && canDoTasks.isEmpty &&
+                        totalCompletedCount == 0 {
                         
                         ContentUnavailableView(
                             "No Active Items",
@@ -181,35 +97,118 @@ struct HomeView: View {
                         )
                         .foregroundStyle(.white.opacity(0.5))
                         .padding(.top, 50)
+                        
+                    } else {
+                        // MARK: - Pinned Sections
+                        LazyVStack(spacing: 12, /*pinnedViews: [.sectionHeaders]*/) {
+                            
+                            // Keep spacer for top safe area if needed
+                            Color.clear.frame(height: 0)
+                            
+                            // MARK: - MUST DO SECTION
+                            if !mustDoHabits.isEmpty || !mustDoTasks.isEmpty {
+                                Section(header: SectionLabel(
+                                    title: "Must Do",
+                                    icon: "flame.fill",
+                                    color: .orange
+                                )) {
+                                    ForEach(mustDoHabits) { habit in
+                                        HabitCardView(habit: habit)
+                                    }
+                                    ForEach(mustDoTasks) { task in
+                                        UserTaskCardView(task: task)
+                                    }
+                                }
+                            }
+                            
+                            // MARK: - CAN DO SECTION
+                            if !canDoHabits.isEmpty || !canDoTasks.isEmpty {
+                                Section(header: SectionLabel(
+                                    title: "Can Do",
+                                    icon: "calendar.badge.clock",
+                                    color: .blue
+                                )) {
+                                    ForEach(canDoHabits) { habit in
+                                        HabitCardView(habit: habit)
+                                    }
+                                    ForEach(canDoTasks) { task in
+                                        UserTaskCardView(task: task)
+                                    }
+                                }
+                            }
+                            
+                            // MARK: - COMPLETED SECTION (Collapsible)
+                            if totalCompletedCount > 0 {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    Button(action: {
+                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                            showCompleted.toggle()
+                                        }
+                                    }) {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .font(.headline)
+                                                .foregroundStyle(.green)
+                                            
+                                            Text("COMPLETED")
+                                                .font(.headline)
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(.primary)
+                                            
+                                            Spacer()
+                                            
+                                            // Count Badge
+                                            Text("\(totalCompletedCount)")
+                                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                                .foregroundStyle(.white.opacity(0.3))
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 4)
+                                                .background(.white.opacity(0.1))
+                                                .clipShape(Capsule())
+                                            
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 14, weight: .bold))
+                                                .foregroundStyle(.white.opacity(0.5))
+                                                .rotationEffect(.degrees(showCompleted ? 90 : 0))
+                                        }
+                                        .font(.system(.caption, design: .rounded))
+                                        .fontWeight(.bold)
+                                        .textCase(.uppercase)
+                                        .kerning(1.0)
+                                        .opacity(0.7)
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 25)
+                                        .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    if showCompleted {
+                                        ForEach(completedHabits) { habit in
+                                            HabitCardView(habit: habit)
+                                                .transition(.move(edge: .top).combined(with: .opacity))
+                                        }
+                                        ForEach(completedTasks) { task in
+                                            UserTaskCardView(task: task)
+                                                .transition(.move(edge: .top).combined(with: .opacity))
+                                        }
+                                    }
+                                }
+                                .padding(.top, 10)
+                            }
+                            
+                            Color.clear
+                                .frame(height: 160)
+                                .accessibilityHidden(true)
+                        }
                     }
-                    
-                    // Bottom Spacer
-                    Color.clear.frame(height: 100)
                 }
-                .padding(.top, 20)
+                .scrollIndicators(.hidden)
             }
-            .scrollIndicators(.hidden)
-            
-            Color.clear
-                .frame(height: 160)
-                .accessibilityHidden(true)
         }
     }
 }
 
-// MARK: - Helper Views
-struct HeaderView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(Date().formatted(.dateTime.year().month().day()))
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .fontWeight(.bold)
-                .foregroundStyle(.white)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-    }
-}
+// MARK: - Subviews (Shared)
 
 struct SectionLabel: View {
     let title: String
@@ -217,19 +216,27 @@ struct SectionLabel: View {
     let color: Color
     
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 14, weight: .bold))
+                .font(.headline)
                 .foregroundStyle(color)
             
             Text(title)
-                .font(.system(.subheadline, design: .rounded))
+                .font(.headline)
                 .fontWeight(.bold)
+                .foregroundStyle(.primary)
                 .textCase(.uppercase)
-                .kerning(1)
-                .foregroundStyle(.white.opacity(0.7))
+            
+            Spacer()
         }
+        .font(.system(.caption, design: .rounded))
+        .fontWeight(.bold)
+        .textCase(.uppercase)
+        .kerning(1.0)
+        .opacity(0.7)
+        .foregroundStyle(.white)
         .padding(.leading, 25)
+        .padding(.vertical, 10)
     }
 }
 
@@ -237,7 +244,7 @@ struct SectionLabel: View {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: UserTask.self, Habit.self, configurations: config)
 
-    // Seed data helper to avoid non-View statements as the last expression
+    // Seed data helper
     func seed(_ context: ModelContext) {
         let habit1 = Habit(title: "Leetcode", frequencyCount: 2, frequencyUnit: .daily)
         let habit2 = Habit(title: "Cardio", frequencyCount: 3, frequencyUnit: .weekly)
@@ -253,7 +260,6 @@ struct SectionLabel: View {
 
     return ZStack {
         Color.black.ignoresSafeArea()
-        AnimatedRadial(color: .blue.opacity(0.1), startPoint: .topLeading, endPoint: .bottomTrailing)
         HomeView()
             .modelContainer(container)
     }

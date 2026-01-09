@@ -22,7 +22,7 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             // 1. Background
-            Color(.black).ignoresSafeArea()
+            Color.black.ignoresSafeArea()
             AnimatedRadialBackground()
             
             // 2. Main Content

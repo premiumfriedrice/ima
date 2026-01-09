@@ -12,7 +12,8 @@ struct UserTaskCardView: View {
     @Bindable var task: UserTask
     @State private var showingEditSheet: Bool = false
     
-    // Helper to calculate progress if subtasks exist
+    // MARK: - Computed Properties
+    
     private var subtaskProgress: Double {
         guard !task.subtasks.isEmpty else {
             return task.isCompleted ? 1.0 : 0.0
@@ -25,134 +26,125 @@ struct UserTaskCardView: View {
         return task.subtasks.isEmpty ? 1.0 : Double(task.subtasks.count)
     }
     
+    // Logic: Show counts only if subtasks exist AND are not yet fully complete
+    private var showCounts: Bool {
+        return !task.subtasks.isEmpty && subtaskProgress < totalSubtasks
+    }
+    
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        HStack(alignment: .center, spacing: 16) {
             
-            // MARK: - Layer 1: The Main Card
+            // MARK: - Left Side: Text Info
             VStack(alignment: .leading, spacing: 10) {
-                // Title Row
-                HStack(spacing: 12) {
-                    Text(task.title)
-                        .font(.system(.title3, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                        .strikethrough(task.isCompleted, color: .gray)
-                        .opacity(task.isCompleted ? 0.6 : 1.0)
-                    
-                    Spacer()
-                }
-                
-                // Subtitle Row (Due Date or Subtask Count)
-                if task.dueDate != nil || !task.subtasks.isEmpty || !task.details.isEmpty {
-                    
-                    HStack {
-                        if let date = task.dueDate {
-                            Text(date.formatted(.dateTime.month().day()))
-                            // Divider Dot
-                            Circle()
-                                .fill(.white.opacity(0.5))
-                                .frame(width: 3, height: 3)
-                            Text("\(Int(subtaskProgress))/\(Int(totalSubtasks)) Subtasks")
-                        } else {
-                            Text("\(Int(subtaskProgress))/\(Int(totalSubtasks)) Subtasks")
-                        }
-                    }
-                    .font(.system(.caption, design: .rounded))
+                // Title
+                Text(task.title)
+                    .font(.system(.title3, design: .rounded))
                     .fontWeight(.bold)
-                    .textCase(.uppercase)
-                    .kerning(1.0)
-                    .opacity(0.5)
                     .foregroundStyle(.white)
-                    
-                }
-                else {
-                    // Option D: Fallback to Priority
-                    Text("\(task.priority.title) priority")
-                        .font(.system(.caption, design: .rounded))
-                        .fontWeight(.bold)
-                        .textCase(.uppercase)
-                        .foregroundStyle(task.priority.color)
-                }
+                    .strikethrough(task.isCompleted, color: .gray)
+                    .opacity(task.isCompleted ? 0.6 : 1.0)
+                    .lineLimit(1)
                 
-                // Progress Line
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Track
-                        Capsule()
-                            .fill(Color.white.opacity(0.1))
-                            .frame(height: 4)
+                // Subtitle Row: Priority • Due Date
+                HStack(spacing: 6) {
+                    // 1. Priority (Colored)
+                    Text(task.priority.title)
+                        .foregroundStyle(task.priority.color)
+                    
+                    // 2. Divider & Date (if exists)
+                    if let date = task.dueDate {
+                        // Divider Dot
+                        Circle()
+                            .fill(.white.opacity(0.3))
+                            .frame(width: 3, height: 3)
                         
-                        // Indicator
-                        Capsule()
-                            .fill(task.priority.color)
-                            .frame(width: (subtaskProgress / totalSubtasks) * geometry.size.width, height: 4)
-                            .shadow(color: task.priority.color.opacity(0.5), radius: 4, x: 0, y: 2)
+                        // Date
+                        Text(date.formatted(.dateTime.month().day()))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                    
+                    // 3. Info Icon (if details exist)
+                    if !task.details.isEmpty {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 10, design: .rounded))
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white.opacity(0.5))
+                            .padding(.leading, 4)
                     }
                 }
-                .frame(height: 4)
-                .animation(.spring(response: 0.5, dampingFraction: 0.7), value: task.isCompleted)
-                .animation(.spring(response: 0.5, dampingFraction: 0.7), value: subtaskProgress)
-            }
-            .padding(20)
-            .background {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(.ultraThinMaterial.opacity(0.1))
-                    .background(
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(Color.black.opacity(0.4))
-                    )
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 24)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                task.priority.color.opacity(0.6),
-                                task.priority.color.opacity(0.1),
-                                task.priority.color.opacity(0.1)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-            }
-            // Visual feedback when completed
-            .opacity(task.isCompleted ? 0.6 : 1.0)
-            .scaleEffect(task.isCompleted ? 0.98 : 1.0)
-            .padding(.horizontal, 20)
-            
-            // MARK: - Interaction (Toggle Complete)
-            .onTapGesture {
-                handleTapInteraction()
+                .font(.system(.caption, design: .rounded))
+                .fontWeight(.bold)
+                .textCase(.uppercase)
+                .kerning(1.0)
             }
             
-//            // MARK: - Layer 2: Edit Button (Top Right)
-//            Button(action: { showingEditSheet = true }) {
-//                Image(systemName: "ellipsis")
-//                    .font(.system(size: 16, weight: .bold))
-//                    .foregroundColor(task.priority.color)
-//                    .padding(12)
-//                    .contentShape(Rectangle())
-//            }
-//            .padding(.top, 15)
-//            .padding(.trailing, 35)
+            Spacer()
+            
+            // MARK: - Right Side: Interaction Area
             ZStack {
-                Button(action: { toggleTaskCompletion() }) {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(task.isCompleted ? .clear : .white)
-                        .frame(width: 32, height: 32)
-                        .background(task.isCompleted ? task.priority.color : .clear)
-                        .clipShape(Circle())
+                if showCounts {
+                    // CASE A: HAS INCOMPLETE SUBTASKS -> Show Numbers Only
+                    HStack(alignment: .firstTextBaseline, spacing: 1) {
+                        Text("\(Int(subtaskProgress))")
+                            .font(.system(size: 16, weight: .black, design: .rounded)) // Larger number
+                            .foregroundStyle(.white)
+                        
+                        Text("/\(Int(totalSubtasks))")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+                    .frame(width: 44, height: 44) // Matches button touch area size
+                    
+                } else {
+                    // CASE B: ALL SUBTASKS DONE (or none existed) -> Show Toggle Button
+                    Button(action: { toggleTaskCompletion() }) {
+                        Image(systemName: task.isCompleted ? "checkmark" : "")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(task.isCompleted ? .black : .clear)
+                            .frame(width: 28, height: 28)
+                            .background(task.isCompleted ? task.priority.color : .clear)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(task.isCompleted ? Color.clear : task.priority.color.opacity(0.5), lineWidth: 2)
+                            )
+                    }
+                    .frame(width: 44, height: 44) // Hit target size
+                    .accessibilityIdentifier("CompleteTaskButton")
                 }
-                .accessibilityIdentifier("IncrementButton")
             }
-            .frame(width: 44, height: 44)
-            .padding(.top, 15)
-            .padding(.trailing, 35)
+            .frame(width: 55, height: 55) // Reference container size
         }
-        // 1. ADDED onDismiss handler here
+        .padding(20)
+        
+        // MARK: - Card Styling
+        .background {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.ultraThinMaterial.opacity(0.1))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(
+                    .white.opacity(0.15),
+                    lineWidth: 2
+                )
+        }
+        // Visual feedback based on completion state
+        .opacity(task.isCompleted ? 0.6 : 1.0)
+        .scaleEffect(task.isCompleted ? 0.98 : 1.0)
+        // Glow Effect when active
+        .shadow(
+            color: .white.opacity(task.isCompleted ? 0.0 : 0.15),
+            radius: task.isCompleted ? 0 : 10,
+            x: 0, y: 0
+        )
+        .padding(.horizontal, 20)
+        
+        // MARK: - Interaction (Open Edit Sheet)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showingEditSheet = true
+        }
         .sheet(isPresented: $showingEditSheet, onDismiss: {
             validateTaskState()
         }) {
@@ -160,28 +152,14 @@ struct UserTaskCardView: View {
         }
     }
     
-    // 2. Logic to check subtasks when tapping the card
-    private func handleTapInteraction() {
-        // If there are subtasks, ensure all are done before allowing completion
-        let hasIncompleteSubtasks = task.subtasks.contains { !$0.isCompleted }
-        
-        if hasIncompleteSubtasks {
-            // If subtasks are pending, open the sheet instead of completing
-            showingEditSheet = true
-        } else {
-            // Otherwise, toggle safely
-            toggleTaskCompletion()
-        }
-    }
+    // MARK: - Logic Helpers
     
-    // 3. Logic to auto-uncomplete if you unchecked something in the sheet
     private func validateTaskState() {
         let hasIncompleteSubtasks = task.subtasks.contains { !$0.isCompleted }
         
         // If the task IS marked complete, but we found an unchecked subtask...
         if task.isCompleted && hasIncompleteSubtasks {
             withAnimation {
-                // ...force the parent task to be incomplete.
                 task.isCompleted = false
             }
         }
@@ -198,9 +176,20 @@ struct UserTaskCardView: View {
 }
 
 #Preview {
-    let task = UserTask(title: "Finish Project", priority: .high, subtasks: [Subtask(title: "Poop", isCompleted: false)])
-    ZStack {
+    let subtasks = [Subtask(title: "Part A", isCompleted: true), Subtask(title: "Part B", isCompleted: false)]
+    let taskWithSub = UserTask(title: "Complex Project", priority: .high, subtasks: subtasks)
+    
+    let subtasksDone = [Subtask(title: "Part A", isCompleted: true), Subtask(title: "Part B", isCompleted: true)]
+    let taskReadyToFinish = UserTask(title: "Ready to Finish", priority: .medium, subtasks: subtasksDone)
+    
+    let simpleTask = UserTask(title: "Buy Milk", priority: .low)
+    
+    return ZStack {
         Color.black.ignoresSafeArea()
-        UserTaskCardView(task: task)
+        VStack(spacing: 20) {
+            UserTaskCardView(task: taskWithSub)
+            UserTaskCardView(task: taskReadyToFinish)
+            UserTaskCardView(task: simpleTask)
+        }
     }
 }

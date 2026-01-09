@@ -198,7 +198,6 @@ struct HomeView: View {
 }
 
 // MARK: - Helper Views
-
 struct HeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -208,7 +207,7 @@ struct HeaderView: View {
                 .foregroundStyle(.white)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 45)
+        .padding(.horizontal, 16)
     }
 }
 

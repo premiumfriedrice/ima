@@ -27,65 +27,61 @@ enum AppTab: Int, CaseIterable, Identifiable {
 struct NavFooterView: View {
     @Binding var showingCreateSheet: Bool
     @Binding var selectedTab: AppTab
-    @State private var animateArrow = false
     
     var body: some View {
         VStack(spacing: 0) {
             
-            // 1. ZStack ensures the ScrollView stays full width even when button appears
-            ZStack(alignment: .trailing) {
+            // MARK: - The Tab Buttons
+            HStack(spacing: 0) {
                 
-                // MARK: - The Scrolling Titles
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 0) {
-                        ForEach(AppTab.allCases) { tab in
-                            HStack {
-                                Text(tab.title)
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white)
-                                    // Fade out unselected items slightly
-                                    .opacity(selectedTab == tab ? 1.0 : 0.3)
-                                    .animation(.snappy, value: selectedTab)
-                                
-                                Spacer()
-                            }
-                            // Forces item to match the ScrollView width exactly
-                            .containerRelativeFrame(.horizontal)
-                            .id(tab)
+                // --- 1. Home Tab ---
+                TabButton(
+                    isActive: selectedTab == .home,
+                    action: { selectedTab = .home }
+                ) {
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 24))
+                }
+                
+                // --- 2. Habits Tab (Dots + Inner Ring) ---
+                TabButton(
+                    isActive: selectedTab == .habits,
+                    action: {
+                        if selectedTab == .habits {
+                            showingCreateSheet = true
+                        } else {
+                            selectedTab = .habits
                         }
                     }
-                    .scrollTargetLayout()
+                ) {
+                    DottedRingTabIcon(isActive: selectedTab == .habits)
                 }
-                // *** THE FIX: Use .paging to kill momentum ***
-                .scrollTargetBehavior(.paging)
-                .scrollPosition(id: Binding(
-                    get: { selectedTab },
-                    set: { if let new = $0 { selectedTab = new } }
-                ))
-                .frame(height: 45)
                 
-                // MARK: - The Floating Action Button
-                if selectedTab != .home {
-                    Button(action: { showingCreateSheet = true }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(10) // Larger touch target
-                            .contentShape(Rectangle())
+                // --- 3. Tasks Tab (Ring + Checkmark/Plus) ---
+                TabButton(
+                    isActive: selectedTab == .usertasks,
+                    action: {
+                        if selectedTab == .usertasks {
+                            showingCreateSheet = true
+                        } else {
+                            selectedTab = .usertasks
+                        }
                     }
-                    .accessibilityIdentifier("AddHabitButton")
-                    .transition(.scale.combined(with: .opacity))
+                ) {
+                    TaskRingTabIcon(isActive: selectedTab == .usertasks)
                 }
             }
-            .padding(.horizontal, 36) // Defines the "Page Width"
-            .padding(.top, 64)
+            .padding(.top, 20)
+            .frame(height: 80) // Height of the touch area
+            .padding(.horizontal, 24)
             
-            Color.clear.frame(height: 8)
+            // Bottom spacer for safe area
+            Color.clear.frame(height: 0)
         }
         .background(alignment: .top) {
             LinearGradient(
                 stops: [
-                    .init(color: Color(.black), location: 0.6),
+                    .init(color: Color(.black), location: 0.7),
                     .init(color: Color(.black).opacity(0), location: 1.0)
                 ],
                 startPoint: .bottom,
@@ -93,19 +89,98 @@ struct NavFooterView: View {
             )
             .ignoresSafeArea()
         }
-        .onAppear {
-            startArrowTimer()
+    }
+}
+
+// MARK: - Custom Icons
+
+struct DottedRingTabIcon: View {
+    var isActive: Bool
+    
+    // Configurable properties
+    let dotCount = 7
+    let ringRadius: CGFloat = 20 // The radius for the dots
+    let dotSize: CGFloat = 3
+    
+    var body: some View {
+        ZStack {
+            // 1. The Inner Ring (New addition based on request)
+            // Sits inside the dots, enclosing the Plus
+            Circle()
+                .stroke(isActive ? Color.white : Color.gray.opacity(0.3), lineWidth: 1.5)
+                .frame(width: 28, height: 28) // Smaller than the dot radius (20*2=40)
+            
+            // 2. The Ring of Dots (Outer Layer)
+            ForEach(0..<dotCount, id: \.self) { index in
+                Circle()
+                    .fill(isActive ? Color.white : Color.gray.opacity(0.5))
+                    .frame(width: dotSize, height: dotSize)
+                    .offset(y: -ringRadius)
+                    .rotationEffect(.degrees(Double(index) / Double(dotCount) * 360))
+            }
+            
+            // 3. The Central Plus
+            if isActive {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .bold)) // Slightly smaller to fit in inner ring
+                    .foregroundColor(isActive ? .white : .gray.opacity(0.5))
+            }
+        }
+        .frame(width: 50, height: 50) // Hit target size
+    }
+}
+
+struct TaskRingTabIcon: View {
+    var isActive: Bool
+    
+    var body: some View {
+        ZStack {
+            // 1. The Ring (No dots, just a stroke)
+            Circle()
+                .stroke(isActive ? Color.white : Color.gray.opacity(0.5), lineWidth: 2)
+                .frame(width: 28, height: 28) // Matches visual size of the dotted ring's outer bounds
+            
+            // 2. The Checkmark (Only obvious when active, or dimmed when inactive)
+            Image(systemName: isActive ? "plus" : "checkmark") // Switched to Plus when active as requested previously, or keep checkmark?
+            // Reverting to your previous request: "active task tab button with the plus in it"
+                 .font(.system(size: 14, weight: .bold))
+                 .foregroundColor(isActive ? .white : .gray.opacity(0.3))
+        }
+        .frame(width: 50, height: 50)
+        .background(Color.clear) // Explicitly transparent
+    }
+}
+
+// MARK: - Helper Views
+
+struct TabButton<Content: View>: View {
+    let isActive: Bool
+    let action: () -> Void
+    let content: () -> Content
+    
+    var body: some View {
+        Button(action: {
+            withAnimation(.snappy) {
+                action()
+            }
+        }) {
+            VStack(spacing: 4) {
+                content()
+            }
+            .foregroundColor(isActive ? .white : .white.opacity(0.4))
+            .scaleEffect(isActive ? 1.0 : 0.9)
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
         }
     }
-    
-    private func startArrowTimer() {
-        Timer.scheduledTimer(withTimeInterval: 12.0, repeats: true) { _ in
-            withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
-                animateArrow = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                animateArrow = false
-            }
+}
+
+#Preview {
+    ZStack {
+        Color.gray // To see the gradient
+        VStack {
+            Spacer()
+            NavFooterView(showingCreateSheet: .constant(false), selectedTab: .constant(.habits))
         }
     }
 }

@@ -42,7 +42,7 @@ struct UserTaskGroupView: View {
                     .opacity(0.5)
                     .foregroundStyle(.white)
                 } else {
-                    LazyVStack(spacing: 24, pinnedViews: [.sectionHeaders]) {
+                    LazyVStack(spacing: 10, /*pinnedViews: [.sectionHeaders]*/) {
                         
                         // Spacer for safe area
                         Color.clear.frame(height: 0)
@@ -89,7 +89,6 @@ struct UserTaskGroupView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 16)
                     .padding(.bottom, 100) // Space for floating button
                 }
             }
@@ -123,7 +122,7 @@ struct TaskSectionHeader: View {
     let color: Color
     
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.headline)
                 .foregroundStyle(color)
@@ -148,7 +147,6 @@ struct TaskSectionHeader: View {
             
             Spacer()
         }
-        .padding(.vertical, 8)
         // Glassmorphism background for sticky effect
         .background(.ultraThinMaterial.opacity(0.01))
         .font(.system(.caption, design: .rounded))
@@ -157,7 +155,8 @@ struct TaskSectionHeader: View {
         .kerning(1.0)
         .opacity(0.7) // Increased opacity slightly for readability
         .foregroundStyle(.white)
-        .padding(.leading, 16)
+        .padding(.leading, 25)
+        .padding(.vertical, 10)
     }
 }
 

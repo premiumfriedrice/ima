@@ -46,7 +46,7 @@ struct HabitInfoView: View {
                         }
                     } label: {
                         Image(systemName: isEditing ? "checkmark" : "square.and.pencil")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 16/*, weight: .bold*/))
                             .foregroundStyle(isEditing ? .black : .white.opacity(0.6))
                             .padding(12)
                             .background(isEditing ? .white : .white.opacity(0.1))
@@ -56,7 +56,7 @@ struct HabitInfoView: View {
                     // Reset Button
                     Button { showingResetConfirmation = true } label: {
                         Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 16/*, weight: .bold*/))
                             .foregroundStyle(.white.opacity(0.6))
                             .padding(12)
                             .background(.white.opacity(0.1))
@@ -87,24 +87,22 @@ struct HabitInfoView: View {
                             // MARK: - Hero Title
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("HABIT")
-                                    .font(.system(.caption, design: .rounded))
-                                    .fontWeight(.bold)
+                                    .font(.caption2)
                                     .textCase(.uppercase)
                                     .kerning(1.0)
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
                                 Text(habit.title)
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                                    .font(.title)
                                     .foregroundStyle(.white)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 25)
                             
                             // MARK: - Today's Progress (Responsive)
-                            VStack(alignment: .leading, spacing: 20) {
+                            VStack(alignment: .leading, spacing: 10) {
                                 Text("TODAY'S PROGRESS")
-                                    .font(.system(.caption, design: .rounded))
-                                    .fontWeight(.bold)
+                                    .font(.caption2)
                                     .textCase(.uppercase)
                                     .kerning(1.0)
                                     .opacity(0.5)
@@ -114,7 +112,7 @@ struct HabitInfoView: View {
                                     // 1. Decrement Button
                                     Button { decrementProgress() } label: {
                                         Image(systemName: "minus")
-                                            .font(.system(size: 24, weight: .bold))
+                                            .font(.system(size: 24, /*weight: .bold*/))
                                             .foregroundStyle(.white)
                                             .frame(width: 50, height: 50)
                                             .background(.white.opacity(0.1))
@@ -164,7 +162,7 @@ struct HabitInfoView: View {
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text("ADJUST YOUR GOAL")
                                         .font(.system(.caption, design: .rounded))
-                                        .fontWeight(.bold)
+//                                        .fontWeight(.bold)
                                         .textCase(.uppercase)
                                         .kerning(1.0)
                                         .opacity(0.5)
@@ -175,7 +173,7 @@ struct HabitInfoView: View {
                                         Picker("Count", selection: $habit.frequencyCount) {
                                             ForEach(1...50, id: \.self) { number in
                                                 Text("\(number)")
-                                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                                    .font(.system(size: 28, /*weight: .bold,*/ design: .rounded))
                                                     .foregroundStyle(.white)
                                                     .tag(number)
                                             }
@@ -185,7 +183,7 @@ struct HabitInfoView: View {
                                         .compositingGroup()
                                         
                                         Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                                            .font(.system(size: 28, /*weight: .bold,*/ design: .rounded))
                                             .foregroundStyle(.white.opacity(0.4))
                                             .padding(.horizontal, 8)
                                         
@@ -193,7 +191,7 @@ struct HabitInfoView: View {
                                         Picker("Frequency", selection: $habit.frequencyUnitRaw) {
                                             ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                                 Text(unit.rawValue.capitalized)
-                                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                                    .font(.system(size: 28, /*weight: .bold,*/ design: .rounded))
                                                     .foregroundStyle(.white)
                                                     .tag(unit.rawValue)
                                             }
@@ -214,7 +212,6 @@ struct HabitInfoView: View {
                             
                             Text("Created " + habit.dateCreated.formatted(date: .abbreviated, time: .shortened))
                                 .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -296,6 +293,7 @@ struct HabitInfoView: View {
     private func decrementProgress() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             habit.decrement()
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }
 }

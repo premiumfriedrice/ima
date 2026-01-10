@@ -13,32 +13,26 @@ struct HabitCardView: View {
     @State private var showingInfoSheet: Bool = false
     
     var body: some View {
-        HStack(alignment: .center, spacing: 16) {
+        HStack(alignment: .center, spacing: 15) {
             
             // MARK: - Left Side: Text Info
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 5) {
                 // Title
                 Text(habit.title)
-                    .font(.system(.title3, design: .rounded))
-                    .fontWeight(.bold)
+//                    .font(.headline)
+                    .font(.body)
                     .foregroundStyle(.white)
                     .lineLimit(1)
                 
                 HStack {
                     // Subtitle (Count & Frequency)
                     Text("\(habit.currentCount)/\(habit.frequencyCount) \(timePeriodString)")
-                        .font(.system(.caption, design: .rounded))
-                        .fontWeight(.bold)
-                        .textCase(.uppercase)
-                        .kerning(1.0)
-                        .opacity(0.5)
-                        .foregroundStyle(.white)
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 10, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                        .opacity(0.5)
+                    
+//                    Image(systemName: "info.circle")
+//                        .opacity(0.5)
                 }
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.7))
             }
             
             Spacer()
@@ -57,7 +51,7 @@ struct HabitCardView: View {
             .frame(width: 55, height: 55) // The reference size
             
         }
-        .padding(20)
+        .padding(15)
         .background {
             RoundedRectangle(cornerRadius: 24)
                 .fill(.ultraThinMaterial.opacity(0.1))
@@ -100,9 +94,9 @@ struct HabitCardView: View {
     
     private var timePeriodString: String {
         switch habit.frequencyUnit {
-        case .daily: return "TODAY"
-        case .weekly: return "THIS WEEK"
-        case .monthly: return "THIS MONTH"
+        case .daily: return "Today"
+        case .weekly: return "This week"
+        case .monthly: return "This month"
         }
     }
 }
@@ -122,7 +116,7 @@ extension Double {
 
     return ZStack {
         Color.black.ignoresSafeArea()
-        VStack(spacing: 20) {
+        VStack(spacing: 10) {
             HabitCardView(habit: habitIncomplete)
             HabitCardView(habit: habitComplete)
         }

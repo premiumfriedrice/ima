@@ -78,8 +78,8 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         // Header Date
                         Text(Date().formatted(.dateTime.year().month().day()))
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .fontWeight(.bold)
+                            .font(.system(size: 32, /*weight: .bold,*/ design: .rounded))
+//                            .fontWeight(.bold)
                             .foregroundStyle(.white)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -152,14 +152,13 @@ struct HomeView: View {
                                             
                                             Text("COMPLETED")
                                                 .font(.headline)
-                                                .fontWeight(.bold)
                                                 .foregroundStyle(.primary)
                                             
                                             Spacer()
                                             
                                             // Count Badge
                                             Text("\(totalCompletedCount)")
-                                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                                .font(.system(size: 12, /*weight: .bold,*/ design: .rounded))
                                                 .foregroundStyle(.white.opacity(0.3))
                                                 .padding(.horizontal, 8)
                                                 .padding(.vertical, 4)
@@ -167,12 +166,12 @@ struct HomeView: View {
                                                 .clipShape(Capsule())
                                             
                                             Image(systemName: "chevron.right")
-                                                .font(.system(size: 14, weight: .bold))
+                                                .font(.system(size: 14, /*weight: .bold*/))
                                                 .foregroundStyle(.white.opacity(0.5))
                                                 .rotationEffect(.degrees(showCompleted ? 90 : 0))
                                         }
                                         .font(.system(.caption, design: .rounded))
-                                        .fontWeight(.bold)
+//                                        .fontWeight(.bold)
                                         .textCase(.uppercase)
                                         .kerning(1.0)
                                         .opacity(0.7)
@@ -223,14 +222,11 @@ struct SectionLabel: View {
             
             Text(title)
                 .font(.headline)
-                .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .textCase(.uppercase)
             
             Spacer()
         }
-        .font(.system(.caption, design: .rounded))
-        .fontWeight(.bold)
         .textCase(.uppercase)
         .kerning(1.0)
         .opacity(0.7)

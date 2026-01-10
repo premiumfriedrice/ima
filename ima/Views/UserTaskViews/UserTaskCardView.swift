@@ -32,48 +32,40 @@ struct UserTaskCardView: View {
     }
     
     var body: some View {
-        HStack(alignment: .center, spacing: 16) {
+        HStack(alignment: .center, spacing: 15) {
             
             // MARK: - Left Side: Text Info
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 5) {
                 // Title
                 Text(task.title)
-                    .font(.system(.title3, design: .rounded))
-                    .fontWeight(.bold)
+//                    .font(.headline)
+                    .font(.body)
                     .foregroundStyle(.white)
                     .strikethrough(task.isCompleted, color: .gray)
                     .opacity(task.isCompleted ? 0.6 : 1.0)
                     .lineLimit(1)
                 
                 // Subtitle Row: Priority • Due Date
-                HStack(spacing: 6) {
+                HStack(spacing: 5) {
                     // 1. Priority (Colored)
-                    Text(task.priority.title)
+                    
+                    Image(systemName: "exclamationmark.circle.fill")
                         .foregroundStyle(task.priority.color)
                     
                     // 2. Divider & Date (if exists)
                     if let date = task.dueDate {
-                        // Divider Dot
-                        Circle()
-                            .fill(.white.opacity(0.3))
-                            .frame(width: 3, height: 3)
-                        
-                        // Date
                         Text(date.formatted(.dateTime.month().day()))
                             .foregroundStyle(.white.opacity(0.7))
                     }
                     
-                    // 3. Info Icon (if details exist)
-                    if !task.details.isEmpty {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 10, design: .rounded))
-                            .fontWeight(.bold)
-                            .foregroundStyle(.white.opacity(0.5))
-                            .padding(.leading, 4)
-                    }
+//                    // 3. Info Icon (if details exist)
+//                    if !task.details.isEmpty {
+//                        Image(systemName: "info.circle")
+//                            .foregroundStyle(.white.opacity(0.5))
+//                            .padding(.leading, 4)
+//                    }
                 }
-                .font(.system(.caption, design: .rounded))
-                .fontWeight(.bold)
+                .font(.caption2)
                 .textCase(.uppercase)
                 .kerning(1.0)
             }
@@ -90,7 +82,7 @@ struct UserTaskCardView: View {
                             .foregroundStyle(.white)
                         
                         Text("/\(Int(totalSubtasks))")
-                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .font(.system(size: 12, /*weight: .bold,*/ design: .rounded))
                             .foregroundStyle(.white.opacity(0.6))
                     }
                     .frame(width: 44, height: 44) // Matches button touch area size
@@ -99,7 +91,7 @@ struct UserTaskCardView: View {
                     // CASE B: ALL SUBTASKS DONE (or none existed) -> Show Toggle Button
                     Button(action: { toggleTaskCompletion() }) {
                         Image(systemName: task.isCompleted ? "checkmark" : "")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 14, /*weight: .bold*/))
                             .foregroundColor(task.isCompleted ? .black : .clear)
                             .frame(width: 28, height: 28)
                             .background(task.isCompleted ? task.priority.color : .clear)
@@ -115,7 +107,7 @@ struct UserTaskCardView: View {
             }
             .frame(width: 55, height: 55) // Reference container size
         }
-        .padding(20)
+        .padding(15)
         
         // MARK: - Card Styling
         .background {

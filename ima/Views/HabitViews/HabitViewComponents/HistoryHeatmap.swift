@@ -20,7 +20,7 @@ struct HistoryHeatmap : View {
             HStack {
                 Text("HISTORY")
                     .font(.system(.caption, design: .rounded))
-                    .fontWeight(.bold)
+//                    .fontWeight(.bold)
                     .textCase(.uppercase)
                     .kerning(1.0)
                     .opacity(0.5)

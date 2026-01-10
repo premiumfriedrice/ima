@@ -28,7 +28,7 @@ struct UserTaskGroupView: View {
                         VStack {
                             Text("No Tasks Yet")
                                 .font(.system(.title2, design: .rounded))
-                                .fontWeight(.bold)
+//                                .fontWeight(.bold)
                             
                             Text("Tap the + button to create your first task.")
                                 .font(.system(.body, design: .rounded))
@@ -52,7 +52,6 @@ struct UserTaskGroupView: View {
                             Section(header: TaskSectionHeader(
                                 title: "High Priority",
                                 count: highPriorityTasks.count,
-                                icon: "exclamationmark.circle.fill",
                                 color: .red)) {
                                 ForEach(highPriorityTasks) { task in
                                     UserTaskCardView(task: task)
@@ -66,7 +65,6 @@ struct UserTaskGroupView: View {
                             Section(header: TaskSectionHeader(
                                 title: "Medium Priority",
                                 count: mediumPriorityTasks.count,
-                                icon: "circle.circle.fill",
                                 color: .yellow)) {
                                 ForEach(mediumPriorityTasks) { task in
                                     UserTaskCardView(task: task)
@@ -80,7 +78,6 @@ struct UserTaskGroupView: View {
                             Section(header: TaskSectionHeader(
                                 title: "Low Priority",
                                 count: lowPriorityTasks.count,
-                                icon: "arrow.down.circle.fill",
                                 color: .gray)) {
                                 ForEach(lowPriorityTasks) { task in
                                     UserTaskCardView(task: task)
@@ -92,6 +89,7 @@ struct UserTaskGroupView: View {
                     .padding(.bottom, 100) // Space for floating button
                 }
             }
+            .scrollIndicators(.hidden) 
         }
         .sheet(item: $selectedTask) { task in
             UserTaskInfoView(userTask: task)
@@ -118,18 +116,16 @@ struct UserTaskGroupView: View {
 struct TaskSectionHeader: View {
     let title: String
     let count: Int
-    let icon: String
     let color: Color
     
     var body: some View {
         HStack(spacing: 5) {
-            Image(systemName: icon)
+            Image(systemName: "exclamationmark.circle.fill")
                 .font(.headline)
                 .foregroundStyle(color)
             
             Text(title)
-                .font(.headline)
-                .fontWeight(.bold)
+                .font(.caption)
                 .foregroundStyle(.primary)
                 .textCase(.uppercase)
             
@@ -139,9 +135,8 @@ struct TaskSectionHeader: View {
                 .frame(width: 4, height: 4)
             
             // Count Subtitle
-            Text("\(count) Tasks")
-                .font(.subheadline)
-                .fontWeight(.bold)
+            Text("\(count) Task")
+                .font(.caption)
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
             
@@ -150,13 +145,13 @@ struct TaskSectionHeader: View {
         // Glassmorphism background for sticky effect
         .background(.ultraThinMaterial.opacity(0.01))
         .font(.system(.caption, design: .rounded))
-        .fontWeight(.bold)
+//        .fontWeight(.bold)
         .textCase(.uppercase)
         .kerning(1.0)
         .opacity(0.7) // Increased opacity slightly for readability
         .foregroundStyle(.white)
         .padding(.leading, 25)
-        .padding(.vertical, 10)
+        .padding(.top, 10)
     }
 }
 

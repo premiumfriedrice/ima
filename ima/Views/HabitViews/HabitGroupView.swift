@@ -40,7 +40,7 @@ struct HabitGroupView: View {
                             VStack {
                                 Text("No Habits Yet")
                                     .font(.system(.title2, design: .rounded))
-                                    .fontWeight(.bold)
+//                                    .fontWeight(.bold)
                                 
                                 Text("Tap the + button to create your first habit.")
                                     .font(.system(.body, design: .rounded))
@@ -104,6 +104,7 @@ struct HabitGroupView: View {
                             .accessibilityHidden(true)
                     }
                 }
+                .scrollIndicators(.hidden)
             }
         }
     }
@@ -163,7 +164,7 @@ struct SectionHeader: View {
             
             Text(title)
                 .font(.headline)
-                .fontWeight(.bold)
+//                .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .textCase(.uppercase)
             
@@ -175,14 +176,14 @@ struct SectionHeader: View {
             // Date/Subtitle
             Text(subtitle)
                 .font(.subheadline)
-                .fontWeight(.bold)
+//                .fontWeight(.bold)
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
             
             Spacer()
         }
         .font(.system(.caption, design: .rounded))
-        .fontWeight(.bold)
+//        .fontWeight(.bold)
         .textCase(.uppercase)
         .kerning(1.0)
         .opacity(0.7)

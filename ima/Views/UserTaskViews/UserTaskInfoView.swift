@@ -34,7 +34,7 @@ struct UserTaskInfoView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 16, /*weight: .bold*/))
                             .foregroundStyle(.white.opacity(0.6))
                             .padding(12)
                             .background(.white.opacity(0.1))
@@ -65,7 +65,7 @@ struct UserTaskInfoView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("TASK")
                                 .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+//                                .fontWeight(.bold)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -73,7 +73,7 @@ struct UserTaskInfoView: View {
                             
                             // Editable title
                             TextField("Task Title", text: $userTask.title)
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .font(.system(size: 36, /*weight: .bold,*/ design: .rounded))
                                 .foregroundStyle(.white)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -83,7 +83,7 @@ struct UserTaskInfoView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("PRIORITY and DUE DATE")
                                 .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+//                                .fontWeight(.bold)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -96,7 +96,7 @@ struct UserTaskInfoView: View {
                                 Picker("Priority", selection: $userTask.priority) {
                                     ForEach(TaskPriority.allCases) { p in
                                         Text("\(p.title)")
-                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .font(.system(size: 16, /*weight: .bold,*/ design: .rounded))
                                             .foregroundStyle(.white)
                                             .tag(p)
                                     }
@@ -120,7 +120,7 @@ struct UserTaskInfoView: View {
                                 
                                 // 2. Connecting text
                                 Text("priority due")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .font(.system(size: 18, /*weight: .bold,*/ design: .rounded))
                                     .foregroundStyle(.white.opacity(0.4))
                                     .padding(0)
                                     .lineLimit(1)
@@ -136,7 +136,7 @@ struct UserTaskInfoView: View {
                                         }
                                     } label: {
                                         Text("no date")
-                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .font(.system(size: 16, /*weight: .bold,*/ design: .rounded))
                                             .foregroundStyle(.white.opacity(0.8))
                                             .lineLimit(1)
                                             .layoutPriority(1)
@@ -157,7 +157,7 @@ struct UserTaskInfoView: View {
                                             withAnimation(.snappy) { isCalendarVisible.toggle() }
                                         } label: {
                                             Text(userTask.dueDate!.formatted(date: .abbreviated, time: .omitted))
-                                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                                .font(.system(size: 16, /*weight: .bold,*/ design: .rounded))
                                                 .foregroundStyle(.white.opacity(0.8))
                                                 .lineLimit(1)
                                                 .layoutPriority(1)
@@ -179,7 +179,7 @@ struct UserTaskInfoView: View {
                                             }
                                         } label: {
                                             Image(systemName: "xmark")
-                                                .font(.system(size: 10, weight: .bold))
+                                                .font(.system(size: 10, /*weight: .bold*/))
                                                 .foregroundStyle(.white.opacity(0.6))
                                                 .padding(6)
                                                 .background(.white.opacity(0.1))
@@ -219,7 +219,7 @@ struct UserTaskInfoView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("DETAILS")
                                 .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+//                                .fontWeight(.bold)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -240,7 +240,7 @@ struct UserTaskInfoView: View {
                         VStack(alignment: .leading, spacing: 15) {
                             Text("SUBTASKS")
                                 .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+//                                .fontWeight(.bold)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -278,7 +278,7 @@ struct UserTaskInfoView: View {
                                             }
                                         } label: {
                                             Image(systemName: "xmark")
-                                                .font(.system(size: 12, weight: .bold))
+                                                .font(.system(size: 12, /*weight: .bold*/))
                                                 .foregroundStyle(.white.opacity(0.3))
                                                 .padding(8)
                                                 .background(.white.opacity(0.05))
@@ -331,7 +331,7 @@ struct UserTaskInfoView: View {
                         // MARK: - Footer Info
                         Text("Created " + userTask.dateCreated.formatted(date: .abbreviated, time: .shortened))
                             .font(.system(.caption, design: .rounded))
-                            .fontWeight(.bold)
+//                            .fontWeight(.bold)
                             .textCase(.uppercase)
                             .kerning(1.0)
                             .opacity(0.5)

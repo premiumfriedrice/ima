@@ -28,7 +28,6 @@ struct UserTaskGroupView: View {
                         VStack {
                             Text("No Tasks Yet")
                                 .font(.system(.title2, design: .rounded))
-//                                .fontWeight(.bold)
                             
                             Text("Tap the + button to create your first task.")
                                 .font(.system(.body, design: .rounded))
@@ -42,17 +41,19 @@ struct UserTaskGroupView: View {
                     .opacity(0.5)
                     .foregroundStyle(.white)
                 } else {
-                    LazyVStack(spacing: 10, /*pinnedViews: [.sectionHeaders]*/) {
+                    LazyVStack(spacing: 10) {
                         
                         // Spacer for safe area
                         Color.clear.frame(height: 0)
                         
                         // MARK: - High Priority Section
                         if !highPriorityTasks.isEmpty {
-                            Section(header: TaskSectionHeader(
+                            Section(header: SectionHeader(
                                 title: "High Priority",
-                                count: highPriorityTasks.count,
-                                color: .red)) {
+                                subtitle: "\(highPriorityTasks.count) \(highPriorityTasks.count == 1 ? "TASK" : "TASKS")",
+                                icon: "exclamationmark.circle.fill",
+                                color: .red
+                            )) {
                                 ForEach(highPriorityTasks) { task in
                                     UserTaskCardView(task: task)
                                         .onTapGesture { selectedTask = task }
@@ -62,10 +63,12 @@ struct UserTaskGroupView: View {
                         
                         // MARK: - Medium Priority Section
                         if !mediumPriorityTasks.isEmpty {
-                            Section(header: TaskSectionHeader(
+                            Section(header: SectionHeader(
                                 title: "Medium Priority",
-                                count: mediumPriorityTasks.count,
-                                color: .yellow)) {
+                                subtitle: "\(mediumPriorityTasks.count) \(mediumPriorityTasks.count == 1 ? "TASK" : "TASKS")",
+                                icon: "exclamationmark.circle.fill",
+                                color: .yellow
+                            )) {
                                 ForEach(mediumPriorityTasks) { task in
                                     UserTaskCardView(task: task)
                                         .onTapGesture { selectedTask = task }
@@ -75,10 +78,12 @@ struct UserTaskGroupView: View {
                         
                         // MARK: - Low Priority Section
                         if !lowPriorityTasks.isEmpty {
-                            Section(header: TaskSectionHeader(
+                            Section(header: SectionHeader(
                                 title: "Low Priority",
-                                count: lowPriorityTasks.count,
-                                color: .gray)) {
+                                subtitle: "\(lowPriorityTasks.count) \(lowPriorityTasks.count == 1 ? "TASK" : "TASKS")",
+                                icon: "exclamationmark.circle.fill",
+                                color: .gray
+                            )) {
                                 ForEach(lowPriorityTasks) { task in
                                     UserTaskCardView(task: task)
                                         .onTapGesture { selectedTask = task }
@@ -113,47 +118,47 @@ struct UserTaskGroupView: View {
 
 // MARK: - Header Component
 // Reused design language from HabitGroupView
-struct TaskSectionHeader: View {
-    let title: String
-    let count: Int
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 5) {
-            Image(systemName: "exclamationmark.circle.fill")
-                .font(.headline)
-                .foregroundStyle(color)
-            
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.primary)
-                .textCase(.uppercase)
-            
-            // Divider Dot
-            Circle()
-                .fill(.white.opacity(0.3))
-                .frame(width: 4, height: 4)
-            
-            // Count Subtitle
-            Text("\(count) Task")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-            
-            Spacer()
-        }
-        // Glassmorphism background for sticky effect
-        .background(.ultraThinMaterial.opacity(0.01))
-        .font(.system(.caption, design: .rounded))
-//        .fontWeight(.bold)
-        .textCase(.uppercase)
-        .kerning(1.0)
-        .opacity(0.7) // Increased opacity slightly for readability
-        .foregroundStyle(.white)
-        .padding(.leading, 25)
-        .padding(.top, 10)
-    }
-}
+//struct TaskSectionHeader: View {
+//    let title: String
+//    let count: Int
+//    let color: Color
+//    
+//    var body: some View {
+//        HStack(spacing: 5) {
+//            Image(systemName: "exclamationmark.circle.fill")
+//                .font(.headline)
+//                .foregroundStyle(color)
+//            
+//            Text(title)
+//                .font(.caption)
+//                .foregroundStyle(.primary)
+//                .textCase(.uppercase)
+//            
+//            // Divider Dot
+//            Circle()
+//                .fill(.white.opacity(0.3))
+//                .frame(width: 4, height: 4)
+//            
+//            // Count Subtitle
+//            Text("\(count) Task")
+//                .font(.caption)
+//                .foregroundStyle(.secondary)
+//                .textCase(.uppercase)
+//            
+//            Spacer()
+//        }
+//        // Glassmorphism background for sticky effect
+//        .background(.ultraThinMaterial.opacity(0.01))
+//        .font(.system(.caption, design: .rounded))
+////        .fontWeight(.bold)
+//        .textCase(.uppercase)
+//        .kerning(1.0)
+//        .opacity(0.7) // Increased opacity slightly for readability
+//        .foregroundStyle(.white)
+//        .padding(.leading, 25)
+//        .padding(.top, 10)
+//    }
+//}
 
 #Preview {
 

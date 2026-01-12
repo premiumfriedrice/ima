@@ -40,7 +40,6 @@ struct HabitGroupView: View {
                             VStack {
                                 Text("No Habits Yet")
                                     .font(.system(.title2, design: .rounded))
-//                                    .fontWeight(.bold)
                                 
                                 Text("Tap the + button to create your first habit.")
                                     .font(.system(.body, design: .rounded))
@@ -55,7 +54,7 @@ struct HabitGroupView: View {
                         .foregroundStyle(.white)
                     }
                     else {
-                        LazyVStack(spacing: 10, /*pinnedViews: [.sectionHeaders]*/) {
+                        LazyVStack(spacing: 10) {
                             
                             // Keep your spacer for top safe area/nav bar
                             Color.clear.frame(height: 0)
@@ -66,11 +65,12 @@ struct HabitGroupView: View {
                                     title: "Daily",
                                     subtitle: dayFormatter.string(from: Date()),
                                     icon: "sun.max.fill",
-                                    color: .orange)) {
-                                        ForEach(dailyHabits) { habit in
-                                            HabitCardView(habit: habit)
-                                        }
+                                    color: .orange,
+                                )) {
+                                    ForEach(dailyHabits) { habit in
+                                        HabitCardView(habit: habit)
                                     }
+                                }
                             }
                             
                             // MARK: - Weekly Section
@@ -79,11 +79,12 @@ struct HabitGroupView: View {
                                     title: "Weekly",
                                     subtitle: currentWeekRange,
                                     icon: "calendar",
-                                    color: .blue)) {
-                                        ForEach(weeklyHabits) { habit in
-                                            HabitCardView(habit: habit)
-                                        }
+                                    color: .blue
+                                )) {
+                                    ForEach(weeklyHabits) { habit in
+                                        HabitCardView(habit: habit)
                                     }
+                                }
                             }
                             
                             // MARK: - Monthly Section
@@ -92,11 +93,12 @@ struct HabitGroupView: View {
                                     title: "Monthly",
                                     subtitle: monthFormatter.string(from: Date()),
                                     icon: "moon.stars.fill",
-                                    color: .purple)) {
-                                        ForEach(monthlyHabits) { habit in
-                                            HabitCardView(habit: habit)
-                                        }
+                                    color: .purple
+                                )) {
+                                    ForEach(monthlyHabits) { habit in
+                                        HabitCardView(habit: habit)
                                     }
+                                }
                             }
                         }
                         Color.clear
@@ -146,50 +148,6 @@ struct HabitGroupView: View {
         let endStr = dayFormatter.string(from: actualEnd)
         
         return "\(startStr) - \(endStr)"
-    }
-}
-
-// MARK: - Subviews
-struct SectionHeader: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 5) {
-            Image(systemName: icon)
-                .font(.headline)
-                .foregroundStyle(color)
-            
-            Text(title)
-                .font(.headline)
-//                .fontWeight(.bold)
-                .foregroundStyle(.primary)
-                .textCase(.uppercase)
-            
-            // Divider Dot
-            Circle()
-                .fill(.white.opacity(0.3))
-                .frame(width: 4, height: 4)
-            
-            // Date/Subtitle
-            Text(subtitle)
-                .font(.subheadline)
-//                .fontWeight(.bold)
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-            
-            Spacer()
-        }
-        .font(.system(.caption, design: .rounded))
-//        .fontWeight(.bold)
-        .textCase(.uppercase)
-        .kerning(1.0)
-        .opacity(0.7)
-        .foregroundStyle(.white)
-        .padding(.leading, 25)
-        .padding(.vertical, 10)
     }
 }
 

@@ -9,40 +9,32 @@ import SwiftUI
 
 struct ProgressRingWithDots<Content: View>: View {
     var habit: Habit
-    
-    // How much of the container to fill (0.0 to 1.0)
     var fillFactor: CGFloat = 1.0
     
     @ViewBuilder var innerContent: () -> Content
     
+    @State private var rotation: Double = 0
+    
     var body: some View {
         GeometryReader { geo in
-            // 1. Determine the base size (square)
+            // 1. Determine size
             let containerSide = min(geo.size.width, geo.size.height)
             let size = containerSide * fillFactor
             
-            // 2. Calculate offset to center the ring in the container
-            let xOffset = (geo.size.width - size) / 2
-            let yOffset = (geo.size.height - size) / 2
-            let center = size / 2
-            
-            // 3. PROPORTIONAL SCALING
-            // We use your 55pt frame as the "Base Unit" to maintain exact look
-            // Base: Frame 55 | RingRadius 20 | DotRadius 26 | Stroke 3 | DotSize 3.5
+            // 2. SCALING MATH
             let scale = size / 55.0
-            
             let ringRadius = 20.0 * scale
             let dotRadius = 26.0 * scale
             let strokeWidth = 3.0 * scale
             let dotSize = 3.5 * scale
             
             ZStack {
-                // A. Continuous Background Track
+                // A. Background Track
                 Circle()
                     .stroke(Color.white.opacity(0.1), lineWidth: strokeWidth)
                     .frame(width: ringRadius * 2, height: ringRadius * 2)
                 
-                // B. Active Progress Line
+                // B. Progress Line
                 Circle()
                     .trim(from: 0, to: CGFloat(habit.progress))
                     .stroke(
@@ -54,8 +46,9 @@ struct ProgressRingWithDots<Content: View>: View {
                     .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
                     .opacity(habit.currentCount > 0 ? 1.0 : 0.0)
                 
-                // C. Incrementation Dots
+                // C. Dots
                 let totalSteps = max(habit.frequencyCount, 1)
+                let center = size / 2 // Local center for dot positioning
                 
                 ForEach(0..<totalSteps, id: \.self) { index in
                     let anglePerStep = 360.0 / Double(totalSteps)
@@ -72,15 +65,60 @@ struct ProgressRingWithDots<Content: View>: View {
                         .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(index) * 0.03), value: habit.currentCount)
                 }
                 
-                // D. Inner Content
-                // We restrict the content size to fit inside the ring (approx diameter 36 at scale 1)
+                // D. Inner Content (Counter-rotated)
                 innerContent()
                     .frame(width: (ringRadius * 2) - strokeWidth, height: (ringRadius * 2) - strokeWidth)
+                    .rotationEffect(.degrees(-rotation))
             }
+            // 3. LOCK THE FRAME SIZE
             .frame(width: size, height: size)
-            .offset(x: xOffset, y: yOffset)
+            
+            // 4. APPLY ROTATION (Around its own center)
+            .rotationEffect(.degrees(rotation))
+            
+            // 5. POSITION EXPLICITLY IN CENTER (Replaces offset)
+            .position(x: geo.frame(in: .local).midX, y: geo.frame(in: .local).midY)
+            
+            // 6. ANIMATION TRIGGER
+            // MARK: - MOMENTUM & FRICTION ANIMATION
+            .onChange(of: habit.isFullyDone) { _, isDone in
+                if isDone {
+                    // response: 0.55 (A bit slower than 0.4 to give the spin "weight")
+                    // damping: 0.6 (Matches your dot's friction/bounce)
+                    withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
+                        rotation += 360
+                    }
+                }
+                
+                playSpinHaptic()
+            }
         }
-        // Keeps the view square based on the smallest dimension
         .aspectRatio(1, contentMode: .fit)
+    }
+    
+    private func playSpinHaptic() {
+        // Run in a Task to allow delays without freezing the UI
+        Task {
+            // 1. The "Push" (Heavy momentum to start the spin)
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.prepare()
+            generator.impactOccurred(intensity: 1.0)
+            
+            // 2. The "Ticks" (Simulating the ring spinning past resistance)
+            // We space them out to simulate slowing down (friction)
+            try? await Task.sleep(for: .seconds(0.1))
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 1.0)
+
+            try? await Task.sleep(for: .seconds(0.15))
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 0.7)
+            
+            try? await Task.sleep(for: .seconds(0.25))
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 0.4)
+
+            // 3. The "Lock" (Final heavy thud when it settles)
+            try? await Task.sleep(for: .seconds(0.2))
+            let lockGenerator = UIImpactFeedbackGenerator(style: .heavy)
+            lockGenerator.impactOccurred(intensity: 0.8)
+        }
     }
 }

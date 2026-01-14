@@ -19,17 +19,12 @@ struct HabitCardView: View {
             VStack(alignment: .leading, spacing: 5) {
                 // Title
                 Text(habit.title)
-//                    .font(.headline)
                     .font(.body)
                     .foregroundStyle(.white)
                     .lineLimit(1)
                 
                 HStack {
-                    // Subtitle (Count & Frequency)
                     Text("\(habit.currentCount)/\(habit.frequencyCount) \(timePeriodString)")
-                    
-//                    Image(systemName: "info.circle")
-//                        .opacity(0.5)
                 }
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.7))
@@ -41,10 +36,11 @@ struct HabitCardView: View {
             ProgressRingWithDots(habit: habit, fillFactor: 1.0) {
                 Button(action: { incrementHabit() }) {
                     Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
-                        .font(.system(size: 14, weight: .bold)) // Fixed font size for small card
-                        .foregroundColor(habit.isFullyDone ? .black : .white)
+//                        .font(.system(size: 14, weight: .bold)) // Fixed font size for small card
+                        .font(.subheadline)
+                        .foregroundColor(habit.isFullyDone ? habit.statusColor : .white)
                         .frame(width: 28, height: 28) // Fixed button size for small card
-                        .background(habit.isFullyDone ? habit.statusColor : .clear)
+                        .background(.clear)
                         .clipShape(Circle())
                 }
             }

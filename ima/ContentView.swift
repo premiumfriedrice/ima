@@ -11,6 +11,7 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
+    
     @Query(sort: \Habit.title) private var habits: [Habit]
     @Query(sort: \UserTask.dateCreated) private var tasks: [UserTask]
     
@@ -21,36 +22,36 @@ struct ContentView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            // 1. Background
+            // 1. Background (Global)
             Color.black.ignoresSafeArea()
             AnimatedRadialBackground()
             
-            // 2. Main Content
-            VStack {
-                switch selectedTab {
-                case .home:
-                    HomeView()
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                case .habits:
-                    HabitGroupView(habits: habits)
-                        .accessibilityIdentifier("HabitList")
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                    
-                case .usertasks: // Make sure this matches your enum case name (usertasks vs tasks)
-                    UserTaskGroupView(userTasks: tasks)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            // 2. Main Content (Swipeable)
+            TabView(selection: $selectedTab) {
+                // Page 1: Home
+                HomeView()
+                    .tag(AppTab.home)
+                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
                 
-                case .profile:
-                    ProfileView()
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
+                // Page 2: Habits
+                HabitGroupView(habits: habits)
+                    .accessibilityIdentifier("HabitList")
+                    .tag(AppTab.habits)
+                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
+                
+                // Page 3: User Tasks
+                UserTaskGroupView(userTasks: tasks)
+                    .tag(AppTab.usertasks)
+                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
+                
+                // Page 4: Profile
+                ProfileView()
+                    .tag(AppTab.profile)
+                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
             }
-            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)
-
-            // Adds invisible padding at the bottom equal to the footer's height
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 100)
-            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .ignoresSafeArea(edges: .bottom)
+            // REMOVED the .animation modifier here
             
             // 3. Footer (Floats on top)
             NavFooterView(showingCreateSheet: $showingCreateSheet, selectedTab: $selectedTab)
@@ -58,8 +59,9 @@ struct ContentView: View {
         .sheet(isPresented: $showingCreateSheet) {
             if selectedTab == .habits {
                 CreateHabitView()
-            }
-            else if selectedTab == .usertasks {
+            } else if selectedTab == .usertasks {
+                CreateTaskView()
+            } else {
                 CreateTaskView()
             }
         }

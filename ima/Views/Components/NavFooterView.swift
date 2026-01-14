@@ -170,11 +170,7 @@ struct TabButton<Content: View>: View {
     let content: () -> Content
     
     var body: some View {
-        Button(action: {
-            withAnimation(.snappy) {
-                action()
-            }
-        }) {
+        Button(action: { action() } ) {
             VStack(spacing: 4) {
                 content()
             }

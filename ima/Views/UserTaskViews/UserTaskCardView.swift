@@ -38,7 +38,6 @@ struct UserTaskCardView: View {
             VStack(alignment: .leading, spacing: 5) {
                 // Title
                 Text(task.title)
-//                    .font(.headline)
                     .font(.body)
                     .foregroundStyle(.white)
                     .strikethrough(task.isCompleted, color: .gray)
@@ -48,7 +47,6 @@ struct UserTaskCardView: View {
                 // Subtitle Row: Priority • Due Date
                 HStack(spacing: 5) {
                     // 1. Priority (Colored)
-                    
                     Image(systemName: "exclamationmark.circle.fill")
                         .foregroundStyle(task.priority.color)
                     
@@ -57,13 +55,6 @@ struct UserTaskCardView: View {
                         Text(date.formatted(.dateTime.month().day()))
                             .foregroundStyle(.white.opacity(0.7))
                     }
-                    
-//                    // 3. Info Icon (if details exist)
-//                    if !task.details.isEmpty {
-//                        Image(systemName: "info.circle")
-//                            .foregroundStyle(.white.opacity(0.5))
-//                            .padding(.leading, 4)
-//                    }
                 }
                 .font(.caption2)
                 .textCase(.uppercase)
@@ -118,7 +109,7 @@ struct UserTaskCardView: View {
             RoundedRectangle(cornerRadius: 24)
                 .stroke(
                     .white.opacity(0.15),
-                    lineWidth: 2
+                    lineWidth: 1
                 )
         }
         // Visual feedback based on completion state
@@ -161,7 +152,7 @@ struct UserTaskCardView: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             task.isCompleted.toggle()
             if task.isCompleted {
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
             }
         }
     }

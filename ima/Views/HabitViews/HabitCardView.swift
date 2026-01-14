@@ -36,7 +36,6 @@ struct HabitCardView: View {
             ProgressRingWithDots(habit: habit, fillFactor: 1.0) {
                 Button(action: { incrementHabit() }) {
                     Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
-//                        .font(.system(size: 14, weight: .bold)) // Fixed font size for small card
                         .font(.subheadline)
                         .foregroundColor(habit.isFullyDone ? habit.statusColor : .white)
                         .frame(width: 28, height: 28) // Fixed button size for small card
@@ -56,7 +55,7 @@ struct HabitCardView: View {
             RoundedRectangle(cornerRadius: 24)
                 .stroke(
                     .white.opacity(0.15),
-                    lineWidth: 2
+                    lineWidth: 1
                 )
         }
         // Visual feedback based on completion state

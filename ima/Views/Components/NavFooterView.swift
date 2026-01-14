@@ -8,9 +8,10 @@
 import SwiftUI
 
 enum AppTab: Int, CaseIterable, Identifiable {
-    case home = 0
-    case habits = 1
+    case home      = 0
+    case habits    = 1
     case usertasks = 2
+    case profile   = 3
     
     // Conforms to Identifiable for the ScrollView ID
     var id: AppTab { self }
@@ -20,6 +21,7 @@ enum AppTab: Int, CaseIterable, Identifiable {
         case .home: return "Home"
         case .habits: return "Habits"
         case .usertasks: return "Tasks"
+        case .profile: return "Profile"
         }
     }
 }
@@ -69,6 +71,16 @@ struct NavFooterView: View {
                     }
                 ) {
                     TaskRingTabIcon(isActive: selectedTab == .usertasks)
+                }
+                
+                TabButton(
+                    isActive: selectedTab == .profile,
+                    action: {
+                        selectedTab = .profile
+                    }
+                ) {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 24))
                 }
             }
             .padding(.top, 20)
@@ -152,7 +164,6 @@ struct TaskRingTabIcon: View {
 }
 
 // MARK: - Helper Views
-
 struct TabButton<Content: View>: View {
     let isActive: Bool
     let action: () -> Void

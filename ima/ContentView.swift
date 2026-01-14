@@ -39,6 +39,10 @@ struct ContentView: View {
                 case .usertasks: // Make sure this matches your enum case name (usertasks vs tasks)
                     UserTaskGroupView(userTasks: tasks)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
+                
+                case .profile:
+                    ProfileView()
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)

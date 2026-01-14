@@ -107,7 +107,7 @@ struct HomeView: View {
                             
                             // MARK: - MUST DO SECTION
                             if !mustDoHabits.isEmpty || !mustDoTasks.isEmpty {
-                                Section(header: SectionLabel(
+                                Section(header: SectionHeader(
                                     title: "Must Do",
                                     icon: "flame.fill",
                                     color: .orange
@@ -123,7 +123,7 @@ struct HomeView: View {
                             
                             // MARK: - CAN DO SECTION
                             if !canDoHabits.isEmpty || !canDoTasks.isEmpty {
-                                Section(header: SectionLabel(
+                                Section(header: SectionHeader(
                                     title: "Can Do",
                                     icon: "calendar.badge.clock",
                                     color: .blue
@@ -209,32 +209,32 @@ struct HomeView: View {
 
 // MARK: - Subviews (Shared)
 
-struct SectionLabel: View {
-    let title: String
-    let icon: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.headline)
-                .foregroundStyle(color)
-            
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(.primary)
-                .textCase(.uppercase)
-            
-            Spacer()
-        }
-        .textCase(.uppercase)
-        .kerning(1.0)
-        .opacity(0.7)
-        .foregroundStyle(.white)
-        .padding(.leading, 25)
-        .padding(.vertical, 10)
-    }
-}
+//struct SectionLabel: View {
+//    let title: String
+//    let icon: String
+//    let color: Color
+//    
+//    var body: some View {
+//        HStack(spacing: 8) {
+//            Image(systemName: icon)
+//                .font(.headline)
+//                .foregroundStyle(color)
+//            
+//            Text(title)
+//                .font(.headline)
+//                .foregroundStyle(.primary)
+//                .textCase(.uppercase)
+//            
+//            Spacer()
+//        }
+//        .textCase(.uppercase)
+//        .kerning(1.0)
+//        .opacity(0.7)
+//        .foregroundStyle(.white)
+//        .padding(.leading, 25)
+//        .padding(.vertical, 10)
+//    }
+//}
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)

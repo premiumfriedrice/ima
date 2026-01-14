@@ -25,23 +25,15 @@ struct UserTaskInfoView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
+                Capsule()
+                    .fill(Color.white.opacity(0.5))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 20)
+                
                 // MARK: - Header
                 HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, /*weight: .bold*/))
-                            .foregroundStyle(.white.opacity(0.6))
-                            .padding(12)
-                            .background(.white.opacity(0.1))
-                            .clipShape(Circle())
-                    }
-                    .accessibilityIdentifier("CloseInfoViewButton")
-                    
                     Spacer()
                     
                     // Delete button
@@ -56,7 +48,7 @@ struct UserTaskInfoView: View {
                             .clipShape(Circle())
                     }
                 }
-                .padding(25)
+                .padding(.horizontal, 20)
                 
                 ScrollView {
                     VStack(spacing: 32) {
@@ -64,7 +56,7 @@ struct UserTaskInfoView: View {
                         // MARK: - Hero Title
                         VStack(alignment: .leading, spacing: 12) {
                             Text("TASK")
-                                .font(.system(.caption, design: .rounded))
+                                .font(.caption2)
 //                                .fontWeight(.bold)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
@@ -73,7 +65,7 @@ struct UserTaskInfoView: View {
                             
                             // Editable title
                             TextField("Task Title", text: $userTask.title)
-                                .font(.system(size: 36, /*weight: .bold,*/ design: .rounded))
+                                .font(.title2)
                                 .foregroundStyle(.white)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -82,8 +74,7 @@ struct UserTaskInfoView: View {
                         // MARK: - Sentence Row (Priority & Due Date)
                         VStack(alignment: .leading, spacing: 12) {
                             Text("PRIORITY and DUE DATE")
-                                .font(.system(.caption, design: .rounded))
-//                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -218,8 +209,7 @@ struct UserTaskInfoView: View {
                         // MARK: - Details Section
                         VStack(alignment: .leading, spacing: 12) {
                             Text("DETAILS")
-                                .font(.system(.caption, design: .rounded))
-//                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -239,8 +229,7 @@ struct UserTaskInfoView: View {
                         // MARK: - Subtasks Section
                         VStack(alignment: .leading, spacing: 15) {
                             Text("SUBTASKS")
-                                .font(.system(.caption, design: .rounded))
-//                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -331,7 +320,6 @@ struct UserTaskInfoView: View {
                         // MARK: - Footer Info
                         Text("Created " + userTask.dateCreated.formatted(date: .abbreviated, time: .shortened))
                             .font(.system(.caption, design: .rounded))
-//                            .fontWeight(.bold)
                             .textCase(.uppercase)
                             .kerning(1.0)
                             .opacity(0.5)

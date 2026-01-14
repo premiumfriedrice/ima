@@ -21,10 +21,14 @@ struct CreateHabitView: View {
             Color(.black).ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // MARK: - Swipe Pill
+                Capsule()
+                    .fill(Color.white.opacity(0.5))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 20)
+                
                 // MARK: - Header
                 HStack {
-                    // Removed X Button as requested
-                    
                     Spacer()
                     
                     // Create Button (Checkmark)
@@ -32,9 +36,9 @@ struct CreateHabitView: View {
                         saveHabit()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.title3)
                             .foregroundStyle(!title.isEmpty ? .white : .white.opacity(0.3))
-                            .frame(width: 50, height: 50) // Fixed size for a perfect circle
+                            .padding(10)
                             .background(
                                 ZStack {
                                     if !title.isEmpty {
@@ -59,23 +63,22 @@ struct CreateHabitView: View {
                     .accessibilityIdentifier("SaveHabitButton")
 
                 }
-                .padding(25)
+                .padding(.horizontal, 20)
 
                 ScrollView {
                     VStack(spacing: 32) {
                         
                         // MARK: - Title Input
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("HABIT")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
                             TextField("e.g., Read, Meditate...", text: $title)
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .font(.title2)
                                 .tint(.blue)
                                 .autocorrectionDisabled()
                                 .accessibilityIdentifier("HabitTitleInput")
@@ -84,10 +87,9 @@ struct CreateHabitView: View {
                         .padding(.horizontal, 25)
                         
                         // MARK: - Set Goal
-                        VStack(alignment: .leading, spacing: 0) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("SET YOUR GOAL")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -97,7 +99,7 @@ struct CreateHabitView: View {
                                 Picker("Count", selection: $frequencyCount) {
                                     ForEach(1...50, id: \.self) { number in
                                         Text("\(number)")
-                                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                                            .font(.title)
                                             .foregroundStyle(.white)
                                             .tag(number)
                                     }
@@ -108,15 +110,15 @@ struct CreateHabitView: View {
 
                                 // Dimmed Connector Text
                                 Text(frequencyCount == 1 ? "time per" : "times per")
-                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                    .font(.title)
                                     .foregroundStyle(.white.opacity(0.4))
-                                    .padding(.horizontal, 8)
+//                                    .padding(.horizontal, 5)
                                 
                                 // Rolling Frequency
                                 Picker("Frequency", selection: $frequencyUnit) {
                                     ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                         Text(unit.rawValue.capitalized)
-                                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                                            .font(.title)
                                             .foregroundStyle(.white)
                                             .tag(unit.rawValue)
                                     }
@@ -154,7 +156,7 @@ struct CreateHabitView: View {
         }
         // MARK: - Sheet Configuration
         .presentationDetents([.medium]) // Locks sheet to half height
-        .presentationDragIndicator(.visible) // Adds standard drag handle
+        .presentationDragIndicator(.hidden)
     }
     
     private func saveHabit() {

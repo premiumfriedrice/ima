@@ -31,7 +31,7 @@ struct HabitInfoView: View {
                 Capsule()
                     .fill(Color.white.opacity(0.5))
                     .frame(width: 36, height: 5)
-                    .padding(.top, 10)
+                    .padding(.top, 20)
                 
                 // MARK: - Header
                 HStack {
@@ -46,19 +46,33 @@ struct HabitInfoView: View {
                         }
                     } label: {
                         Image(systemName: isEditing ? "checkmark" : "square.and.pencil")
-                            .font(.system(size: 16/*, weight: .bold*/))
-                            .foregroundStyle(isEditing ? .black : .white.opacity(0.6))
-                            .padding(12)
-                            .background(isEditing ? .white : .white.opacity(0.1))
+                            .font(.callout)
+                            .foregroundStyle(isEditing ? .white : .white.opacity(0.6))
+                            .padding(10)
+                            .background(
+                                ZStack {
+                                    if isEditing {
+                                        // Gradient when active
+                                        LinearGradient(
+                                            colors: [Color.blue, Color.purple],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    } else {
+                                        // Subtle gray background when disabled
+                                        Color.white.opacity(0.1)
+                                    }
+                                }
+                            )
                             .clipShape(Circle())
                     }
                     
                     // Reset Button
                     Button { showingResetConfirmation = true } label: {
                         Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 16/*, weight: .bold*/))
+                            .font(.callout)
                             .foregroundStyle(.white.opacity(0.6))
-                            .padding(12)
+                            .padding(10)
                             .background(.white.opacity(0.1))
                             .clipShape(Circle())
                     }
@@ -68,16 +82,14 @@ struct HabitInfoView: View {
                     // Delete Button
                     Button(role: .destructive) { showingDeleteConfirmation = true } label: {
                         Image(systemName: "trash")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.callout)
                             .foregroundStyle(.red.opacity(0.8))
-                            .padding(12)
+                            .padding(10)
                             .background(.red.opacity(0.1))
                             .clipShape(Circle())
                     }
                 }
-                .padding(.horizontal, 25)
-                .padding(.bottom, 10)
-                .padding(.top, 10)
+                .padding(.horizontal, 20)
                 
                 // 2. Wrap ScrollView in ScrollViewReader to enable scrolling
                 ScrollViewReader { proxy in
@@ -93,7 +105,7 @@ struct HabitInfoView: View {
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
                                 Text(habit.title)
-                                    .font(.title)
+                                    .font(.title2)
                                     .foregroundStyle(.white)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -112,7 +124,7 @@ struct HabitInfoView: View {
                                     // 1. Decrement Button
                                     Button { decrementProgress() } label: {
                                         Image(systemName: "minus")
-                                            .font(.system(size: 24, /*weight: .bold*/))
+                                            .font(.callout)
                                             .foregroundStyle(.white)
                                             .frame(width: 50, height: 50)
                                             .background(.white.opacity(0.1))
@@ -142,7 +154,7 @@ struct HabitInfoView: View {
                                     // 3. Increment Button
                                     Button { incrementProgress() } label: {
                                         Image(systemName: "plus")
-                                            .font(.system(size: 16, weight: .bold))
+                                            .font(.callout)
                                             .foregroundStyle(.black)
                                             .frame(width: 50, height: 50)
                                             .background(.white)

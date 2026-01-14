@@ -28,7 +28,7 @@ struct CalendarView: View {
             
             VStack(alignment: .leading, spacing: 20) {
                 Text(Date.now.formatted(.dateTime.month(.wide).year()).uppercased())
-                    .font(.caption).bold()
+                    .font(.caption2)
                     .foregroundStyle(.white.opacity(0.4))
                 
                 VStack(spacing: 15) {

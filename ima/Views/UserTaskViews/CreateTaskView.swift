@@ -31,117 +31,63 @@ struct CreateTaskView: View {
     var body: some View {
         ZStack {
             Color(.black).ignoresSafeArea()
-            AnimatedRadial(color: .white.opacity(0.1), startPoint: .topLeading, endPoint: .topTrailing)
             
             VStack(spacing: 0) {
+                Capsule()
+                    .fill(Color.white.opacity(0.5))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 20)
+                
                 // MARK: - Header
                 HStack {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.6))
-                            .padding(12)
-                            .background(.white.opacity(0.1))
-                            .clipShape(Circle())
-                    }
-                    
                     Spacer()
                     
-                    
-                    // Option 1
-                    Button { createTask() } label: {
-                        HStack(spacing: 6) {
-                            Text("CREATE")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.black) // Extra bold for impact
-                            
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 14, weight: .bold))
-                        }
-                        .foregroundStyle( !canCreate ? .white.opacity(0.6) :  .white )
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
-                        .background(
-                            ZStack {
-                                if canCreate {
-                                    // Gradient when active
-                                    LinearGradient(
-                                        colors: [Color.blue, Color.purple],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                } else {
-                                    // Subtle gray stroke when disabled
-                                    Color.white.opacity(0.1)
+                    Button {
+                        createTask()
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(!title.isEmpty ? .white : .white.opacity(0.3))
+                            .frame(width: 50, height: 50) // Fixed size for a perfect circle
+                            .background(
+                                ZStack {
+                                    if !title.isEmpty {
+                                        // Gradient when active
+                                        LinearGradient(
+                                            colors: [Color.blue, Color.purple],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    } else {
+                                        // Subtle gray background when disabled
+                                        Color.white.opacity(0.1)
+                                    }
                                 }
-                            }
-                        )
-                        .clipShape(Capsule())
-                        // Add a glow when active
-                        .shadow(color: canCreate ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
-                        .animation(.smooth, value: canCreate)
+                            )
+                            .clipShape(Circle())
+                            // Add a glow when active
+                            .shadow(color: !title.isEmpty ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
+                            .animation(.smooth, value: !title.isEmpty)
                     }
-                    .disabled(!canCreate)
-                    
-                    // Option 2
-//                    Button { createTask() } label: {
-//                        HStack(spacing: 8) {
-//                            Text("CREATE")
-//                                .font(.system(size: 14, weight: .bold, design: .rounded))
-//                                .kerning(1) // Adds letter spacing for a premium feel
-//                            
-//                            Image(systemName: "arrow.up")
-//                                .font(.system(size: 14, weight: .bold))
-//                        }
-//                        // Text is White when active, gray when disabled
-//                        .foregroundStyle(canCreate ? .black : .white.opacity(0.3))
-//                        .padding(.vertical, 12)
-//                        .padding(.horizontal, 24)
-//                        .background(
-//                            Capsule()
-//                                .fill(canCreate ? .white : .white.opacity(0.1))
-//                                .shadow(color: canCreate ? .white.opacity(0.4) : .clear, radius: 8, y: 0) // White glow
-//                        )
-//                        .scaleEffect(canCreate ? 1.0 : 0.95) // Slight shrink when disabled
-//                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: canCreate)
-//                    }
-//                    .disabled(!canCreate)
-                    
-                    // Option 3
-//                    Button { createTask() } label: {
-//                        HStack(spacing: 6) {
-//                            Text("CREATE")
-//                                .font(.system(.caption, design: .rounded))
-//                                .fontWeight(.bold)
-//                            Image(systemName: "arrow.up")
-//                        }
-//                        .foregroundStyle(canCreate ? .white : .white.opacity(0.3))
-//                        .padding(.vertical, 10)
-//                        .padding(.horizontal, 18)
-//                        .background(
-//                            Capsule()
-//                                .stroke(canCreate ? .white : .white.opacity(0.1), lineWidth: 1.5)
-//                        )
-//                    }
-//                    .disabled(!canCreate)
+                    .disabled(title.isEmpty)
+                    .accessibilityIdentifier("CreateUserTaskButton")
                 }
-                .padding(25)
+                .padding(.horizontal, 20)
                 
                 ScrollView {
                     VStack(spacing: 32) {
                         
                         // MARK: - Title Input
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("TASK")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
                             TextField("e.g., Shopping, Laundry", text: $title)
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .font(.title2)
                                 .foregroundStyle(.white)
                                 .tint(.white)
                                 .submitLabel(.next)
@@ -152,10 +98,9 @@ struct CreateTaskView: View {
                         .padding(.horizontal, 25)
 
                         // MARK: - Sentence Row (Priority & Due Date)
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("PRIORITY and DUE DATE")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -168,7 +113,7 @@ struct CreateTaskView: View {
                                 Picker("Priority", selection: $priority) {
                                     ForEach(TaskPriority.allCases) { p in
                                         Text("\(p.title)")
-                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .font(.subheadline)
                                             .foregroundStyle(.white)
                                             .tag(p)
                                     }
@@ -192,7 +137,7 @@ struct CreateTaskView: View {
                                 
                                 // 2. Connecting text
                                 Text("priority due")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .font(.subheadline)
                                     .foregroundStyle(.white.opacity(0.4))
                                     .padding(0)
                                     .lineLimit(1)
@@ -208,7 +153,7 @@ struct CreateTaskView: View {
                                         }
                                     } label: {
                                         Text("no date")
-                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .font(.subheadline)
                                             .foregroundStyle(.white.opacity(0.8))
                                             .lineLimit(1)
                                             .layoutPriority(1)
@@ -225,12 +170,12 @@ struct CreateTaskView: View {
                                 }
                                 else {
                                     // State B: "Dec 30, 2025" + Close
-                                    HStack(spacing: 6) {
+                                    HStack(spacing: 5) {
                                         Button {
                                             withAnimation(.snappy) { isCalendarVisible.toggle() }
                                         } label: {
                                             Text(dueDate.formatted(date: .abbreviated, time: .omitted))
-                                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                                .font(.subheadline)
                                                 .foregroundStyle(.white.opacity(0.8))
                                                 .lineLimit(1)
                                                 .layoutPriority(1)
@@ -286,17 +231,16 @@ struct CreateTaskView: View {
                         }
 
                         // MARK: - Details Section
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("DETAILS")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
                             TextField("Add notes, context, or descriptions...", text: $newDetailsInput, axis: .vertical)
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .font(.caption2)
                                 .foregroundStyle(.white)
                                 .padding(16)
                                 .background(.white.opacity(0.05))
@@ -309,8 +253,7 @@ struct CreateTaskView: View {
                         // MARK: - Subtasks Section
                         VStack(alignment: .leading, spacing: 15) {
                             Text("SUBTASKS")
-                                .font(.system(.caption, design: .rounded))
-                                .fontWeight(.bold)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -324,7 +267,7 @@ struct CreateTaskView: View {
                                             .foregroundStyle(.white.opacity(0.3))
                                         
                                         Text(subtaskTitle)
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .font(.caption2)
                                             .foregroundStyle(.white)
                                         
                                         Spacer()

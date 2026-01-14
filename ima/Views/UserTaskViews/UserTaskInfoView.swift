@@ -57,7 +57,6 @@ struct UserTaskInfoView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("TASK")
                                 .font(.caption2)
-//                                .fontWeight(.bold)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -72,7 +71,7 @@ struct UserTaskInfoView: View {
                         .padding(.horizontal, 25)
                         
                         // MARK: - Sentence Row (Priority & Due Date)
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("PRIORITY and DUE DATE")
                                 .font(.caption2)
                                 .textCase(.uppercase)
@@ -87,7 +86,7 @@ struct UserTaskInfoView: View {
                                 Picker("Priority", selection: $userTask.priority) {
                                     ForEach(TaskPriority.allCases) { p in
                                         Text("\(p.title)")
-                                            .font(.system(size: 16, /*weight: .bold,*/ design: .rounded))
+                                            .font(.subheadline)
                                             .foregroundStyle(.white)
                                             .tag(p)
                                     }
@@ -111,9 +110,8 @@ struct UserTaskInfoView: View {
                                 
                                 // 2. Connecting text
                                 Text("priority due")
-                                    .font(.system(size: 18, /*weight: .bold,*/ design: .rounded))
-                                    .foregroundStyle(.white.opacity(0.4))
-                                    .padding(0)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(0.6))
                                     .lineLimit(1)
                                     .layoutPriority(1)
                                 
@@ -127,7 +125,7 @@ struct UserTaskInfoView: View {
                                         }
                                     } label: {
                                         Text("no date")
-                                            .font(.system(size: 16, /*weight: .bold,*/ design: .rounded))
+                                            .font(.subheadline)
                                             .foregroundStyle(.white.opacity(0.8))
                                             .lineLimit(1)
                                             .layoutPriority(1)
@@ -143,16 +141,16 @@ struct UserTaskInfoView: View {
                                     
                                 } else {
                                     // State B: "Dec 30, 2025" + Close
-                                    HStack(spacing: 6) {
+                                    HStack(spacing: 5) {
                                         Button {
                                             withAnimation(.snappy) { isCalendarVisible.toggle() }
                                         } label: {
                                             Text(userTask.dueDate!.formatted(date: .abbreviated, time: .omitted))
-                                                .font(.system(size: 16, /*weight: .bold,*/ design: .rounded))
+                                                .font(.subheadline)
                                                 .foregroundStyle(.white.opacity(0.8))
                                                 .lineLimit(1)
                                                 .layoutPriority(1)
-                                                .padding(.vertical, 8)
+                                                .padding(.vertical, 5)
                                                 .padding(.horizontal, 10)
                                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                                 .overlay(
@@ -170,9 +168,9 @@ struct UserTaskInfoView: View {
                                             }
                                         } label: {
                                             Image(systemName: "xmark")
-                                                .font(.system(size: 10, /*weight: .bold*/))
+                                                .font(.caption2)
                                                 .foregroundStyle(.white.opacity(0.6))
-                                                .padding(6)
+                                                .padding(5)
                                                 .background(.white.opacity(0.1))
                                                 .clipShape(Circle())
                                         }
@@ -185,7 +183,7 @@ struct UserTaskInfoView: View {
                             // 2. Add normal margin
                             .padding(.leading, 20)
                             // 3. Reserve extra space on the right (25 normal + 20 buffer = 45pt empty space)
-                            .padding(.trailing, 25)
+                            .padding(.trailing, 20)
                             .padding(.vertical, -10)
                             
                             // Row 2: The Calendar
@@ -207,7 +205,7 @@ struct UserTaskInfoView: View {
                         }
                         
                         // MARK: - Details Section
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("DETAILS")
                                 .font(.caption2)
                                 .textCase(.uppercase)
@@ -328,6 +326,7 @@ struct UserTaskInfoView: View {
                     }
                     .padding(.top, 20)
                 }
+                .scrollIndicators(.hidden)
             }
             .foregroundStyle(.white)
             // Shiny Border Overlay

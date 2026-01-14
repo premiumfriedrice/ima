@@ -343,6 +343,7 @@ struct CreateTaskView: View {
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
+            .scrollIndicators(.hidden)
         }
         .onAppear {
             isTitleFocused = true

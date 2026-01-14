@@ -139,12 +139,15 @@ struct HabitInfoView: View {
                                             VStack(spacing: 0) {
                                                 // Scale font relative to the size to keep proportions
                                                 Text("\(habit.currentCount)")
-                                                    .font(.system(size: size * 0.2, weight: .black, design: .rounded))
+                                                    .font(.largeTitle)
+                                                    .bold()
+//                                                    .font(.system(size: size * 0.2, weight: .black, design: .rounded))
                                                     .foregroundStyle(.white)
                                                     .contentTransition(.numericText(value: Double(habit.currentCount)))
                                                 
                                                 Text("/ \(habit.frequencyCount)")
-                                                    .font(.system(size: size * 0.1, weight: .bold, design: .rounded))
+                                                    .font(.callout)
+//                                                    .font(.system(size: size * 0.1, weight: .bold, design: .rounded))
                                                     .foregroundStyle(.white.opacity(0.5))
                                             }
                                         }
@@ -244,6 +247,7 @@ struct HabitInfoView: View {
                         }
                     }
                 }
+                .scrollIndicators(.hidden)
             }
         }
         .foregroundStyle(.white)

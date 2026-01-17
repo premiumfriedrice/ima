@@ -214,7 +214,7 @@ struct UserTaskInfoView: View {
                                 .foregroundStyle(.white)
                             
                             TextField("Add notes, context, or descriptions...", text: $userTask.details, axis: .vertical)
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .font(.subheadline)
                                 .foregroundStyle(.white)
                                 .padding(16)
                                 .background(.white.opacity(0.05))
@@ -233,11 +233,11 @@ struct UserTaskInfoView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
-                            VStack(spacing: 12) {
+                            VStack(spacing: 10) {
                                 // 1. List of Subtasks
                                 // We iterate over the object directly.
                                 ForEach(userTask.subtasks) { subtask in
-                                    HStack(spacing: 12) {
+                                    HStack(spacing: 10) {
                                         // Checkbox
                                         Button {
                                             withAnimation(.snappy) {
@@ -252,7 +252,7 @@ struct UserTaskInfoView: View {
                                         // Text Input (Editable)
                                         // Bindable(subtask) allows us to create a binding to a SwiftData object's property inside a loop
                                         TextField("Subtask", text: Bindable(subtask).title)
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .font(.subheadline)
                                             .strikethrough(subtask.isCompleted)
                                             .foregroundStyle(subtask.isCompleted ? .white.opacity(0.5) : .white)
                                         
@@ -265,9 +265,9 @@ struct UserTaskInfoView: View {
                                             }
                                         } label: {
                                             Image(systemName: "xmark")
-                                                .font(.system(size: 12, /*weight: .bold*/))
+                                                .font(.caption2)
                                                 .foregroundStyle(.white.opacity(0.3))
-                                                .padding(8)
+                                                .padding(5)
                                                 .background(.white.opacity(0.05))
                                                 .clipShape(Circle())
                                         }
@@ -278,13 +278,13 @@ struct UserTaskInfoView: View {
                                 }
                                 
                                 // 2. Add Subtask Input
-                                HStack(spacing: 12) {
+                                HStack(spacing: 10) {
                                     Image(systemName: "circle")
                                         .font(.system(size: 24))
                                         .foregroundStyle(.white.opacity(0.3))
                                     
                                     TextField("Add a subtask...", text: $newSubtaskTitle)
-                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .font(.subheadline)
                                         .foregroundStyle(.white)
                                         .submitLabel(.done)
                                         .focused($isInputFocused)

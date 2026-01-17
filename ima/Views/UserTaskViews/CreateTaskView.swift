@@ -233,7 +233,7 @@ struct CreateTaskView: View {
                         // MARK: - Details Section
                         VStack(alignment: .leading, spacing: 10) {
                             Text("DETAILS")
-                                .font(.caption2)
+                                .font(.footnote)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -267,14 +267,14 @@ struct CreateTaskView: View {
                                             .foregroundStyle(.white.opacity(0.3))
                                         
                                         Text(subtaskTitle)
-                                            .font(.caption2)
+                                            .font(.subheadline)
                                             .foregroundStyle(.white)
                                         
                                         Spacer()
                                         
                                         Button { deleteTempSubtask(at: index) } label: {
                                             Image(systemName: "xmark")
-                                                .font(.system(size: 12, weight: .bold))
+                                                .font(.caption2)
                                                 .foregroundStyle(.white.opacity(0.3))
                                                 .padding(8)
                                                 .background(.white.opacity(0.05))
@@ -292,7 +292,7 @@ struct CreateTaskView: View {
                                         .foregroundStyle(.white.opacity(0.3))
                                     
                                     TextField("Add a subtask...", text: $newSubtaskInput)
-                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .font(.caption2)
                                         .foregroundStyle(.white)
                                         .submitLabel(.done)
                                         .focused($isInputFocused)

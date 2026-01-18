@@ -139,13 +139,13 @@ struct HomeView: View {
                             
                             // MARK: - COMPLETED SECTION (Collapsible)
                             if totalCompletedCount > 0 {
-                                VStack(alignment: .leading, spacing: 16) {
+                                VStack(alignment: .leading, spacing: 5) {
                                     Button(action: {
                                         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                                             showCompleted.toggle()
                                         }
                                     }) {
-                                        HStack(spacing: 8) {
+                                        HStack(spacing: 5) {
                                             Image(systemName: "checkmark.circle.fill")
                                                 .font(.headline)
                                                 .foregroundStyle(.green)
@@ -157,21 +157,20 @@ struct HomeView: View {
                                             Spacer()
                                             
                                             // Count Badge
-                                            Text("\(totalCompletedCount)")
-                                                .font(.system(size: 12, /*weight: .bold,*/ design: .rounded))
-                                                .foregroundStyle(.white.opacity(0.3))
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .background(.white.opacity(0.1))
-                                                .clipShape(Capsule())
-                                            
-                                            Image(systemName: "chevron.right")
-                                                .font(.system(size: 14, /*weight: .bold*/))
-                                                .foregroundStyle(.white.opacity(0.5))
-                                                .rotationEffect(.degrees(showCompleted ? 90 : 0))
+                                            HStack(spacing: 0) {
+                                                Text("\(totalCompletedCount)")
+                                                    .font(.subheadline)
+                                                    .foregroundStyle(.white.opacity(0.3))
+                                                    .padding(.horizontal, 10)
+                                                    .padding(.vertical, 5)
+                                                
+                                                Image(systemName: "chevron.right")
+                                                    .font(.subheadline)
+                                                    .foregroundStyle(.white.opacity(0.5))
+                                                    .rotationEffect(.degrees(showCompleted ? 90 : 0))
+                                            }
                                         }
                                         .font(.system(.caption, design: .rounded))
-//                                        .fontWeight(.bold)
                                         .textCase(.uppercase)
                                         .kerning(1.0)
                                         .opacity(0.7)
@@ -206,35 +205,6 @@ struct HomeView: View {
         }
     }
 }
-
-// MARK: - Subviews (Shared)
-
-//struct SectionLabel: View {
-//    let title: String
-//    let icon: String
-//    let color: Color
-//    
-//    var body: some View {
-//        HStack(spacing: 8) {
-//            Image(systemName: icon)
-//                .font(.headline)
-//                .foregroundStyle(color)
-//            
-//            Text(title)
-//                .font(.headline)
-//                .foregroundStyle(.primary)
-//                .textCase(.uppercase)
-//            
-//            Spacer()
-//        }
-//        .textCase(.uppercase)
-//        .kerning(1.0)
-//        .opacity(0.7)
-//        .foregroundStyle(.white)
-//        .padding(.leading, 25)
-//        .padding(.vertical, 10)
-//    }
-//}
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)

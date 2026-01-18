@@ -112,7 +112,6 @@ struct CreateHabitView: View {
                                 Text(frequencyCount == 1 ? "time per" : "times per")
                                     .font(.title)
                                     .foregroundStyle(.white.opacity(0.4))
-//                                    .padding(.horizontal, 5)
                                 
                                 // Rolling Frequency
                                 Picker("Frequency", selection: $frequencyUnit) {

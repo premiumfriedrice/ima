@@ -153,7 +153,7 @@ struct TaskRingTabIcon: View {
             // 2. The Checkmark (Only obvious when active, or dimmed when inactive)
             Image(systemName: isActive ? "plus" : "checkmark") // Switched to Plus when active as requested previously, or keep checkmark?
             // Reverting to your previous request: "active task tab button with the plus in it"
-                .font(.headline)
+                .font(isActive ? .headline : .footnote)
                  .foregroundColor(.black)
         }
         .frame(width: 50, height: 50)

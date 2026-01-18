@@ -14,8 +14,5 @@ struct AnimatedRadialBackground: View {
         AnimatedRadial(color: Color.blue.opacity(0.05),
                        startPoint: .topTrailing,
                        endPoint: .bottomLeading)
-//        AnimatedRadial(color: Color.white.opacity(0.1),
-//                       startPoint: .topLeading,
-//                       endPoint: .topTrailing)
     }
 }

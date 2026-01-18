@@ -36,14 +36,14 @@ struct HabitCardView: View {
             ProgressRingWithDots(habit: habit, fillFactor: 1.0) {
                 Button(action: { incrementHabit() }) {
                     Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundColor(habit.isFullyDone ? habit.statusColor : .white)
                         .frame(width: 28, height: 28) // Fixed button size for small card
-                        .background(.clear)
+//                        .background(.clear)
                         .clipShape(Circle())
                 }
             }
-            .frame(width: 55, height: 55) // The reference size
+            .frame(width: 40, height: 40) // The reference size
             
         }
         .padding(15)
@@ -59,7 +59,7 @@ struct HabitCardView: View {
                 )
         }
         // Visual feedback based on completion state
-        .opacity(habit.isFullyDone ? 0.6 : 1.0)
+        .opacity(habit.isFullyDone ? 0.5 : 1.0)
         .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
         // MARK: New Highlight Effect
         // Add a soft white glow when NOT completed
@@ -106,7 +106,7 @@ extension Double {
     habitIncomplete.currentCount = 1
     
     // Example of a complete habit (no highlight, dimmed)
-    let habitComplete = Habit(title: "Drink Water", frequencyCount: 3, frequencyUnit: .daily)
+    let habitComplete = Habit(title: "Drink Water", frequencyCount: 7, frequencyUnit: .daily)
     habitComplete.currentCount = 3
 
     return ZStack {

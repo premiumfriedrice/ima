@@ -23,15 +23,15 @@ struct ProgressRingWithDots<Content: View>: View {
             
             // 2. SCALING MATH
             let scale = size / 55.0
-            let ringRadius = 20.0 * scale
-            let dotRadius = 26.0 * scale
+            let ringRadius = 17.0 * scale
+            let dotRadius = 24.0 * scale
             let strokeWidth = 3.0 * scale
-            let dotSize = 3.5 * scale
+            let dotSize = 4 * scale
             
             ZStack {
                 // A. Background Track
                 Circle()
-                    .stroke(Color.white.opacity(0.1), lineWidth: strokeWidth)
+                    .stroke(.white.opacity(0.1), lineWidth: strokeWidth)
                     .frame(width: ringRadius * 2, height: ringRadius * 2)
                 
                 // B. Progress Line
@@ -45,7 +45,7 @@ struct ProgressRingWithDots<Content: View>: View {
                     .frame(width: ringRadius * 2, height: ringRadius * 2)
                     .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
                     .opacity(habit.currentCount > 0 ? 1.0 : 0.0)
-                
+            
                 // C. Dots
                 let totalSteps = max(habit.frequencyCount, 1)
                 let center = size / 2 // Local center for dot positioning
@@ -56,7 +56,7 @@ struct ProgressRingWithDots<Content: View>: View {
                     let isCompleted = index < habit.currentCount
                     
                     Circle()
-                        .fill(isCompleted ? habit.statusColor : Color.white.opacity(0.2))
+                        .fill(isCompleted ? habit.statusColor : Color.white.opacity(0.1))
                         .frame(width: dotSize, height: dotSize)
                         .position(
                             x: center + (dotRadius * cos(angle.degreesToRadians)),

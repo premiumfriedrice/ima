@@ -26,7 +26,6 @@ struct UserTaskCardView: View {
         return task.subtasks.isEmpty ? 1.0 : Double(task.subtasks.count)
     }
     
-    // Logic: Show counts only if subtasks exist AND are not yet fully complete
     private var showCounts: Bool {
         return !task.subtasks.isEmpty && subtaskProgress < totalSubtasks
     }
@@ -46,11 +45,9 @@ struct UserTaskCardView: View {
                 
                 // Subtitle Row: Priority • Due Date
                 HStack(spacing: 5) {
-                    // 1. Priority (Colored)
                     Image(systemName: "exclamationmark.circle.fill")
                         .foregroundStyle(task.priority.color)
                     
-                    // 2. Divider & Date (if exists)
                     if let date = task.dueDate {
                         Text(date.formatted(.dateTime.month().day()))
                             .foregroundStyle(.white.opacity(0.7))
@@ -66,37 +63,37 @@ struct UserTaskCardView: View {
             // MARK: - Right Side: Interaction Area
             ZStack {
                 if showCounts {
-                    // CASE A: HAS INCOMPLETE SUBTASKS -> Show Numbers Only
+                    // CASE A: Subtask Counts
                     HStack(alignment: .firstTextBaseline, spacing: 1) {
                         Text("\(Int(subtaskProgress))")
-                            .font(.system(size: 16, weight: .black, design: .rounded)) // Larger number
+                            .font(.callout)
                             .foregroundStyle(.white)
                         
                         Text("/\(Int(totalSubtasks))")
-                            .font(.system(size: 12, /*weight: .bold,*/ design: .rounded))
+                            .font(.caption)
                             .foregroundStyle(.white.opacity(0.6))
                     }
-                    .frame(width: 44, height: 44) // Matches button touch area size
+                    .frame(width: 40, height: 40) // Matches Habit Button
                     
                 } else {
-                    // CASE B: ALL SUBTASKS DONE (or none existed) -> Show Toggle Button
+                    // CASE B: Checkmark Button
                     Button(action: { toggleTaskCompletion() }) {
                         Image(systemName: task.isCompleted ? "checkmark" : "")
-                            .font(.system(size: 14, /*weight: .bold*/))
+                            .font(.footnote)
                             .foregroundColor(task.isCompleted ? .black : .clear)
-                            .frame(width: 28, height: 28)
-                            .background(task.isCompleted ? task.priority.color : .clear)
+                            .frame(width: 28, height: 28) // Icon visual size
+                            .background(task.isCompleted ? .green : .clear)
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
-                                    .stroke(task.isCompleted ? Color.clear : task.priority.color.opacity(0.5), lineWidth: 2)
+                                    .stroke(task.isCompleted ? .clear : .white.opacity(0.3), lineWidth: 1.5)
                             )
                     }
-                    .frame(width: 44, height: 44) // Hit target size
+                    .frame(width: 40, height: 40) // Hit target matches Habit Button
                     .accessibilityIdentifier("CompleteTaskButton")
                 }
             }
-            .frame(width: 55, height: 55) // Reference container size
+            .frame(width: 40, height: 40) // Reference container size (Matches HabitCardView)
         }
         .padding(15)
         
@@ -112,10 +109,8 @@ struct UserTaskCardView: View {
                     lineWidth: 1
                 )
         }
-        // Visual feedback based on completion state
-        .opacity(task.isCompleted ? 0.6 : 1.0)
+        .opacity(task.isCompleted ? 0.5 : 1.0)
         .scaleEffect(task.isCompleted ? 0.98 : 1.0)
-        // Glow Effect when active
         .shadow(
             color: .white.opacity(task.isCompleted ? 0.0 : 0.15),
             radius: task.isCompleted ? 0 : 10,
@@ -123,7 +118,7 @@ struct UserTaskCardView: View {
         )
         .padding(.horizontal, 20)
         
-        // MARK: - Interaction (Open Edit Sheet)
+        // MARK: - Interaction
         .contentShape(Rectangle())
         .onTapGesture {
             showingEditSheet = true
@@ -136,11 +131,8 @@ struct UserTaskCardView: View {
     }
     
     // MARK: - Logic Helpers
-    
     private func validateTaskState() {
         let hasIncompleteSubtasks = task.subtasks.contains { !$0.isCompleted }
-        
-        // If the task IS marked complete, but we found an unchecked subtask...
         if task.isCompleted && hasIncompleteSubtasks {
             withAnimation {
                 task.isCompleted = false

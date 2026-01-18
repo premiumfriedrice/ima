@@ -41,8 +41,8 @@ struct NavFooterView: View {
                     isActive: selectedTab == .home,
                     action: { selectedTab = .home }
                 ) {
-                    Image(systemName: "house.fill")
-                        .font(.system(size: 24))
+                    Image(systemName: "rectangle.grid.1x3.fill")
+                        .font(.title2)
                 }
                 
                 // --- 2. Habits Tab (Dots + Inner Ring) ---
@@ -80,7 +80,7 @@ struct NavFooterView: View {
                     }
                 ) {
                     Image(systemName: "person.fill")
-                        .font(.system(size: 24))
+                        .font(.title)
                 }
             }
             .padding(.top, 20)
@@ -105,40 +105,38 @@ struct NavFooterView: View {
 }
 
 // MARK: - Custom Icons
-
 struct DottedRingTabIcon: View {
     var isActive: Bool
     
-    // Configurable properties
-    let dotCount = 7
-    let ringRadius: CGFloat = 20 // The radius for the dots
-    let dotSize: CGFloat = 3
+    // Configurable properties for "Dense" look
+    let dotCount = 7 // Increased count for density
+    let ringRadius: CGFloat = 16 // Tighter radius (pulled in from 20)
+    let dotSize: CGFloat = 3 // Larger dots (up from 3)
     
     var body: some View {
         ZStack {
-            // 1. The Inner Ring (New addition based on request)
-            // Sits inside the dots, enclosing the Plus
             Circle()
-                .stroke(isActive ? Color.white : Color.gray.opacity(0.3), lineWidth: 1.5)
-                .frame(width: 28, height: 28) // Smaller than the dot radius (20*2=40)
+                .fill(isActive ? .white : .white.opacity(0.5))
+                .frame(width: 24, height: 24) // Solid core
             
-            // 2. The Ring of Dots (Outer Layer)
+            // 2. The Ring of Dots (Studs)
             ForEach(0..<dotCount, id: \.self) { index in
                 Circle()
-                    .fill(isActive ? Color.white : Color.gray.opacity(0.5))
+                    .fill(isActive ? .white : .white.opacity(0.5))
                     .frame(width: dotSize, height: dotSize)
                     .offset(y: -ringRadius)
                     .rotationEffect(.degrees(Double(index) / Double(dotCount) * 360))
             }
             
-            // 3. The Central Plus
-            if isActive {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .bold)) // Slightly smaller to fit in inner ring
-                    .foregroundColor(isActive ? .white : .gray.opacity(0.5))
-            }
+            // 3. The Central Plus (Cutout style)
+            // We make this black (or clear) to simulate the 'filled icon' cutout look
+            Image(systemName: "plus")
+                .font(.headline)
+                .foregroundStyle(isActive ? .black : .clear)
         }
-        .frame(width: 50, height: 50) // Hit target size
+        .frame(width: 50, height: 50)
+        // Optional: Add a shadow to make it pop like a 3D button
+        .shadow(color: isActive ? .white.opacity(0.3) : .clear, radius: 5)
     }
 }
 
@@ -149,14 +147,14 @@ struct TaskRingTabIcon: View {
         ZStack {
             // 1. The Ring (No dots, just a stroke)
             Circle()
-                .stroke(isActive ? Color.white : Color.gray.opacity(0.5), lineWidth: 2)
-                .frame(width: 28, height: 28) // Matches visual size of the dotted ring's outer bounds
+                .fill(isActive ? .white : .white.opacity(0.5))
+                .frame(width: 28, height: 28) // Solid core
             
             // 2. The Checkmark (Only obvious when active, or dimmed when inactive)
             Image(systemName: isActive ? "plus" : "checkmark") // Switched to Plus when active as requested previously, or keep checkmark?
             // Reverting to your previous request: "active task tab button with the plus in it"
-                 .font(.system(size: 14, weight: .bold))
-                 .foregroundColor(isActive ? .white : .gray.opacity(0.3))
+                .font(.headline)
+                 .foregroundColor(.black)
         }
         .frame(width: 50, height: 50)
         .background(Color.clear) // Explicitly transparent

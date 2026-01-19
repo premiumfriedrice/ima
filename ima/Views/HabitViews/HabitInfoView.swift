@@ -22,9 +22,6 @@ struct HabitInfoView: View {
     
     var body: some View {
         ZStack {
-            // Background
-            Color.black.ignoresSafeArea()
-            
             VStack(spacing: 0) {
                 
                 // MARK: - Swipe Pill
@@ -141,13 +138,11 @@ struct HabitInfoView: View {
                                                 Text("\(habit.currentCount)")
                                                     .font(.largeTitle)
                                                     .bold()
-//                                                    .font(.system(size: size * 0.2, weight: .black, design: .rounded))
                                                     .foregroundStyle(.white)
                                                     .contentTransition(.numericText(value: Double(habit.currentCount)))
                                                 
                                                 Text("/ \(habit.frequencyCount)")
                                                     .font(.callout)
-//                                                    .font(.system(size: size * 0.1, weight: .bold, design: .rounded))
                                                     .foregroundStyle(.white.opacity(0.5))
                                             }
                                         }
@@ -253,7 +248,18 @@ struct HabitInfoView: View {
         .foregroundStyle(.white)
         .overlay {
             RoundedRectangle(cornerRadius: 40)
-                .stroke(LinearGradient(stops: [.init(color: .white.opacity(0.2), location: 0.0), .init(color: .white.opacity(0.05), location: 0.2), .init(color: .clear, location: 0.5)], startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
+                .stroke(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
+                            .init(color: .white.opacity(0.05), location: 0.2),
+                            .init(color: .clear, location: 0.5)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 3 // Thicker line catches more "light"
+                )
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
         }
@@ -261,7 +267,7 @@ struct HabitInfoView: View {
         // 5. Bind the detents to the state variable
         .presentationDetents([.medium, .large], selection: $currentDetent)
         .presentationDragIndicator(.hidden)
-        .presentationBackground(.ultraThinMaterial.opacity(0.1))
+        .presentationBackground(.ultraThickMaterial.opacity(0.5))
         .presentationCornerRadius(40)
         
         // MARK: - Alerts

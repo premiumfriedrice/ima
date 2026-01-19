@@ -24,7 +24,6 @@ struct UserTaskInfoView: View {
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
                 Capsule()
@@ -329,6 +328,7 @@ struct UserTaskInfoView: View {
                 .scrollIndicators(.hidden)
             }
             .foregroundStyle(.white)
+            .presentationBackground(.ultraThickMaterial.opacity(0.5))
             // Shiny Border Overlay
             .overlay {
                 RoundedRectangle(cornerRadius: 40)

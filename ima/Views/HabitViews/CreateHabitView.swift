@@ -18,8 +18,6 @@ struct CreateHabitView: View {
     
     var body: some View {
         ZStack {
-            Color(.black).ignoresSafeArea()
-            
             VStack(spacing: 0) {
                 // MARK: - Swipe Pill
                 Capsule()
@@ -136,24 +134,25 @@ struct CreateHabitView: View {
             }
             .foregroundStyle(.white)
             .overlay {
-                RoundedRectangle(cornerRadius: 40) // Matches standard iOS sheet corners
+                RoundedRectangle(cornerRadius: 40)
                     .stroke(
                         LinearGradient(
                             stops: [
-                                .init(color: .white.opacity(0.2), location: 0.0), // Shiny top
-                                .init(color: .white.opacity(0.05), location: 0.2), // Fades quickly
-                                .init(color: .clear, location: 0.5) // Invisible at bottom
+                                .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
+                                .init(color: .white.opacity(0.05), location: 0.2),
+                                .init(color: .clear, location: 0.5)
                             ],
                             startPoint: .top,
                             endPoint: .bottom
                         ),
-                        lineWidth: 1.5
+                        lineWidth: 3 // Thicker line catches more "light"
                     )
-                    .ignoresSafeArea() // Ensures the stroke follows the sheet edge completely
-                    .allowsHitTesting(false) // Ensures you can still touch buttons underneath
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
             }
         }
         // MARK: - Sheet Configuration
+        .presentationBackground(.ultraThickMaterial.opacity(0.5))
         .presentationDetents([.medium]) // Locks sheet to half height
         .presentationDragIndicator(.hidden)
     }

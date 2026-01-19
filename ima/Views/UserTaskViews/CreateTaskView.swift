@@ -29,9 +29,7 @@ struct CreateTaskView: View {
     @FocusState private var isTitleFocused: Bool
 
     var body: some View {
-        ZStack {
-            Color(.black).ignoresSafeArea()
-            
+        ZStack {            
             VStack(spacing: 0) {
                 Capsule()
                     .fill(Color.white.opacity(0.5))
@@ -325,6 +323,7 @@ struct CreateTaskView: View {
                     .padding(.bottom, 50)
                 }
             }
+            .presentationBackground(.ultraThickMaterial.opacity(0.5))
             .foregroundStyle(.white)
             .overlay {
                 RoundedRectangle(cornerRadius: 40)

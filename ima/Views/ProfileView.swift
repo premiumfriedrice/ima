@@ -26,16 +26,13 @@ struct ProfileView: View {
     }
     
     private var strongestHabits: [Habit] {
-        // Sorting by current count descending (High -> Low)
         let sorted = habits.sorted { $0.currentCount > $1.currentCount }
-        return Array(sorted.prefix(3)) // Top 3
+        return Array(sorted.prefix(3))
     }
     
     private var weakestHabits: [Habit] {
-        // Sorting by current count ascending (Low -> High)
-        // Filter out brand new habits (0 count) if you want, or keep them to show what needs work
         let sorted = habits.sorted { $0.currentCount < $1.currentCount }
-        return Array(sorted.prefix(3)) // Bottom 3
+        return Array(sorted.prefix(3))
     }
     
     var body: some View {
@@ -44,125 +41,101 @@ struct ProfileView: View {
             Color.black.ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 32) { // Increased spacing to match InfoView rhythm
                     
-                    // MARK: - Header
+                    // MARK: - Top Nav
                     HStack {
-                        // Settings Gear (Left or Right based on pref, usually Right)
                         Button {
                             showSettings = true
                         } label: {
                             Image(systemName: "gearshape.fill")
-                                .font(.system(size: 20, weight: .bold))
+                                .font(.system(size: 16))
                                 .foregroundStyle(.white.opacity(0.6))
-                                .padding(12)
+                                .padding(10)
                                 .background(.white.opacity(0.1))
                                 .clipShape(Circle())
                         }
                         
                         Spacer()
-                        
-                        Text("Profile")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .opacity(0.0) // Invisible spacer text to balance if needed, or remove
-                        
-                        Spacer()
-                        
-                        // Close Button
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.6))
-                                .padding(12)
-                                .background(.white.opacity(0.1))
-                                .clipShape(Circle())
-                        }
                     }
                     .padding(.top, 20)
                     
-                    // MARK: - Profile Card (User Loved This)
-                    HStack(spacing: 16) {
+                    // MARK: - Profile Hero
+                    VStack(spacing: 20) {
+                        // Avatar
                         ZStack {
                             Circle()
                                 .fill(LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .frame(width: 70, height: 70)
+                                .frame(width: 80, height: 80)
                                 .shadow(color: .blue.opacity(0.5), radius: 10, x: 0, y: 5)
                             
-                            Text("LM") // Initials
-                                .font(.system(size: 24, weight: .black, design: .rounded))
+                            Text("LA") // Initials
+                                .font(.title)
+                                .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                         }
                         
-                        VStack(alignment: .leading, spacing: 6) {
+                        // Text Info
+                        VStack(spacing: 8) {
                             Text("Lloyd Alba")
-                                .font(.system(.title2, design: .rounded))
-                                .fontWeight(.black)
+                                .font(.title2) // Matches Hero Title in InfoViews
                                 .foregroundStyle(.white)
                             
                             Text("CS Student • Texas A&M")
-                                .font(.system(.subheadline, design: .rounded))
-                                .fontWeight(.bold)
-                                .textCase(.uppercase)
+                                .font(.subheadline)
                                 .foregroundStyle(.white.opacity(0.5))
                         }
-                        
-                        Spacer()
-                    }
-                    .padding(24)
-                    .background {
-                        RoundedRectangle(cornerRadius: 32)
-                            .fill(.ultraThinMaterial.opacity(0.1))
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 32)
-                            .stroke(.white.opacity(0.1), lineWidth: 1)
                     }
                     
-                    // MARK: - Main Stat: Total Tasks (The "Trophy Count")
-                    HStack {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("TASKS COMPLETED")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.5))
-                                .kerning(1)
-                            
-                            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                Text("\(totalTasksCompleted)")
-                                    .font(.system(size: 48, weight: .black, design: .rounded))
-                                    .foregroundStyle(.white)
-                                
-                                Text("total")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white.opacity(0.3))
-                            }
-                        }
-                        Spacer()
+                    // MARK: - Main Stat (Tasks)
+                    VStack(alignment: .leading, spacing: 10) {
+                        // Section Header Style
+                        Text("LIFETIME STATS")
+                            .font(.caption2)
+                            .textCase(.uppercase)
+                            .kerning(1.0)
+                            .opacity(0.5)
+                            .foregroundStyle(.white)
                         
-                        // Icon Decoration
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 40))
-                            .foregroundStyle(LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom))
-                            .shadow(color: .orange.opacity(0.5), radius: 10)
-                    }
-                    .padding(24)
-                    .background {
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(.ultraThinMaterial.opacity(0.1))
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 24)
-                            .stroke(.white.opacity(0.1), lineWidth: 1)
+                        HStack {
+                            VStack(alignment: .leading, spacing: 0) {
+                                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                    Text("\(totalTasksCompleted)")
+                                        .font(.system(size: 42, weight: .regular)) // Cleaner number font
+                                        .foregroundStyle(.white)
+                                    
+                                    Text("tasks")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.white.opacity(0.5))
+                                }
+                                
+                                Text("Total completed")
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.4))
+                            }
+                            Spacer()
+                            
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 32))
+                                .foregroundStyle(LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom))
+                                .shadow(color: .orange.opacity(0.3), radius: 8)
+                        }
+                        .padding(20)
+                        .background(.white.opacity(0.05)) // Matches InfoView container style
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
                     
                     // MARK: - Strongest Habits
                     if !strongestHabits.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            SectionHeader(title: "Strongest Habits", icon: "crown.fill", color: .yellow)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("STRONGEST HABITS")
+                                .font(.caption2)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
                             
-                            VStack(spacing: 12) {
+                            VStack(spacing: 8) {
                                 ForEach(strongestHabits) { habit in
                                     StatRow(habit: habit, type: .strong)
                                 }
@@ -172,10 +145,15 @@ struct ProfileView: View {
                     
                     // MARK: - Weakest Habits
                     if !weakestHabits.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            SectionHeader(title: "Needs Improvement", icon: "exclamationmark.triangle.fill", color: .red)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("NEEDS IMPROVEMENT")
+                                .font(.caption2)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
                             
-                            VStack(spacing: 12) {
+                            VStack(spacing: 8) {
                                 ForEach(weakestHabits) { habit in
                                     StatRow(habit: habit, type: .weak)
                                 }
@@ -183,13 +161,12 @@ struct ProfileView: View {
                         }
                     }
                     
-                    // Bottom Padding
                     Color.clear.frame(height: 50)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 25) // Matches padding in InfoViews
             }
+            .scrollIndicators(.hidden)
         }
-        // Present Settings Sheet
         .sheet(isPresented: $showSettings) {
             SettingsView()
                 .presentationDetents([.medium])
@@ -218,49 +195,35 @@ struct StatRow: View {
     
     var body: some View {
         HStack {
-            // Rank Indicator
+            // Simple Dot Indicator
             Circle()
-                .fill(type.color.opacity(0.2))
-                .frame(width: 40, height: 40)
-                .overlay {
-                    Image(systemName: type == .strong ? "arrow.up" : "arrow.down")
-                        .font(.system(size: 14, weight: .black))
-                        .foregroundStyle(type.color)
-                }
+                .fill(type.color.opacity(0.8))
+                .frame(width: 8, height: 8)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(habit.title)
-                    .font(.system(.body, design: .rounded))
-                    .fontWeight(.bold)
+                    .font(.subheadline) // Matches subtask text style
                     .foregroundStyle(.white)
                 
                 Text("\(habit.currentCount) completions")
-                    .font(.system(.caption, design: .rounded))
-                    .fontWeight(.medium)
+                    .font(.caption)
                     .foregroundStyle(.white.opacity(0.5))
             }
             
             Spacer()
             
-            // Percentage or Score (Simplified visual)
-            Capsule()
-                .fill(type.color.opacity(0.1))
-                .frame(width: 60, height: 24)
-                .overlay {
-                    Text(type == .strong ? "TOP" : "LOW")
-                        .font(.system(size: 10, weight: .black))
-                        .foregroundStyle(type.color)
-                }
+            // Minimal Badge
+            Text(type == .strong ? "TOP" : "LOW")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(type.color)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(type.color.opacity(0.1))
+                .clipShape(Capsule())
         }
         .padding(16)
-        .background {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial.opacity(0.1))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(.white.opacity(0.05), lineWidth: 1)
-        }
+        .background(.white.opacity(0.05)) // Matches subtask container
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 

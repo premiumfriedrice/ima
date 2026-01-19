@@ -72,18 +72,22 @@ struct HomeView: View {
     
     var body: some View {
         VStack {
+            
+            Text("What Can I do today?")
+                .foregroundStyle(.white)
+                .font(.title)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 25)
+                .padding(.bottom, 10)
+                .zIndex(1) // Ensures it sits on top
+            
             ZStack(alignment: .bottom) {
                 // MARK: - Main Content Area
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 4) {
-                        // Header Date
-                        Text(Date().formatted(.dateTime.year().month().day()))
-                            .font(.system(size: 32, /*weight: .bold,*/ design: .rounded))
-//                            .fontWeight(.bold)
-                            .foregroundStyle(.white)
+                    VStack(alignment: .leading, spacing: 5) {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
+                    .padding(.leading, 25)
                     
                     // Empty State Check
                     if mustDoHabits.isEmpty && mustDoTasks.isEmpty &&
@@ -100,7 +104,7 @@ struct HomeView: View {
                         
                     } else {
                         // MARK: - Pinned Sections
-                        LazyVStack(spacing: 12, /*pinnedViews: [.sectionHeaders]*/) {
+                        LazyVStack(spacing: 10) {
                             
                             // Keep spacer for top safe area if needed
                             Color.clear.frame(height: 0)
@@ -191,7 +195,7 @@ struct HomeView: View {
                                         }
                                     }
                                 }
-                                .padding(.top, 10)
+//                                .padding(.top, 10)
                             }
                             
                             Color.clear

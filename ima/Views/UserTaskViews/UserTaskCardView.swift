@@ -40,7 +40,7 @@ struct UserTaskCardView: View {
                     .font(.body)
                     .foregroundStyle(.white)
                     .strikethrough(task.isCompleted, color: .gray)
-                    .opacity(task.isCompleted ? 0.6 : 1.0)
+                    .opacity(task.isCompleted ? 0.4 : 1.0)
                     .lineLimit(1)
                 
                 // Subtitle Row: Priority • Due Date
@@ -73,7 +73,7 @@ struct UserTaskCardView: View {
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.6))
                     }
-                    .frame(width: 40, height: 40) // Matches Habit Button
+                    .frame(width: 45, height: 45) // Matches Habit Button
                     
                 } else {
                     // CASE B: Checkmark Button
@@ -89,7 +89,7 @@ struct UserTaskCardView: View {
                                     .stroke(task.isCompleted ? .clear : .white.opacity(0.3), lineWidth: 1.5)
                             )
                     }
-                    .frame(width: 40, height: 40) // Hit target matches Habit Button
+                    .frame(width: 45, height: 45) // Hit target matches Habit Button
                     .accessibilityIdentifier("CompleteTaskButton")
                 }
             }
@@ -100,20 +100,28 @@ struct UserTaskCardView: View {
         // MARK: - Card Styling
         .background {
             RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial.opacity(0.1))
+                .fill(.ultraThinMaterial.opacity(0.5))
         }
         .overlay {
             RoundedRectangle(cornerRadius: 24)
                 .stroke(
-                    .white.opacity(0.15),
-                    lineWidth: 1
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
+                            .init(color: .white.opacity(0.05), location: 0.2),
+                            .init(color: .clear, location: 0.5)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 1.5 // Thicker line catches more "light"
                 )
         }
-        .opacity(task.isCompleted ? 0.5 : 1.0)
+        .opacity(task.isCompleted ? 0.3 : 1.0)
         .scaleEffect(task.isCompleted ? 0.98 : 1.0)
         .shadow(
-            color: .white.opacity(task.isCompleted ? 0.0 : 0.15),
-            radius: task.isCompleted ? 0 : 10,
+            color: .white.opacity(task.isCompleted ? 0.0 : 0.1),
+            radius: task.isCompleted ? 0 : 5,
             x: 0, y: 0
         )
         .padding(.horizontal, 20)

@@ -33,10 +33,16 @@ struct NavFooterView: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            // MARK: - The Tab Buttons
+            // MARK: - 1. The Top Line (Edge to Edge)
+            // Matches card overlay color (.white.opacity(0.15))
+            Rectangle()
+                .fill(.white.opacity(0.15))
+                .frame(height: 1)
+            
+            // MARK: - 2. The Tab Buttons
             HStack(spacing: 0) {
                 
-                // --- 1. Home Tab ---
+                // --- Home ---
                 TabButton(
                     isActive: selectedTab == .home,
                     action: { selectedTab = .home }
@@ -45,7 +51,7 @@ struct NavFooterView: View {
                         .font(.title2)
                 }
                 
-                // --- 2. Habits Tab (Dots + Inner Ring) ---
+                // --- Habits ---
                 TabButton(
                     isActive: selectedTab == .habits,
                     action: {
@@ -59,7 +65,7 @@ struct NavFooterView: View {
                     DottedRingTabIcon(isActive: selectedTab == .habits)
                 }
                 
-                // --- 3. Tasks Tab (Ring + Checkmark/Plus) ---
+                // --- Tasks ---
                 TabButton(
                     isActive: selectedTab == .usertasks,
                     action: {
@@ -73,33 +79,27 @@ struct NavFooterView: View {
                     TaskRingTabIcon(isActive: selectedTab == .usertasks)
                 }
                 
+                // --- Profile ---
                 TabButton(
                     isActive: selectedTab == .profile,
-                    action: {
-                        selectedTab = .profile
-                    }
+                    action: { selectedTab = .profile }
                 ) {
                     Image(systemName: "person.fill")
                         .font(.title)
                 }
             }
-            .padding(.top, 20)
-            .frame(height: 80) // Height of the touch area
-            .padding(.horizontal, 24)
-            
-            // Bottom spacer for safe area
-            Color.clear.frame(height: 0)
+            .frame(height: 40) // Compact height for the buttons
+            .padding(.top, 10)  // Slight breathing room below the line
         }
-        .background(alignment: .top) {
-            LinearGradient(
-                stops: [
-                    .init(color: Color(.black), location: 0.7),
-                    .init(color: Color(.black).opacity(0), location: 1.0)
-                ],
-                startPoint: .bottom,
-                endPoint: .top
-            )
-            .ignoresSafeArea()
+        // MARK: - 3. Edge-to-Edge Background
+        .background {
+            ZStack {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                
+                Color.black
+            }
+            .ignoresSafeArea() // Extends behind the Home Indicator
         }
     }
 }

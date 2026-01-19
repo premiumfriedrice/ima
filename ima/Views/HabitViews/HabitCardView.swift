@@ -37,35 +37,44 @@ struct HabitCardView: View {
                 Button(action: { incrementHabit() }) {
                     Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
                         .font(.caption)
-                        .foregroundColor(habit.isFullyDone ? habit.statusColor : .white)
+                        .foregroundColor(habit.isFullyDone ? .clear : .white)
                         .frame(width: 28, height: 28) // Fixed button size for small card
-//                        .background(.clear)
+                        .background(habit.isFullyDone ? habit.statusColor : .white.opacity(0.1))
                         .clipShape(Circle())
+                        .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
                 }
             }
-            .frame(width: 40, height: 40) // The reference size
+            .frame(width: 45, height: 45) // The reference size
             
         }
         .padding(15)
         .background {
             RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial.opacity(0.1))
+                .fill(.ultraThinMaterial.opacity(0.5))
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(
-                    .white.opacity(0.15),
-                    lineWidth: 1
-                )
-        }
+                RoundedRectangle(cornerRadius: 24)
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
+                                .init(color: .white.opacity(0.05), location: 0.2),
+                                .init(color: .clear, location: 0.5)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1.5 // Thicker line catches more "light"
+                    )
+            }
         // Visual feedback based on completion state
-        .opacity(habit.isFullyDone ? 0.5 : 1.0)
+        .opacity(habit.isFullyDone ? 0.3 : 1.0)
         .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
         // MARK: New Highlight Effect
         // Add a soft white glow when NOT completed
         .shadow(
-            color: .white.opacity(habit.isFullyDone ? 0.0 : 0.15),
-            radius: habit.isFullyDone ? 0 : 10,
+            color: .white.opacity(habit.isFullyDone ? 0.0 : 0.1),
+            radius: habit.isFullyDone ? 0 : 5,
             x: 0, y: 0
         )
         .padding(.horizontal, 20)

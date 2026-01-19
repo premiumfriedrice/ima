@@ -27,7 +27,15 @@ struct HabitGroupView: View {
     }()
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            Text("Habits")
+                .foregroundStyle(.white)
+                .font(.title)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 25)
+                .padding(.bottom, 10)
+                .zIndex(1) // Ensures it sits on top
+            
             ZStack(alignment: .bottom) {
                 // MARK: - Main Content Area
                 ScrollView {
@@ -54,11 +62,7 @@ struct HabitGroupView: View {
                         .foregroundStyle(.white)
                     }
                     else {
-                        LazyVStack(spacing: 10) {
-                            
-                            // Keep your spacer for top safe area/nav bar
-                            Color.clear.frame(height: 0)
-                            
+                        LazyVStack(alignment: .leading, spacing: 10) {
                             // MARK: - Daily Section
                             if !dailyHabits.isEmpty {
                                 Section(header: SectionHeader(

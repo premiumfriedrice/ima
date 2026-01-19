@@ -17,11 +17,11 @@ struct SectionHeader: View {
     var body: some View {
         HStack(spacing: 5) {
             Image(systemName: icon)
-                .font(.headline)
+                .font(.subheadline)
                 .foregroundStyle(color)
             
             Text(title)
-                .font(.headline)
+                .font(.subheadline)
                 .foregroundStyle(.primary)
                 .textCase(.uppercase)
             

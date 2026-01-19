@@ -19,50 +19,58 @@ struct SettingsView: View {
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 24) {
+                // Header
                 Text("Settings")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(.title2) // Standard system font
+                    .fontWeight(.bold)
                     .foregroundStyle(.white)
                     .padding(.top, 30)
                 
-                VStack(spacing: 16) {
-                    
-                    // General
-                    VStack(alignment: .leading, spacing: 16) {
-                        SectionHeader(title: "General", icon: "gear", color: .gray)
-                        
-                        VStack(spacing: 1) {
-                            SettingsRow(icon: "iphone", title: "Lock Rotation", color: .blue) {
-                                Toggle("", isOn: $lockRotation)
-                                    .tint(.blue)
-                            }
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // MARK: - Support & Legal Section (NEW)
+                        VStack(alignment: .leading, spacing: 10) {
+                            SectionHeader(title: "Support & Legal", icon: "doc.text.fill", color: .purple)
                             
-                            Divider().background(.white.opacity(0.1)).padding(.leading, 50)
-                            
-                            SettingsRow(icon: "hand.tap.fill", title: "Haptic Feedback", color: .green) {
-                                Toggle("", isOn: $hapticsEnabled)
-                                    .tint(.green)
+                            VStack(spacing: 1) {
+                                // 1. Contact Us
+                                Link(destination: URL(string: "mailto:support@ima.app")!) {
+                                    SettingsRow(icon: "envelope.fill", title: "Contact Us", color: .pink) {
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundStyle(.white.opacity(0.3))
+                                    }
+                                }
+                                
+                                Divider().background(.white.opacity(0.1)).padding(.leading, 50)
+                                
+                                // 2. Privacy Policy
+                                Link(destination: URL(string: "https://www.google.com")!) {
+                                    SettingsRow(icon: "hand.raised.fill", title: "Privacy Policy", color: .blue) {
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundStyle(.white.opacity(0.3))
+                                    }
+                                }
+                                
+                                Divider().background(.white.opacity(0.1)).padding(.leading, 50)
+                                
+                                // 3. Terms & Conditions
+                                // Replace string with your actual URL
+                                Link(destination: URL(string: "https://www.google.com")!) {
+                                    SettingsRow(icon: "doc.text.fill", title: "Terms & Conditions", color: .yellow) {
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundStyle(.white.opacity(0.3))
+                                    }
+                                }
                             }
+                            .background(Color.white.opacity(0.05))
+                            .clipShape(RoundedRectangle(cornerRadius: 24))
                         }
-                        .background(Color.white.opacity(0.05))
-                        .clipShape(RoundedRectangle(cornerRadius: 24))
                     }
-                    
-                    // Data
-                    VStack(alignment: .leading, spacing: 16) {
-                        SectionHeader(title: "Data", icon: "externaldrive.fill", color: .orange)
-                        
-                        VStack(spacing: 1) {
-                            SettingsRow(icon: "icloud.fill", title: "iCloud Sync", color: .cyan) {
-                                Text("On")
-                                    .font(.system(.subheadline, design: .rounded))
-                                    .foregroundStyle(.white.opacity(0.5))
-                            }
-                        }
-                        .background(Color.white.opacity(0.05))
-                        .clipShape(RoundedRectangle(cornerRadius: 24))
-                    }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 20)
                 
                 Spacer()
                 
@@ -75,7 +83,8 @@ struct SettingsView: View {
     }
 }
 
-// Reuse helper for consistency
+// MARK: - Helper Views
+
 struct SettingsRow<Content: View>: View {
     let icon: String
     let title: String
@@ -85,7 +94,7 @@ struct SettingsRow<Content: View>: View {
     var body: some View {
         HStack(spacing: 16) {
             ZStack {
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(color.opacity(0.2))
                     .frame(width: 32, height: 32)
                 
@@ -95,7 +104,7 @@ struct SettingsRow<Content: View>: View {
             }
             
             Text(title)
-                .font(.system(.body, design: .rounded))
+                .font(.body) // System font
                 .fontWeight(.medium)
                 .foregroundStyle(.white)
             
@@ -104,5 +113,6 @@ struct SettingsRow<Content: View>: View {
             content()
         }
         .padding(16)
+        .contentShape(Rectangle()) // Ensures the whole row is tappable inside the Link
     }
 }

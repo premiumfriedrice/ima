@@ -16,9 +16,13 @@ struct HabitInfoView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingResetConfirmation = false
     @State private var isEditing = false
-    
-    // 1. Add state to control the sheet size
     @State private var currentDetent: PresentationDetent = .medium
+    
+    // Grid layout for statistics
+    private let statColumns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
     
     var body: some View {
         ZStack {
@@ -36,10 +40,7 @@ struct HabitInfoView: View {
                     Button {
                         withAnimation(.snappy) {
                             isEditing.toggle()
-                            // If we are entering edit mode, force the sheet to expand
-                            if isEditing {
-                                currentDetent = .large
-                            }
+                            if isEditing { currentDetent = .large }
                         }
                     } label: {
                         Image(systemName: isEditing ? "checkmark" : "square.and.pencil")
@@ -49,14 +50,8 @@ struct HabitInfoView: View {
                             .background(
                                 ZStack {
                                     if isEditing {
-                                        // Gradient when active
-                                        LinearGradient(
-                                            colors: [Color.blue, Color.purple],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
+                                        LinearGradient(colors: [Color.blue, Color.purple], startPoint: .topLeading, endPoint: .bottomTrailing)
                                     } else {
-                                        // Subtle gray background when disabled
                                         Color.white.opacity(0.1)
                                     }
                                 }
@@ -88,7 +83,6 @@ struct HabitInfoView: View {
                 }
                 .padding(.horizontal, 20)
                 
-                // 2. Wrap ScrollView in ScrollViewReader to enable scrolling
                 ScrollViewReader { proxy in
                     ScrollView {
                         VStack(spacing: 32) {
@@ -108,7 +102,7 @@ struct HabitInfoView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 25)
                             
-                            // MARK: - Today's Progress (Responsive)
+                            // MARK: - Today's Progress
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("TODAY'S PROGRESS")
                                     .font(.caption2)
@@ -118,7 +112,6 @@ struct HabitInfoView: View {
                                     .foregroundStyle(.white)
                                 
                                 HStack(spacing: 20) {
-                                    // 1. Decrement Button
                                     Button { decrementProgress() } label: {
                                         Image(systemName: "minus")
                                             .font(.callout)
@@ -130,11 +123,8 @@ struct HabitInfoView: View {
                                     .padding(.bottom, 25)
                                     
                                     GeometryReader { geo in
-                                        let size = min(geo.size.width, geo.size.height)
-                                        
                                         ProgressRingWithDots(habit: habit, fillFactor: 0.9) {
                                             VStack(spacing: 0) {
-                                                // Scale font relative to the size to keep proportions
                                                 Text("\(habit.currentCount)")
                                                     .font(.largeTitle)
                                                     .bold()
@@ -149,7 +139,6 @@ struct HabitInfoView: View {
                                     }
                                     .frame(height: 250)
                                     
-                                    // 3. Increment Button
                                     Button { incrementProgress() } label: {
                                         Image(systemName: "plus")
                                             .font(.callout)
@@ -167,6 +156,35 @@ struct HabitInfoView: View {
                             // MARK: - History Heatmap
                             HistoryHeatmap(habit: habit)
                             
+                            // MARK: - Statistics Section
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("STATISTICS")
+                                    .font(.caption2)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+                                
+                                LazyVGrid(columns: statColumns, spacing: 15) {
+                                    // 1. Average Completion Rate
+                                    StatCard(
+                                        title: "Avg. Completion",
+                                        value: completionRateString,
+                                        icon: "chart.bar.fill",
+                                        color: .blue
+                                    )
+                                    
+                                    // 2. Perfect Days/Weeks/Months
+                                    StatCard(
+                                        title: perfectCountLabel,
+                                        value: "\(perfectCount)",
+                                        icon: "star.fill",
+                                        color: .yellow
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 25)
+                            
                             // MARK: - Adjust Goal
                             if isEditing {
                                 VStack(alignment: .leading, spacing: 0) {
@@ -178,11 +196,10 @@ struct HabitInfoView: View {
                                         .foregroundStyle(.white)
                                     
                                     HStack(spacing: 0) {
-                                        // Rolling Count
                                         Picker("Count", selection: $habit.frequencyCount) {
                                             ForEach(1...50, id: \.self) { number in
                                                 Text("\(number)")
-                                                    .font(.system(size: 28, /*weight: .bold,*/ design: .rounded))
+                                                    .font(.system(size: 28, design: .rounded))
                                                     .foregroundStyle(.white)
                                                     .tag(number)
                                             }
@@ -192,15 +209,14 @@ struct HabitInfoView: View {
                                         .compositingGroup()
                                         
                                         Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                            .font(.system(size: 28, /*weight: .bold,*/ design: .rounded))
+                                            .font(.system(size: 28, design: .rounded))
                                             .foregroundStyle(.white.opacity(0.4))
                                             .padding(.horizontal, 8)
                                         
-                                        // Rolling Frequency
                                         Picker("Frequency", selection: $habit.frequencyUnitRaw) {
                                             ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                                 Text(unit.rawValue.capitalized)
-                                                    .font(.system(size: 28, /*weight: .bold,*/ design: .rounded))
+                                                    .font(.system(size: 28, design: .rounded))
                                                     .foregroundStyle(.white)
                                                     .tag(unit.rawValue)
                                             }
@@ -213,7 +229,6 @@ struct HabitInfoView: View {
                                 }
                                 .padding(.horizontal, 25)
                                 .transition(.move(edge: .top).combined(with: .opacity))
-                                // 3. Add an ID so we can scroll to it
                                 .id("AdjustGoalSection")
                             }
                             
@@ -229,10 +244,8 @@ struct HabitInfoView: View {
                         }
                         .padding(.top, 20)
                     }
-                    // 4. Watch for edit state changes to trigger scroll
                     .onChange(of: isEditing) { _, newValue in
                         if newValue {
-                            // Delay slightly to allow the sheet to expand to .large before scrolling
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                     proxy.scrollTo("AdjustGoalSection", anchor: .center)
@@ -250,27 +263,22 @@ struct HabitInfoView: View {
                 .stroke(
                     LinearGradient(
                         stops: [
-                            .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
+                            .init(color: .white.opacity(0.2), location: 0.0),
                             .init(color: .white.opacity(0.05), location: 0.2),
                             .init(color: .clear, location: 0.5)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     ),
-                    lineWidth: 3 // Thicker line catches more "light"
+                    lineWidth: 3
                 )
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
         }
-        // MARK: - Presentation Logic
-        // 5. Bind the detents to the state variable
         .presentationDetents([.medium, .large], selection: $currentDetent)
         .presentationDragIndicator(.hidden)
-//        .presentationBackground(.ultraThickMaterial.opacity(0.5))
         .presentationBackground(.black)
         .presentationCornerRadius(40)
-        
-        // MARK: - Alerts
         .confirmationDialog(
             "Are you sure you want to delete '\(habit.title)'?",
             isPresented: $showingDeleteConfirmation,
@@ -293,9 +301,7 @@ struct HabitInfoView: View {
             titleVisibility: .visible
         ) {
             Button("Reset Todays Progress", role: .destructive) {
-                withAnimation {
-                    habit.resetCurrentProgress()
-                }
+                withAnimation { habit.resetCurrentProgress() }
             }
             Button("Cancel") { }
         } message: {
@@ -303,7 +309,8 @@ struct HabitInfoView: View {
         }
     }
     
-    // MARK: - Logic
+    // MARK: - Logic & Actions
+    
     private func incrementProgress() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             habit.increment()
@@ -316,6 +323,130 @@ struct HabitInfoView: View {
             habit.decrement()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
+    }
+    
+    // MARK: - Computed Statistics
+    
+    private var perfectCountLabel: String {
+        switch habit.frequencyUnit {
+        case .daily: return "Perfect Days"
+        case .weekly: return "Perfect Weeks"
+        case .monthly: return "Perfect Months"
+        }
+    }
+    
+    private var perfectCount: Int {
+        let history = habit.completionHistory
+        let goal = habit.frequencyCount
+        
+        switch habit.frequencyUnit {
+        case .daily:
+            // Count days where value >= goal
+            return history.values.filter { $0 >= goal }.count
+            
+        case .weekly:
+            // Aggregate daily counts into weeks
+            var weeklySums: [String: Int] = [:] // Key: "Year-Week"
+            let calendar = Calendar.current
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            
+            for (dateStr, count) in history {
+                if let date = formatter.date(from: dateStr) {
+                    let year = calendar.component(.yearForWeekOfYear, from: date)
+                    let week = calendar.component(.weekOfYear, from: date)
+                    let key = "\(year)-\(week)"
+                    weeklySums[key, default: 0] += count
+                }
+            }
+            return weeklySums.values.filter { $0 >= goal }.count
+            
+        case .monthly:
+            // Aggregate daily counts into months
+            var monthlySums: [String: Int] = [:] // Key: "Year-Month"
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            
+            for (dateStr, count) in history {
+                if let date = formatter.date(from: dateStr) {
+                    let comps = Calendar.current.dateComponents([.year, .month], from: date)
+                    let key = "\(comps.year!)-\(comps.month!)"
+                    monthlySums[key, default: 0] += count
+                }
+            }
+            return monthlySums.values.filter { $0 >= goal }.count
+        }
+    }
+    
+    private var completionRateString: String {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        // Calculate total units elapsed since creation
+        var totalElapsedUnits: Int = 1
+        
+        switch habit.frequencyUnit {
+        case .daily:
+            // Days elapsed (minimum 1 to avoid division by zero)
+            if let days = calendar.dateComponents([.day], from: habit.dateCreated, to: now).day {
+                totalElapsedUnits = max(1, days + 1)
+            }
+        case .weekly:
+            // Weeks elapsed
+            if let weeks = calendar.dateComponents([.weekOfYear], from: habit.dateCreated, to: now).weekOfYear {
+                totalElapsedUnits = max(1, weeks + 1)
+            }
+        case .monthly:
+            // Months elapsed
+            if let months = calendar.dateComponents([.month], from: habit.dateCreated, to: now).month {
+                totalElapsedUnits = max(1, months + 1)
+            }
+        }
+        
+        let rate = Double(perfectCount) / Double(totalElapsedUnits)
+        let percentage = Int(rate * 100)
+        return "\(percentage)%"
+    }
+}
+
+// MARK: - Helper View for Statistics
+struct StatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                Image(systemName: icon)
+                    .font(.subheadline)
+                    .foregroundStyle(color.gradient)
+                    .padding(10)
+                    .background(color.opacity(0.2))
+                    .clipShape(Circle())
+                
+                Spacer()
+                
+                Text(value)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+            }
+            
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.6))
+                .textCase(.uppercase)
+                .fontWeight(.medium)
+        }
+        .padding(16)
+        .background(Color.white.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+        )
     }
 }
 

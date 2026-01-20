@@ -24,7 +24,7 @@ struct ContentView: View {
         ZStack(alignment: .bottom) {
             // 1. Background (Global)
             Color.clear.ignoresSafeArea()
-            AnimatedRadialBackground()
+//            AnimatedRadialBackground()
             
             // 2. Main Content (Swipeable)
             TabView(selection: $selectedTab) {

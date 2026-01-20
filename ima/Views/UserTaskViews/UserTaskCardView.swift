@@ -90,7 +90,7 @@ struct UserTaskCardView: View {
         .padding(15)
         .background {
             RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial.opacity(0.5))
+                .fill(.ultraThinMaterial.opacity(0.2))
         }
         .overlay {
             RoundedRectangle(cornerRadius: 24)
@@ -100,7 +100,7 @@ struct UserTaskCardView: View {
                 )
         }
         .opacity(task.isCompleted ? 0.3 : 1.0)
-        .scaleEffect(task.isCompleted ? 0.98 : 1.0)
+//        .scaleEffect(task.isCompleted ? 0.98 : 1.0)
         .shadow(
             color: .white.opacity(task.isCompleted ? 0.0 : 0.1),
             radius: task.isCompleted ? 0 : 5,

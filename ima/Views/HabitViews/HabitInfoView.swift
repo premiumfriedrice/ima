@@ -220,7 +220,7 @@ struct HabitInfoView: View {
                             Spacer()
                             
                             Text("Created " + habit.dateCreated.formatted(date: .abbreviated, time: .shortened))
-                                .font(.system(.caption, design: .rounded))
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
@@ -266,7 +266,8 @@ struct HabitInfoView: View {
         // 5. Bind the detents to the state variable
         .presentationDetents([.medium, .large], selection: $currentDetent)
         .presentationDragIndicator(.hidden)
-        .presentationBackground(.ultraThickMaterial.opacity(0.5))
+//        .presentationBackground(.ultraThickMaterial.opacity(0.5))
+        .presentationBackground(.black)
         .presentationCornerRadius(40)
         
         // MARK: - Alerts

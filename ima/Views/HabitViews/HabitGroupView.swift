@@ -16,6 +16,11 @@ struct HabitGroupView: View {
     // 1. Add state to track the active habit for the sheet
     @State private var selectedHabit: Habit?
     
+    // 2. State variables for collapsing sections
+    @State private var isDailyExpanded = true
+    @State private var isWeeklyExpanded = true
+    @State private var isMonthlyExpanded = true
+    
     // MARK: - Date Formatters
     private let dayFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -56,7 +61,7 @@ struct HabitGroupView: View {
                         .foregroundStyle(.white)
                     }
                     else {
-                        // CHANGE 1: Set spacing to 0 to prevent "early" header pushing & Pin Headers
+                        // Set spacing to 0 to prevent "early" header pushing & Pin Headers
                         LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                             
                             Color.clear.frame(height: 0)
@@ -68,12 +73,22 @@ struct HabitGroupView: View {
                                     subtitle: dayFormatter.string(from: Date()),
                                     icon: "sun.max.fill",
                                     color: .orange,
+                                    isExpanded: isDailyExpanded, // Pass state
                                     coordinateSpace: "habitScroll"
-                                )) {
-                                    ForEach(dailyHabits) { habit in
-                                        HabitCardView(habit: habit)
-                                            .onTapGesture { selectedHabit = habit }
-                                            .padding(.bottom, 10) // CHANGE 2: Add spacing manually to items
+                                )
+                                .contentShape(Rectangle()) // Make header tappable
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isDailyExpanded.toggle()
+                                    }
+                                }
+                                ) {
+                                    if isDailyExpanded {
+                                        ForEach(dailyHabits) { habit in
+                                            HabitCardView(habit: habit)
+                                                .onTapGesture { selectedHabit = habit }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
@@ -85,12 +100,22 @@ struct HabitGroupView: View {
                                     subtitle: currentWeekRange,
                                     icon: "calendar",
                                     color: .blue,
+                                    isExpanded: isWeeklyExpanded,
                                     coordinateSpace: "habitScroll"
-                                )) {
-                                    ForEach(weeklyHabits) { habit in
-                                        HabitCardView(habit: habit)
-                                            .onTapGesture { selectedHabit = habit }
-                                            .padding(.bottom, 10)
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isWeeklyExpanded.toggle()
+                                    }
+                                }
+                                ) {
+                                    if isWeeklyExpanded {
+                                        ForEach(weeklyHabits) { habit in
+                                            HabitCardView(habit: habit)
+                                                .onTapGesture { selectedHabit = habit }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
@@ -102,17 +127,27 @@ struct HabitGroupView: View {
                                     subtitle: monthFormatter.string(from: Date()),
                                     icon: "moon.stars.fill",
                                     color: .purple,
+                                    isExpanded: isMonthlyExpanded,
                                     coordinateSpace: "habitScroll"
-                                )) {
-                                    ForEach(monthlyHabits) { habit in
-                                        HabitCardView(habit: habit)
-                                            .onTapGesture { selectedHabit = habit }
-                                            .padding(.bottom, 10)
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isMonthlyExpanded.toggle()
+                                    }
+                                }
+                                ) {
+                                    if isMonthlyExpanded {
+                                        ForEach(monthlyHabits) { habit in
+                                            HabitCardView(habit: habit)
+                                                .onTapGesture { selectedHabit = habit }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
                         }
-                        .padding(.bottom, 160)
+                        .padding(.bottom, 200)
                     }
                 }
                 .scrollIndicators(.hidden)
@@ -137,7 +172,6 @@ struct HabitGroupView: View {
                 }
             }
         }
-        // 3. Attach the sheet to the parent view
         .sheet(item: $selectedHabit) { habit in
             HabitInfoView(habit: habit)
         }

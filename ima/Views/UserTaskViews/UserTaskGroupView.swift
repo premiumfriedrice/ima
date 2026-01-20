@@ -13,8 +13,14 @@ struct UserTaskGroupView: View {
     
     var userTasks: [UserTask]
     
-    // 1. Add state for the sheet
+    // State for the sheet
     @State private var selectedTask: UserTask?
+    
+    // 1. State variables for collapsing sections
+    @State private var isHighPriorityExpanded = true
+    @State private var isMediumPriorityExpanded = true
+    @State private var isLowPriorityExpanded = true
+    @State private var isCompletedExpanded = true // Set to false if you want it closed by default
     
     var body: some View {
         VStack(spacing: 0) {
@@ -43,80 +49,120 @@ struct UserTaskGroupView: View {
                         .opacity(0.5)
                         .foregroundStyle(.white)
                     } else {
-                        // CHANGE 1: Set spacing to 0 to prevent "early" header pushing
                         LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                             
                             Color.clear.frame(height: 0)
                             
-                            // High Priority
+                            // MARK: - High Priority
                             if !highPriorityTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "High Priority",
                                     subtitle: "\(highPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
                                     color: .red,
+                                    isExpanded: isHighPriorityExpanded, // Pass state
                                     coordinateSpace: "taskScroll"
-                                )) {
-                                    ForEach(highPriorityTasks) { task in
-                                        UserTaskCardView(task: task)
-                                            .onTapGesture { selectedTask = task }
-                                            .padding(.bottom, 10) // CHANGE 2: Add spacing manually to items
+                                )
+                                .contentShape(Rectangle()) // Makes entire header tappable
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isHighPriorityExpanded.toggle()
+                                    }
+                                }
+                                ) {
+                                    // Wrap content in if-check
+                                    if isHighPriorityExpanded {
+                                        ForEach(highPriorityTasks) { task in
+                                            UserTaskCardView(task: task)
+                                                .onTapGesture { selectedTask = task }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
                             
-                            // Medium Priority
+                            // MARK: - Medium Priority
                             if !mediumPriorityTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "Medium Priority",
                                     subtitle: "\(mediumPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
                                     color: .yellow,
+                                    isExpanded: isMediumPriorityExpanded,
                                     coordinateSpace: "taskScroll"
-                                )) {
-                                    ForEach(mediumPriorityTasks) { task in
-                                        UserTaskCardView(task: task)
-                                            .onTapGesture { selectedTask = task }
-                                            .padding(.bottom, 10) // CHANGE 2
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isMediumPriorityExpanded.toggle()
+                                    }
+                                }
+                                ) {
+                                    if isMediumPriorityExpanded {
+                                        ForEach(mediumPriorityTasks) { task in
+                                            UserTaskCardView(task: task)
+                                                .onTapGesture { selectedTask = task }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
                             
-                            // Low Priority
+                            // MARK: - Low Priority
                             if !lowPriorityTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "Low Priority",
                                     subtitle: "\(lowPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
                                     color: .gray,
+                                    isExpanded: isLowPriorityExpanded,
                                     coordinateSpace: "taskScroll"
-                                )) {
-                                    ForEach(lowPriorityTasks) { task in
-                                        UserTaskCardView(task: task)
-                                            .onTapGesture { selectedTask = task }
-                                            .padding(.bottom, 10) // CHANGE 2
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isLowPriorityExpanded.toggle()
+                                    }
+                                }
+                                ) {
+                                    if isLowPriorityExpanded {
+                                        ForEach(lowPriorityTasks) { task in
+                                            UserTaskCardView(task: task)
+                                                .onTapGesture { selectedTask = task }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
                             
-                            // Completed
+                            // MARK: - Completed
                             if !completedTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "Completed",
                                     subtitle: "\(completedTasks.count) DONE",
                                     icon: "checkmark.circle.fill",
                                     color: .green,
+                                    isExpanded: isCompletedExpanded,
                                     coordinateSpace: "taskScroll"
-                                )) {
-                                    ForEach(completedTasks) { task in
-                                        UserTaskCardView(task: task)
-                                            .onTapGesture { selectedTask = task }
-                                            .padding(.bottom, 10) // CHANGE 2
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isCompletedExpanded.toggle()
+                                    }
+                                }
+                                ) {
+                                    if isCompletedExpanded {
+                                        ForEach(completedTasks) { task in
+                                            UserTaskCardView(task: task)
+                                                .onTapGesture { selectedTask = task }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
                         }
-                        .padding(.bottom, 100)
+                        .padding(.bottom, 200)
                     }
                 }
                 .scrollIndicators(.hidden)

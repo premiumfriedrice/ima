@@ -15,12 +15,15 @@ struct HomeView: View {
     @Query(sort: \UserTask.dateCreated, order: .reverse) private var tasks: [UserTask]
     @Query private var habits: [Habit]
     
-    // MARK: - State for Sheets & UI
-    @State private var showCompleted: Bool = false
-    
+    // MARK: - State for Sheets
     // Lifted State: Track selection here so sheets survive list re-ordering
     @State private var selectedHabit: Habit?
     @State private var selectedTask: UserTask?
+    
+    // MARK: - State for Collapsible Sections
+    @State private var isMustDoExpanded = true
+    @State private var isCanDoExpanded = true
+    @State private var isCompletedExpanded = false // Default to collapsed for Completed
     
     // MARK: - Computed Filters
     
@@ -83,7 +86,7 @@ struct HomeView: View {
                         .padding(.top, 100)
                         
                     } else {
-                        // CHANGE 1: Spacing 0 and Pinned Headers
+                        // Spacing 0 and Pinned Headers
                         LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                             Color.clear.frame(height: 0)
                             
@@ -93,17 +96,27 @@ struct HomeView: View {
                                     title: "Must Do",
                                     icon: "flame.fill",
                                     color: .orange,
-                                    coordinateSpace: "homeScroll" // CHANGE 2: Sticky Fade Logic
-                                )) {
-                                    ForEach(mustDoHabits) { habit in
-                                        HabitCardView(habit: habit)
-                                            .onTapGesture { selectedHabit = habit }
-                                            .padding(.bottom, 10) // CHANGE 3: Item Spacing
+                                    isExpanded: isMustDoExpanded,
+                                    coordinateSpace: "homeScroll"
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isMustDoExpanded.toggle()
                                     }
-                                    ForEach(mustDoTasks) { task in
-                                        UserTaskCardView(task: task)
-                                            .onTapGesture { selectedTask = task }
-                                            .padding(.bottom, 10)
+                                }
+                                ) {
+                                    if isMustDoExpanded {
+                                        ForEach(mustDoHabits) { habit in
+                                            HabitCardView(habit: habit)
+                                                .onTapGesture { selectedHabit = habit }
+                                                .padding(.bottom, 10)
+                                        }
+                                        ForEach(mustDoTasks) { task in
+                                            UserTaskCardView(task: task)
+                                                .onTapGesture { selectedTask = task }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
@@ -114,65 +127,49 @@ struct HomeView: View {
                                     title: "Can Do",
                                     icon: "calendar.badge.clock",
                                     color: .blue,
+                                    isExpanded: isCanDoExpanded,
                                     coordinateSpace: "homeScroll"
-                                )) {
-                                    ForEach(canDoHabits) { habit in
-                                        HabitCardView(habit: habit)
-                                            .onTapGesture { selectedHabit = habit }
-                                            .padding(.bottom, 10)
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isCanDoExpanded.toggle()
                                     }
-                                    ForEach(canDoTasks) { task in
-                                        UserTaskCardView(task: task)
-                                            .onTapGesture { selectedTask = task }
-                                            .padding(.bottom, 10)
+                                }
+                                ) {
+                                    if isCanDoExpanded {
+                                        ForEach(canDoHabits) { habit in
+                                            HabitCardView(habit: habit)
+                                                .onTapGesture { selectedHabit = habit }
+                                                .padding(.bottom, 10)
+                                        }
+                                        ForEach(canDoTasks) { task in
+                                            UserTaskCardView(task: task)
+                                                .onTapGesture { selectedTask = task }
+                                                .padding(.bottom, 10)
+                                        }
                                     }
                                 }
                             }
                             
                             // MARK: - COMPLETED SECTION
                             if totalCompletedCount > 0 {
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Button(action: {
-                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                            showCompleted.toggle()
-                                        }
-                                    }) {
-                                        HStack(spacing: 5) {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .font(.headline)
-                                                .foregroundStyle(.green)
-                                            
-                                            Text("COMPLETED")
-                                                .font(.headline)
-                                                .foregroundStyle(.primary)
-                                            
-                                            Spacer()
-                                            
-                                            HStack(spacing: 0) {
-                                                Text("\(totalCompletedCount)")
-                                                    .font(.subheadline)
-                                                    .foregroundStyle(.white.opacity(0.3))
-                                                    .padding(.horizontal, 10)
-                                                    .padding(.vertical, 5)
-                                                
-                                                Image(systemName: "chevron.right")
-                                                    .font(.subheadline)
-                                                    .foregroundStyle(.white.opacity(0.5))
-                                                    .rotationEffect(.degrees(showCompleted ? 90 : 0))
-                                            }
-                                        }
-                                        .font(.system(.caption, design: .rounded))
-                                        .textCase(.uppercase)
-                                        .kerning(1.0)
-                                        .opacity(0.7)
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 25)
-                                        .contentShape(Rectangle())
+                                Section(header: SectionHeader(
+                                    title: "Completed",
+                                    subtitle: "\(totalCompletedCount) DONE",
+                                    icon: "checkmark.circle.fill",
+                                    color: .green,
+                                    isExpanded: isCompletedExpanded,
+                                    coordinateSpace: "homeScroll"
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        isCompletedExpanded.toggle()
                                     }
-                                    .buttonStyle(.plain)
-                                    .padding(.bottom, 10) // Spacing before list starts
-                                    
-                                    if showCompleted {
+                                }
+                                ) {
+                                    if isCompletedExpanded {
                                         ForEach(completedHabits) { habit in
                                             HabitCardView(habit: habit)
                                                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -189,17 +186,17 @@ struct HomeView: View {
                                 }
                             }
                             
-                            Color.clear.frame(height: 160).accessibilityHidden(true)
+                            Color.clear.frame(height: 200).accessibilityHidden(true)
                         }
                     }
                 }
                 .scrollIndicators(.hidden)
-                .coordinateSpace(name: "homeScroll") // CHANGE 4: Define Scroll Space
+                .coordinateSpace(name: "homeScroll")
                 
                 // MARK: - STICKY MAIN HEADER
                 .safeAreaInset(edge: .top, spacing: 0) {
                     VStack(spacing: 0) {
-                        Text("What Can I do today?")
+                        Text("What can I do today?")
                             .foregroundStyle(.white)
                             .font(.title)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -235,6 +232,10 @@ struct HomeView: View {
         let habit2 = Habit(title: "Cardio", frequencyCount: 3, frequencyUnit: .weekly)
         let task1 = UserTask(title: "Submit Report", priority: .high)
         let task2 = UserTask(title: "Clean motorcycle chain", priority: .low)
+        
+        // Mark one as done for the completed section
+        task2.isCompleted = true
+        
         context.insert(habit1)
         context.insert(habit2)
         context.insert(task1)

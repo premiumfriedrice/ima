@@ -14,7 +14,9 @@ struct SectionHeader: View {
     let icon: String
     let color: Color
     
-    // 1. Optional coordinate space to enable sticky background logic
+    // 1. Add optional property to control chevron
+    var isExpanded: Bool? = nil
+    
     var coordinateSpace: String? = nil
     
     var body: some View {
@@ -46,19 +48,30 @@ struct SectionHeader: View {
             .padding(.vertical, 5)
             .padding(.horizontal, 5)
 //            .background {
-//                Capsule() // The "Pill" Spotlight
+//                Capsule()
 //                    .fill(.ultraThickMaterial.opacity(0.5))
 //                    .blur(radius: 10)
 //            }
             Spacer()
+            
+            // 2. Add Chevron if isExpanded is provided
+            if let isExpanded {
+                Image(systemName: "chevron.right")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white.opacity(0.5))
+                    .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    // Helper to prevent hit testing issues if the row is small
+                    .contentShape(Rectangle())
+            }
         }
         .font(.system(.caption, design: .rounded))
         .textCase(.uppercase)
         .kerning(1.0)
         .foregroundStyle(.white)
         .padding(.leading, 15)
+        // Add padding trailing for the chevron
+        .padding(.trailing, 25)
         .padding(.vertical, 10)
-        // 2. Apply the sticky background helper if a coordinate space is provided
         .background {
             if let coordinateSpace {
                 StickyHeaderBackground(coordinateSpace: coordinateSpace)

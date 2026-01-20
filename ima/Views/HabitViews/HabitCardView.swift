@@ -40,7 +40,7 @@ struct HabitCardView: View {
                         .frame(width: 28, height: 28) // Fixed button size for small card
                         .background(habit.isFullyDone ? habit.statusColor : .white.opacity(0.1))
                         .clipShape(Circle())
-                        .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
+//                        .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
                 }
             }
             .frame(width: 45, height: 45)
@@ -49,7 +49,7 @@ struct HabitCardView: View {
         .padding(15)
         .background {
             RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial.opacity(0.5))
+                .fill(.ultraThinMaterial.opacity(0.2))
         }
         .overlay {
             RoundedRectangle(cornerRadius: 24)
@@ -60,7 +60,7 @@ struct HabitCardView: View {
             
         }
         .opacity(habit.isFullyDone ? 0.3 : 1.0)
-        .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
+//        .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
         .shadow(
             color: .white.opacity(habit.isFullyDone ? 0.0 : 0.1),
             radius: habit.isFullyDone ? 0 : 5,

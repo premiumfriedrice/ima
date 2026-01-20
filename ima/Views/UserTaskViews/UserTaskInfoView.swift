@@ -316,7 +316,7 @@ struct UserTaskInfoView: View {
                         
                         // MARK: - Footer Info
                         Text("Created " + userTask.dateCreated.formatted(date: .abbreviated, time: .shortened))
-                            .font(.system(.caption, design: .rounded))
+                            .font(.caption2)
                             .textCase(.uppercase)
                             .kerning(1.0)
                             .opacity(0.5)
@@ -329,7 +329,8 @@ struct UserTaskInfoView: View {
             }
             .foregroundStyle(.white)
             .presentationDragIndicator(.hidden)
-            .presentationBackground(.ultraThickMaterial.opacity(0.5))
+//            .presentationBackground(.ultraThickMaterial.opacity(0.5))
+            .presentationBackground(.black)
             .presentationCornerRadius(40)
             // Shiny Border Overlay
             .overlay {

@@ -18,20 +18,6 @@ struct UserTaskGroupView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            
-            // Sticky Header
-            if !userTasks.isEmpty {
-                Text("Tasks")
-                    .foregroundStyle(.white)
-                    .font(.title)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 25)
-                    .padding(.bottom, 10)
-                    .padding(.top, 10)
-                    .background(Color.black)
-                    .zIndex(1)
-            }
-            
             ZStack(alignment: .bottom) {
                 ScrollView {
                     if userTasks.isEmpty {
@@ -57,7 +43,8 @@ struct UserTaskGroupView: View {
                         .opacity(0.5)
                         .foregroundStyle(.white)
                     } else {
-                        LazyVStack(alignment: .leading, spacing: 10, pinnedViews: [.sectionHeaders]) {
+                        // CHANGE 1: Set spacing to 0 to prevent "early" header pushing
+                        LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                             
                             Color.clear.frame(height: 0)
                             
@@ -67,11 +54,13 @@ struct UserTaskGroupView: View {
                                     title: "High Priority",
                                     subtitle: "\(highPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
-                                    color: .red
-                                ).background(Color.black)) {
+                                    color: .red,
+                                    coordinateSpace: "taskScroll"
+                                )) {
                                     ForEach(highPriorityTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
+                                            .padding(.bottom, 10) // CHANGE 2: Add spacing manually to items
                                     }
                                 }
                             }
@@ -82,11 +71,13 @@ struct UserTaskGroupView: View {
                                     title: "Medium Priority",
                                     subtitle: "\(mediumPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
-                                    color: .yellow
-                                ).background(Color.black)) {
+                                    color: .yellow,
+                                    coordinateSpace: "taskScroll"
+                                )) {
                                     ForEach(mediumPriorityTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
+                                            .padding(.bottom, 10) // CHANGE 2
                                     }
                                 }
                             }
@@ -97,11 +88,13 @@ struct UserTaskGroupView: View {
                                     title: "Low Priority",
                                     subtitle: "\(lowPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
-                                    color: .gray
-                                ).background(Color.black)) {
+                                    color: .gray,
+                                    coordinateSpace: "taskScroll"
+                                )) {
                                     ForEach(lowPriorityTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
+                                            .padding(.bottom, 10) // CHANGE 2
                                     }
                                 }
                             }
@@ -112,11 +105,13 @@ struct UserTaskGroupView: View {
                                     title: "Completed",
                                     subtitle: "\(completedTasks.count) DONE",
                                     icon: "checkmark.circle.fill",
-                                    color: .green
-                                ).background(Color.black)) {
+                                    color: .green,
+                                    coordinateSpace: "taskScroll"
+                                )) {
                                     ForEach(completedTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
+                                            .padding(.bottom, 10) // CHANGE 2
                                     }
                                 }
                             }
@@ -125,9 +120,27 @@ struct UserTaskGroupView: View {
                     }
                 }
                 .scrollIndicators(.hidden)
+                .coordinateSpace(name: "taskScroll")
+                
+                // MARK: - STICKY HEADER
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    VStack(spacing: 0) {
+                        Text("Tasks")
+                            .foregroundStyle(.white)
+                            .font(.title)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                            .zIndex(1)
+                    }
+                    .background {
+                        ZStack {
+                            Color.black
+                        }
+                        .ignoresSafeArea(edges: .top)
+                    }
+                }
             }
         }
-        // 2. Attach Sheet to Parent View
         .sheet(item: $selectedTask) { task in
             UserTaskInfoView(userTask: task)
         }
@@ -160,7 +173,6 @@ struct UserTaskGroupView: View {
     
     ZStack {
         Color(.black).ignoresSafeArea()
-        // AnimatedRadialBackground() // Uncomment if available
         UserTaskGroupView(userTasks: tasks)
     }
 }

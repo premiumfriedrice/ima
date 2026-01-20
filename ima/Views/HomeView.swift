@@ -18,7 +18,7 @@ struct HomeView: View {
     // MARK: - State for Sheets & UI
     @State private var showCompleted: Bool = false
     
-    // 1. Lifted State: Track selection here so sheets survive list re-ordering
+    // Lifted State: Track selection here so sheets survive list re-ordering
     @State private var selectedHabit: Habit?
     @State private var selectedTask: UserTask?
     
@@ -67,22 +67,9 @@ struct HomeView: View {
     }
     
     var body: some View {
-        VStack {
-            Text("What Can I do today?")
-                .foregroundStyle(.white)
-                .font(.title)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 25)
-                .padding(.bottom, 10)
-                .zIndex(1)
-            
+        VStack(spacing: 0) {
             ZStack(alignment: .bottom) {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 5) {
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    
                     if mustDoHabits.isEmpty && mustDoTasks.isEmpty &&
                         canDoHabits.isEmpty && canDoTasks.isEmpty &&
                         totalCompletedCount == 0 {
@@ -93,10 +80,11 @@ struct HomeView: View {
                             description: Text("Create a task or habit to get started.")
                         )
                         .foregroundStyle(.white.opacity(0.5))
-                        .padding(.top, 50)
+                        .padding(.top, 100)
                         
                     } else {
-                        LazyVStack(spacing: 10) {
+                        // CHANGE 1: Spacing 0 and Pinned Headers
+                        LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                             Color.clear.frame(height: 0)
                             
                             // MARK: - MUST DO SECTION
@@ -104,15 +92,18 @@ struct HomeView: View {
                                 Section(header: SectionHeader(
                                     title: "Must Do",
                                     icon: "flame.fill",
-                                    color: .orange
+                                    color: .orange,
+                                    coordinateSpace: "homeScroll" // CHANGE 2: Sticky Fade Logic
                                 )) {
                                     ForEach(mustDoHabits) { habit in
                                         HabitCardView(habit: habit)
                                             .onTapGesture { selectedHabit = habit }
+                                            .padding(.bottom, 10) // CHANGE 3: Item Spacing
                                     }
                                     ForEach(mustDoTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
+                                            .padding(.bottom, 10)
                                     }
                                 }
                             }
@@ -122,15 +113,18 @@ struct HomeView: View {
                                 Section(header: SectionHeader(
                                     title: "Can Do",
                                     icon: "calendar.badge.clock",
-                                    color: .blue
+                                    color: .blue,
+                                    coordinateSpace: "homeScroll"
                                 )) {
                                     ForEach(canDoHabits) { habit in
                                         HabitCardView(habit: habit)
                                             .onTapGesture { selectedHabit = habit }
+                                            .padding(.bottom, 10)
                                     }
                                     ForEach(canDoTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
+                                            .padding(.bottom, 10)
                                     }
                                 }
                             }
@@ -176,17 +170,20 @@ struct HomeView: View {
                                         .contentShape(Rectangle())
                                     }
                                     .buttonStyle(.plain)
+                                    .padding(.bottom, 10) // Spacing before list starts
                                     
                                     if showCompleted {
                                         ForEach(completedHabits) { habit in
                                             HabitCardView(habit: habit)
                                                 .transition(.move(edge: .top).combined(with: .opacity))
                                                 .onTapGesture { selectedHabit = habit }
+                                                .padding(.bottom, 10)
                                         }
                                         ForEach(completedTasks) { task in
                                             UserTaskCardView(task: task)
                                                 .transition(.move(edge: .top).combined(with: .opacity))
                                                 .onTapGesture { selectedTask = task }
+                                                .padding(.bottom, 10)
                                         }
                                     }
                                 }
@@ -197,9 +194,28 @@ struct HomeView: View {
                     }
                 }
                 .scrollIndicators(.hidden)
+                .coordinateSpace(name: "homeScroll") // CHANGE 4: Define Scroll Space
+                
+                // MARK: - STICKY MAIN HEADER
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    VStack(spacing: 0) {
+                        Text("What Can I do today?")
+                            .foregroundStyle(.white)
+                            .font(.title)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                            .zIndex(1)
+                    }
+                    .background {
+                        ZStack {
+                            Color.black
+                        }
+                        .ignoresSafeArea(edges: .top)
+                    }
+                }
             }
         }
-        // 2. Attach Sheets to HomeView (Stable Parent)
+        // Attach Sheets to HomeView (Stable Parent)
         .sheet(item: $selectedHabit) { habit in
             HabitInfoView(habit: habit)
         }

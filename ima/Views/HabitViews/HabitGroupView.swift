@@ -30,108 +30,110 @@ struct HabitGroupView: View {
     }()
     
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            
-            ScrollView {
-                if habits.isEmpty {
-                    VStack(spacing: 10) {
-                        Image(systemName: "tray")
-                            .font(.system(size: 60))
-                            .foregroundStyle(.white.opacity(0.5))
-                        
-                        VStack {
-                            Text("No Habits Yet")
-                                .font(.system(.title2, design: .rounded))
+        VStack(spacing: 0) {
+            ZStack(alignment: .bottom) {
+                ScrollView {
+                    if habits.isEmpty {
+                        VStack(spacing: 10) {
+                            Image(systemName: "tray")
+                                .font(.system(size: 60))
+                                .foregroundStyle(.white.opacity(0.5))
                             
-                            Text("Tap the + button to create your first habit.")
-                                .font(.system(.body, design: .rounded))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 40)
-                        }
-                    }
-                    .padding(.top, 100)
-                    .font(.system(.caption, design: .rounded))
-                    .kerning(1.0)
-                    .opacity(0.5)
-                    .foregroundStyle(.white)
-                }
-                else {
-                    LazyVStack(alignment: .leading, spacing: 10) {
-                        
-                        // MARK: - Daily Section
-                        if !dailyHabits.isEmpty {
-                            Section(header: SectionHeader(
-                                title: "Daily",
-                                subtitle: dayFormatter.string(from: Date()),
-                                icon: "sun.max.fill",
-                                color: .orange
-                            )) {
-                                ForEach(dailyHabits) { habit in
-                                    HabitCardView(habit: habit)
-                                        // 2. Add tap gesture here
-                                        .onTapGesture {
-                                            selectedHabit = habit
-                                        }
-                                }
+                            VStack {
+                                Text("No Habits Yet")
+                                    .font(.system(.title2, design: .rounded))
+                                
+                                Text("Tap the + button to create your first habit.")
+                                    .font(.system(.body, design: .rounded))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 40)
                             }
                         }
-                        
-                        // MARK: - Weekly Section
-                        if !weeklyHabits.isEmpty {
-                            Section(header: SectionHeader(
-                                title: "Weekly",
-                                subtitle: currentWeekRange,
-                                icon: "calendar",
-                                color: .blue
-                            )) {
-                                ForEach(weeklyHabits) { habit in
-                                    HabitCardView(habit: habit)
-                                        .onTapGesture {
-                                            selectedHabit = habit
-                                        }
-                                }
-                            }
-                        }
-                        
-                        // MARK: - Monthly Section
-                        if !monthlyHabits.isEmpty {
-                            Section(header: SectionHeader(
-                                title: "Monthly",
-                                subtitle: monthFormatter.string(from: Date()),
-                                icon: "moon.stars.fill",
-                                color: .purple
-                            )) {
-                                ForEach(monthlyHabits) { habit in
-                                    HabitCardView(habit: habit)
-                                        .onTapGesture {
-                                            selectedHabit = habit
-                                        }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.bottom, 160)
-                }
-            }
-            .scrollIndicators(.hidden)
-            
-            // MARK: - STICKY HEADER
-            .safeAreaInset(edge: .top, spacing: 0) {
-                VStack(spacing: 0) {
-                    Text("Habits")
+                        .padding(.top, 100)
+                        .font(.system(.caption, design: .rounded))
+                        .kerning(1.0)
+                        .opacity(0.5)
                         .foregroundStyle(.white)
-                        .font(.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 25)
-                        .padding(.bottom, 25)
-                        .zIndex(1)
-                }
-                .background {
-                    ZStack {
-                        Color.black
                     }
-                    .ignoresSafeArea(edges: .top)
+                    else {
+                        // CHANGE 1: Set spacing to 0 to prevent "early" header pushing & Pin Headers
+                        LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                            
+                            Color.clear.frame(height: 0)
+                            
+                            // MARK: - Daily Section
+                            if !dailyHabits.isEmpty {
+                                Section(header: SectionHeader(
+                                    title: "Daily",
+                                    subtitle: dayFormatter.string(from: Date()),
+                                    icon: "sun.max.fill",
+                                    color: .orange,
+                                    coordinateSpace: "habitScroll"
+                                )) {
+                                    ForEach(dailyHabits) { habit in
+                                        HabitCardView(habit: habit)
+                                            .onTapGesture { selectedHabit = habit }
+                                            .padding(.bottom, 10) // CHANGE 2: Add spacing manually to items
+                                    }
+                                }
+                            }
+                            
+                            // MARK: - Weekly Section
+                            if !weeklyHabits.isEmpty {
+                                Section(header: SectionHeader(
+                                    title: "Weekly",
+                                    subtitle: currentWeekRange,
+                                    icon: "calendar",
+                                    color: .blue,
+                                    coordinateSpace: "habitScroll"
+                                )) {
+                                    ForEach(weeklyHabits) { habit in
+                                        HabitCardView(habit: habit)
+                                            .onTapGesture { selectedHabit = habit }
+                                            .padding(.bottom, 10)
+                                    }
+                                }
+                            }
+                            
+                            // MARK: - Monthly Section
+                            if !monthlyHabits.isEmpty {
+                                Section(header: SectionHeader(
+                                    title: "Monthly",
+                                    subtitle: monthFormatter.string(from: Date()),
+                                    icon: "moon.stars.fill",
+                                    color: .purple,
+                                    coordinateSpace: "habitScroll"
+                                )) {
+                                    ForEach(monthlyHabits) { habit in
+                                        HabitCardView(habit: habit)
+                                            .onTapGesture { selectedHabit = habit }
+                                            .padding(.bottom, 10)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.bottom, 160)
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .coordinateSpace(name: "habitScroll")
+                
+                // MARK: - STICKY HEADER
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    VStack(spacing: 0) {
+                        Text("Habits")
+                            .foregroundStyle(.white)
+                            .font(.title)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                            .zIndex(1)
+                    }
+                    .background {
+                        ZStack {
+                            Color.black
+                        }
+                        .ignoresSafeArea(edges: .top)
+                    }
                 }
             }
         }

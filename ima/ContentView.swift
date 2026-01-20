@@ -23,7 +23,7 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             // 1. Background (Global)
-            Color.black.ignoresSafeArea()
+            Color.clear.ignoresSafeArea()
             AnimatedRadialBackground()
             
             // 2. Main Content (Swipeable)
@@ -37,6 +37,7 @@ struct ContentView: View {
                 HabitGroupView(habits: habits)
                     .accessibilityIdentifier("HabitList")
                     .tag(AppTab.habits)
+                    // Added bottom inset for footer space
                     .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
                 
                 // Page 3: User Tasks
@@ -50,8 +51,8 @@ struct ContentView: View {
                     .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .ignoresSafeArea(edges: .bottom)
-            // REMOVED the .animation modifier here
+            // FIXED: Ignore ALL safe areas so pages go behind the Notch/Dynamic Island
+            .ignoresSafeArea()
             
             // 3. Footer (Floats on top)
             NavFooterView(showingCreateSheet: $showingCreateSheet, selectedTab: $selectedTab)

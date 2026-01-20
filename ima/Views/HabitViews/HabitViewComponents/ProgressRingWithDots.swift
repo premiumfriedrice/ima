@@ -29,7 +29,8 @@ struct ProgressRingWithDots<Content: View>: View {
             let dotSize = 4 * scale
             
             ZStack {
-                // A. Progress Line
+                
+                // B. Progress Line
                 Circle()
                     .trim(from: 0, to: CGFloat(habit.progress))
                     .stroke(
@@ -41,7 +42,7 @@ struct ProgressRingWithDots<Content: View>: View {
                     .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.currentCount)
                     .opacity(habit.currentCount > 0 ? 1.0 : 0.0)
             
-                // B. Dots
+                // C. Dots
                 let totalSteps = max(habit.frequencyCount, 1)
                 let center = size / 2 // Local center for dot positioning
                 

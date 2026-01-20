@@ -15,12 +15,15 @@ struct HomeView: View {
     @Query(sort: \UserTask.dateCreated, order: .reverse) private var tasks: [UserTask]
     @Query private var habits: [Habit]
     
-    // MARK: - State for Collapsible Section
+    // MARK: - State for Sheets & UI
     @State private var showCompleted: Bool = false
+    
+    // 1. Lifted State: Track selection here so sheets survive list re-ordering
+    @State private var selectedHabit: Habit?
+    @State private var selectedTask: UserTask?
     
     // MARK: - Computed Filters
     
-    // 1. MUST DO (Daily Habits + High Priority/Due Tasks)
     private var mustDoHabits: [Habit] {
         habits.filter { $0.frequencyUnit == .daily && !$0.isFullyDone }
     }
@@ -28,17 +31,14 @@ struct HomeView: View {
     private var mustDoTasks: [UserTask] {
         tasks.filter { task in
             guard !task.isCompleted else { return false }
-            
             let isHighPriority = task.priority == .high
             let isDueTodayOrPast = task.dueDate.map {
                 Calendar.current.startOfDay(for: $0) <= Calendar.current.startOfDay(for: Date())
             } ?? false
-            
             return isHighPriority || isDueTodayOrPast
         }
     }
     
-    // 2. CAN DO (Weekly/Monthly Habits + Low Priority Tasks)
     private var canDoHabits: [Habit] {
         habits.filter { $0.frequencyUnit != .daily && !$0.isFullyDone }
     }
@@ -46,17 +46,14 @@ struct HomeView: View {
     private var canDoTasks: [UserTask] {
         tasks.filter { task in
             guard !task.isCompleted else { return false }
-            
             let isHighPriority = task.priority == .high
             let isDueTodayOrPast = task.dueDate.map {
                 Calendar.current.startOfDay(for: $0) <= Calendar.current.startOfDay(for: Date())
             } ?? false
-            
             return !isHighPriority && !isDueTodayOrPast
         }
     }
     
-    // 3. COMPLETED
     private var completedHabits: [Habit] {
         habits.filter { $0.isFullyDone }
     }
@@ -65,31 +62,27 @@ struct HomeView: View {
         tasks.filter { $0.isCompleted }
     }
     
-    // Helper for the count badge
     private var totalCompletedCount: Int {
         completedHabits.count + completedTasks.count
     }
     
     var body: some View {
         VStack {
-            
             Text("What Can I do today?")
                 .foregroundStyle(.white)
                 .font(.title)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 25)
                 .padding(.bottom, 10)
-                .zIndex(1) // Ensures it sits on top
+                .zIndex(1)
             
             ZStack(alignment: .bottom) {
-                // MARK: - Main Content Area
                 ScrollView {
                     VStack(alignment: .leading, spacing: 5) {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 25)
                     
-                    // Empty State Check
                     if mustDoHabits.isEmpty && mustDoTasks.isEmpty &&
                         canDoHabits.isEmpty && canDoTasks.isEmpty &&
                         totalCompletedCount == 0 {
@@ -103,10 +96,7 @@ struct HomeView: View {
                         .padding(.top, 50)
                         
                     } else {
-                        // MARK: - Pinned Sections
                         LazyVStack(spacing: 10) {
-                            
-                            // Keep spacer for top safe area if needed
                             Color.clear.frame(height: 0)
                             
                             // MARK: - MUST DO SECTION
@@ -118,9 +108,11 @@ struct HomeView: View {
                                 )) {
                                     ForEach(mustDoHabits) { habit in
                                         HabitCardView(habit: habit)
+                                            .onTapGesture { selectedHabit = habit }
                                     }
                                     ForEach(mustDoTasks) { task in
                                         UserTaskCardView(task: task)
+                                            .onTapGesture { selectedTask = task }
                                     }
                                 }
                             }
@@ -134,14 +126,16 @@ struct HomeView: View {
                                 )) {
                                     ForEach(canDoHabits) { habit in
                                         HabitCardView(habit: habit)
+                                            .onTapGesture { selectedHabit = habit }
                                     }
                                     ForEach(canDoTasks) { task in
                                         UserTaskCardView(task: task)
+                                            .onTapGesture { selectedTask = task }
                                     }
                                 }
                             }
                             
-                            // MARK: - COMPLETED SECTION (Collapsible)
+                            // MARK: - COMPLETED SECTION
                             if totalCompletedCount > 0 {
                                 VStack(alignment: .leading, spacing: 5) {
                                     Button(action: {
@@ -160,7 +154,6 @@ struct HomeView: View {
                                             
                                             Spacer()
                                             
-                                            // Count Badge
                                             HStack(spacing: 0) {
                                                 Text("\(totalCompletedCount)")
                                                     .font(.subheadline)
@@ -188,24 +181,30 @@ struct HomeView: View {
                                         ForEach(completedHabits) { habit in
                                             HabitCardView(habit: habit)
                                                 .transition(.move(edge: .top).combined(with: .opacity))
+                                                .onTapGesture { selectedHabit = habit }
                                         }
                                         ForEach(completedTasks) { task in
                                             UserTaskCardView(task: task)
                                                 .transition(.move(edge: .top).combined(with: .opacity))
+                                                .onTapGesture { selectedTask = task }
                                         }
                                     }
                                 }
-//                                .padding(.top, 10)
                             }
                             
-                            Color.clear
-                                .frame(height: 160)
-                                .accessibilityHidden(true)
+                            Color.clear.frame(height: 160).accessibilityHidden(true)
                         }
                     }
                 }
                 .scrollIndicators(.hidden)
             }
+        }
+        // 2. Attach Sheets to HomeView (Stable Parent)
+        .sheet(item: $selectedHabit) { habit in
+            HabitInfoView(habit: habit)
+        }
+        .sheet(item: $selectedTask) { task in
+            UserTaskInfoView(userTask: task)
         }
     }
 }

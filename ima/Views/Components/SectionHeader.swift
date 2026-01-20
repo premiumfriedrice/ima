@@ -43,7 +43,6 @@ struct SectionHeader: View {
         .font(.system(.caption, design: .rounded))
         .textCase(.uppercase)
         .kerning(1.0)
-        .opacity(0.7)
         .foregroundStyle(.white)
         .padding(.leading, 25)
         .padding(.vertical, 10)

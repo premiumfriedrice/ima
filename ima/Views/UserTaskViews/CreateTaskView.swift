@@ -289,8 +289,8 @@ struct CreateTaskView: View {
                                         .font(.system(size: 24))
                                         .foregroundStyle(.white.opacity(0.3))
                                     
-                                    TextField("Add a subtask...", text: $newSubtaskInput)
-                                        .font(.caption2)
+                                    TextField("Add a subtask...", text: $newSubtaskInput, axis:.vertical)
+                                        .font(.subheadline)
                                         .foregroundStyle(.white)
                                         .submitLabel(.done)
                                         .focused($isInputFocused)

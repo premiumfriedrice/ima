@@ -250,7 +250,7 @@ struct UserTaskInfoView: View {
                                         
                                         // Text Input (Editable)
                                         // Bindable(subtask) allows us to create a binding to a SwiftData object's property inside a loop
-                                        TextField("Subtask", text: Bindable(subtask).title)
+                                        TextField("Subtask", text: Bindable(subtask).title, axis: .vertical)
                                             .font(.subheadline)
                                             .strikethrough(subtask.isCompleted)
                                             .foregroundStyle(subtask.isCompleted ? .white.opacity(0.5) : .white)
@@ -282,7 +282,7 @@ struct UserTaskInfoView: View {
                                         .font(.system(size: 24))
                                         .foregroundStyle(.white.opacity(0.3))
                                     
-                                    TextField("Add a subtask...", text: $newSubtaskTitle)
+                                    TextField("Add a subtask...", text: $newSubtaskTitle, axis: .vertical)
                                         .font(.subheadline)
                                         .foregroundStyle(.white)
                                         .submitLabel(.done)
@@ -328,7 +328,9 @@ struct UserTaskInfoView: View {
                 .scrollIndicators(.hidden)
             }
             .foregroundStyle(.white)
+            .presentationDragIndicator(.hidden)
             .presentationBackground(.ultraThickMaterial.opacity(0.5))
+            .presentationCornerRadius(40)
             // Shiny Border Overlay
             .overlay {
                 RoundedRectangle(cornerRadius: 40)

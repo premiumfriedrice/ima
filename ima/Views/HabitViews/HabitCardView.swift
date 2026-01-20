@@ -10,14 +10,13 @@ import SwiftData
 
 struct HabitCardView: View {
     @Bindable var habit: Habit
-    @State private var showingInfoSheet: Bool = false
+    // REMOVED: @State private var showingInfoSheet
     
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
             
             // MARK: - Left Side: Text Info
             VStack(alignment: .leading, spacing: 5) {
-                // Title
                 Text(habit.title)
                     .font(.body)
                     .foregroundStyle(.white)
@@ -32,7 +31,7 @@ struct HabitCardView: View {
             
             Spacer()
             
-            // MARK: - Right Side: Continuous Ring + Incrementation Dots
+            // MARK: - Right Side: Button
             ProgressRingWithDots(habit: habit, fillFactor: 1.0) {
                 Button(action: { incrementHabit() }) {
                     Image(systemName: habit.isFullyDone ? "checkmark" : "plus")
@@ -44,7 +43,7 @@ struct HabitCardView: View {
                         .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
                 }
             }
-            .frame(width: 45, height: 45) // The reference size
+            .frame(width: 45, height: 45)
             
         }
         .padding(15)
@@ -53,46 +52,27 @@ struct HabitCardView: View {
                 .fill(.ultraThinMaterial.opacity(0.5))
         }
         .overlay {
-                RoundedRectangle(cornerRadius: 24)
-                    .stroke(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
-                                .init(color: .white.opacity(0.05), location: 0.2),
-                                .init(color: .clear, location: 0.5)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1.5 // Thicker line catches more "light"
-                    )
-            }
-        // Visual feedback based on completion state
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(
+                    .white.opacity(0.15),
+                    lineWidth: 1
+                )
+            
+        }
         .opacity(habit.isFullyDone ? 0.3 : 1.0)
         .scaleEffect(habit.isFullyDone ? 0.98 : 1.0)
-        // MARK: New Highlight Effect
-        // Add a soft white glow when NOT completed
         .shadow(
             color: .white.opacity(habit.isFullyDone ? 0.0 : 0.1),
             radius: habit.isFullyDone ? 0 : 5,
             x: 0, y: 0
         )
         .padding(.horizontal, 20)
-        
-        // MARK: - Interaction (Tap Card to Open Info)
-        .onTapGesture {
-            showingInfoSheet = true
-        }
-        .sheet(isPresented: $showingInfoSheet) {
-            HabitInfoView(habit: habit)
-        }
     }
     
     private func incrementHabit() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             habit.increment()
-            // Optional: If targeting iOS 17+, prefer .sensoryFeedback modifier on the view instead
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
     }
     

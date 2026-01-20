@@ -172,7 +172,6 @@ struct HabitInfoView: View {
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text("ADJUST YOUR GOAL")
                                         .font(.system(.caption, design: .rounded))
-//                                        .fontWeight(.bold)
                                         .textCase(.uppercase)
                                         .kerning(1.0)
                                         .opacity(0.5)
@@ -293,7 +292,6 @@ struct HabitInfoView: View {
             titleVisibility: .visible
         ) {
             Button("Reset Todays Progress", role: .destructive) {
-                dismiss()
                 withAnimation {
                     habit.resetCurrentProgress()
                 }

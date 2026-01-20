@@ -13,14 +13,13 @@ struct UserTaskGroupView: View {
     
     var userTasks: [UserTask]
     
-    // State to track which task is being edited
+    // 1. Add state for the sheet
     @State private var selectedTask: UserTask?
     
     var body: some View {
-        VStack(spacing: 0) { // 1. Use VStack to stack Header + Content
+        VStack(spacing: 0) {
             
-            // MARK: - Sticky Main Header
-            // Shown ONLY if there are tasks, sits outside the ScrollView
+            // Sticky Header
             if !userTasks.isEmpty {
                 Text("Tasks")
                     .foregroundStyle(.white)
@@ -28,14 +27,16 @@ struct UserTaskGroupView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 25)
                     .padding(.bottom, 10)
+                    .padding(.top, 10)
+                    .background(Color.black)
                     .zIndex(1)
             }
             
             ZStack(alignment: .bottom) {
                 ScrollView {
                     if userTasks.isEmpty {
-                        // MARK: - Empty State
-                        VStack(spacing: 10) {
+                        // Empty State
+                        VStack(spacing: 12) {
                             Image(systemName: "tray")
                                 .font(.system(size: 60))
                                 .foregroundStyle(.white.opacity(0.5))
@@ -56,20 +57,18 @@ struct UserTaskGroupView: View {
                         .opacity(0.5)
                         .foregroundStyle(.white)
                     } else {
-                        // 2. Enable Pinned Views for Section Headers
-                        LazyVStack(alignment: .leading, spacing: 10) {
+                        LazyVStack(alignment: .leading, spacing: 10, pinnedViews: [.sectionHeaders]) {
                             
-                            // Spacer for safe area / header breathing room
                             Color.clear.frame(height: 0)
                             
-                            // MARK: - High Priority (Active)
+                            // High Priority
                             if !highPriorityTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "High Priority",
-                                    subtitle: "\(highPriorityTasks.count) \(highPriorityTasks.count == 1 ? "TASK" : "TASKS")",
+                                    subtitle: "\(highPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
                                     color: .red
-                                )) { // 3. Add Black Background to header
+                                ).background(Color.black)) {
                                     ForEach(highPriorityTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
@@ -77,14 +76,14 @@ struct UserTaskGroupView: View {
                                 }
                             }
                             
-                            // MARK: - Medium Priority (Active)
+                            // Medium Priority
                             if !mediumPriorityTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "Medium Priority",
-                                    subtitle: "\(mediumPriorityTasks.count) \(mediumPriorityTasks.count == 1 ? "TASK" : "TASKS")",
+                                    subtitle: "\(mediumPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
                                     color: .yellow
-                                )) {
+                                ).background(Color.black)) {
                                     ForEach(mediumPriorityTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
@@ -92,14 +91,14 @@ struct UserTaskGroupView: View {
                                 }
                             }
                             
-                            // MARK: - Low Priority (Active)
+                            // Low Priority
                             if !lowPriorityTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "Low Priority",
-                                    subtitle: "\(lowPriorityTasks.count) \(lowPriorityTasks.count == 1 ? "TASK" : "TASKS")",
+                                    subtitle: "\(lowPriorityTasks.count) TASKS",
                                     icon: "exclamationmark.circle.fill",
                                     color: .gray
-                                )) {
+                                ).background(Color.black)) {
                                     ForEach(lowPriorityTasks) { task in
                                         UserTaskCardView(task: task)
                                             .onTapGesture { selectedTask = task }
@@ -107,11 +106,11 @@ struct UserTaskGroupView: View {
                                 }
                             }
                             
-                            // MARK: - Completed Section
+                            // Completed
                             if !completedTasks.isEmpty {
                                 Section(header: SectionHeader(
                                     title: "Completed",
-                                    subtitle: "\(completedTasks.count) \(completedTasks.count == 1 ? "DONE" : "DONE")",
+                                    subtitle: "\(completedTasks.count) DONE",
                                     icon: "checkmark.circle.fill",
                                     color: .green
                                 ).background(Color.black)) {
@@ -122,15 +121,15 @@ struct UserTaskGroupView: View {
                                 }
                             }
                         }
-                        .padding(.bottom, 100) // Space for floating button
+                        .padding(.bottom, 100)
                     }
                 }
                 .scrollIndicators(.hidden)
             }
         }
+        // 2. Attach Sheet to Parent View
         .sheet(item: $selectedTask) { task in
             UserTaskInfoView(userTask: task)
-                .presentationDragIndicator(.visible)
         }
     }
     

@@ -10,14 +10,10 @@ import SwiftData
 
 struct UserTaskCardView: View {
     @Bindable var task: UserTask
-    @State private var showingEditSheet: Bool = false
-    
-    // MARK: - Computed Properties
+    // REMOVED: @State private var showingEditSheet
     
     private var subtaskProgress: Double {
-        guard !task.subtasks.isEmpty else {
-            return task.isCompleted ? 1.0 : 0.0
-        }
+        guard !task.subtasks.isEmpty else { return task.isCompleted ? 1.0 : 0.0 }
         let completed = task.subtasks.filter { $0.isCompleted }.count
         return Double(completed)
     }
@@ -35,7 +31,6 @@ struct UserTaskCardView: View {
             
             // MARK: - Left Side: Text Info
             VStack(alignment: .leading, spacing: 5) {
-                // Title
                 Text(task.title)
                     .font(.body)
                     .foregroundStyle(.white)
@@ -43,7 +38,6 @@ struct UserTaskCardView: View {
                     .opacity(task.isCompleted ? 0.4 : 1.0)
                     .lineLimit(1)
                 
-                // Subtitle Row: Priority • Due Date
                 HStack(spacing: 5) {
                     Image(systemName: "exclamationmark.circle.fill")
                         .foregroundStyle(task.priority.color)
@@ -63,7 +57,6 @@ struct UserTaskCardView: View {
             // MARK: - Right Side: Interaction Area
             ZStack {
                 if showCounts {
-                    // CASE A: Subtask Counts
                     HStack(alignment: .firstTextBaseline, spacing: 1) {
                         Text("\(Int(subtaskProgress))")
                             .font(.callout)
@@ -73,15 +66,14 @@ struct UserTaskCardView: View {
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.6))
                     }
-                    .frame(width: 45, height: 45) // Matches Habit Button
+                    .frame(width: 45, height: 45)
                     
                 } else {
-                    // CASE B: Checkmark Button
                     Button(action: { toggleTaskCompletion() }) {
                         Image(systemName: task.isCompleted ? "checkmark" : "")
                             .font(.footnote)
                             .foregroundColor(task.isCompleted ? .black : .clear)
-                            .frame(width: 28, height: 28) // Icon visual size
+                            .frame(width: 28, height: 28)
                             .background(task.isCompleted ? .green : .clear)
                             .clipShape(Circle())
                             .overlay(
@@ -89,15 +81,13 @@ struct UserTaskCardView: View {
                                     .stroke(task.isCompleted ? .clear : .white.opacity(0.3), lineWidth: 1.5)
                             )
                     }
-                    .frame(width: 45, height: 45) // Hit target matches Habit Button
+                    .frame(width: 45, height: 45)
                     .accessibilityIdentifier("CompleteTaskButton")
                 }
             }
-            .frame(width: 40, height: 40) // Reference container size (Matches HabitCardView)
+            .frame(width: 40, height: 40)
         }
         .padding(15)
-        
-        // MARK: - Card Styling
         .background {
             RoundedRectangle(cornerRadius: 24)
                 .fill(.ultraThinMaterial.opacity(0.5))
@@ -105,16 +95,8 @@ struct UserTaskCardView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 24)
                 .stroke(
-                    LinearGradient(
-                        stops: [
-                            .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
-                            .init(color: .white.opacity(0.05), location: 0.2),
-                            .init(color: .clear, location: 0.5)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
-                    lineWidth: 1.5 // Thicker line catches more "light"
+                    .white.opacity(0.15),
+                    lineWidth: 1
                 )
         }
         .opacity(task.isCompleted ? 0.3 : 1.0)
@@ -125,27 +107,7 @@ struct UserTaskCardView: View {
             x: 0, y: 0
         )
         .padding(.horizontal, 20)
-        
-        // MARK: - Interaction
-        .contentShape(Rectangle())
-        .onTapGesture {
-            showingEditSheet = true
-        }
-        .sheet(isPresented: $showingEditSheet, onDismiss: {
-            validateTaskState()
-        }) {
-            UserTaskInfoView(userTask: task)
-        }
-    }
-    
-    // MARK: - Logic Helpers
-    private func validateTaskState() {
-        let hasIncompleteSubtasks = task.subtasks.contains { !$0.isCompleted }
-        if task.isCompleted && hasIncompleteSubtasks {
-            withAnimation {
-                task.isCompleted = false
-            }
-        }
+        .contentShape(Rectangle()) // Ensures entire card is tappable
     }
     
     private func toggleTaskCompletion() {

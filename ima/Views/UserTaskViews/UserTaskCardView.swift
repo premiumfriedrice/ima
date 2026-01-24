@@ -73,12 +73,12 @@ struct UserTaskCardView: View {
                         Image(systemName: task.isCompleted ? "checkmark" : "")
                             .font(.footnote)
                             .foregroundColor(task.isCompleted ? .black : .clear)
-                            .frame(width: 28, height: 28)
+                            .frame(width: 25, height: 25)
                             .background(task.isCompleted ? .green : .clear)
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
-                                    .stroke(task.isCompleted ? .clear : .white.opacity(0.3), lineWidth: 1.5)
+                                    .stroke(task.isCompleted ? .clear : .white.opacity(0.3), lineWidth: 2.5)
                             )
                     }
                     .frame(width: 45, height: 45)

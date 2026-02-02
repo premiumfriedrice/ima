@@ -66,6 +66,7 @@ struct ProgressRingWithDots<Content: View>: View {
                             let angle = anglePerStep * Double(index + 1) - 90
                             let isCompleted = index < habit.currentCount
                             
+
                             Circle()
                                 .fill(isCompleted ? habit.statusColor : Color.white.opacity(0.1))
                                 .frame(width: dotSize, height: dotSize)
@@ -75,6 +76,26 @@ struct ProgressRingWithDots<Content: View>: View {
                                 )
                                 // Individual dot animation for filling up
                                 .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(index) * 0.03), value: habit.currentCount)
+                            
+                            ZStack {
+                                Circle()
+                                    .fill(isCompleted ? habit.statusColor : Color.white.opacity(0.1))
+                                    .frame(width: dotSize, height: dotSize)
+                                    .position(
+                                        x: center + (dotRadius * cos(angle.degreesToRadians)),
+                                        y: center + (dotRadius * sin(angle.degreesToRadians))
+                                    )
+                                // Individual dot animation for filling up
+                                    .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(index) * 0.03), value: habit.currentCount)
+                                
+                                Image(systemName: "plus")
+                                    .foregroundColor(.white.opacity(0.5)) // Set the icon color
+                                    .font(.system(size: dotSize - (dotSize / 4)))
+                                    .position(
+                                        x: center + (dotRadius * cos(angle.degreesToRadians)),
+                                        y: center + (dotRadius * sin(angle.degreesToRadians))
+                                    )
+                            }
                         }
                     }
                     .frame(width: size, height: size)

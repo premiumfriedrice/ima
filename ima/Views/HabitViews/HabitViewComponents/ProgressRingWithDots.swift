@@ -88,13 +88,13 @@ struct ProgressRingWithDots<Content: View>: View {
                                 // Individual dot animation for filling up
                                     .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(index) * 0.03), value: habit.currentCount)
                                 
-                                Image(systemName: "plus")
-                                    .foregroundColor(.white.opacity(0.5)) // Set the icon color
-                                    .font(.system(size: dotSize - (dotSize / 4)))
-                                    .position(
-                                        x: center + (dotRadius * cos(angle.degreesToRadians)),
-                                        y: center + (dotRadius * sin(angle.degreesToRadians))
-                                    )
+//                                Image(systemName: "plus")
+//                                    .foregroundColor(.white.opacity(0.5)) // Set the icon color
+//                                    .font(.system(size: dotSize - (dotSize / 4)))
+//                                    .position(
+//                                        x: center + (dotRadius * cos(angle.degreesToRadians)),
+//                                        y: center + (dotRadius * sin(angle.degreesToRadians))
+//                                    )
                             }
                         }
                     }

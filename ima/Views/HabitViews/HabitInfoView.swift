@@ -11,6 +11,7 @@ import SwiftData
 struct HabitInfoView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appBackground) private var appBackground
     @Bindable var habit: Habit
     
     @State private var showingDeleteConfirmation = false
@@ -189,7 +190,7 @@ struct HabitInfoView: View {
                             if isEditing {
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text("ADJUST YOUR GOAL")
-                                        .font(.system(.caption, design: .rounded))
+                                        .font(.caption)
                                         .textCase(.uppercase)
                                         .kerning(1.0)
                                         .opacity(0.5)
@@ -199,7 +200,7 @@ struct HabitInfoView: View {
                                         Picker("Count", selection: $habit.frequencyCount) {
                                             ForEach(1...50, id: \.self) { number in
                                                 Text("\(number)")
-                                                    .font(.system(size: 28, design: .rounded))
+                                                    .font(.system(size: 28))
                                                     .foregroundStyle(.white)
                                                     .tag(number)
                                             }
@@ -209,14 +210,14 @@ struct HabitInfoView: View {
                                         .compositingGroup()
                                         
                                         Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                            .font(.system(size: 28, design: .rounded))
+                                            .font(.system(size: 28))
                                             .foregroundStyle(.white.opacity(0.4))
                                             .padding(.horizontal, 8)
                                         
                                         Picker("Frequency", selection: $habit.frequencyUnitRaw) {
                                             ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                                 Text(unit.rawValue.capitalized)
-                                                    .font(.system(size: 28, design: .rounded))
+                                                    .font(.system(size: 28))
                                                     .foregroundStyle(.white)
                                                     .tag(unit.rawValue)
                                             }
@@ -277,7 +278,7 @@ struct HabitInfoView: View {
         }
         .presentationDetents([.medium, .large], selection: $currentDetent)
         .presentationDragIndicator(.hidden)
-        .presentationBackground(.black)
+        .presentationBackground(appBackground)
         .presentationCornerRadius(40)
         .confirmationDialog(
             "Are you sure you want to delete '\(habit.title)'?",

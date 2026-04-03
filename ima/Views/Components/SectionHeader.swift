@@ -64,7 +64,7 @@ struct SectionHeader: View {
                     .contentShape(Rectangle())
             }
         }
-        .font(.system(.caption, design: .rounded))
+        .font(.caption)
         .textCase(.uppercase)
         .kerning(1.0)
         .foregroundStyle(.white)
@@ -83,7 +83,8 @@ struct SectionHeader: View {
 // MARK: - Helper View for Sticky Logic
 struct StickyHeaderBackground: View {
     let coordinateSpace: String
-    
+    @Environment(\.appBackground) private var appBackground
+
     var body: some View {
         GeometryReader { geo in
             let minY = geo.frame(in: .named(coordinateSpace)).minY
@@ -95,7 +96,7 @@ struct StickyHeaderBackground: View {
             
             LinearGradient(
                 stops: [
-                    .init(color: .black, location: 0.85), // Solid black base
+                    .init(color: appBackground, location: 0.85),
                     .init(color: .clear, location: 1.0)   // Fades edge
                 ],
                 startPoint: .top,

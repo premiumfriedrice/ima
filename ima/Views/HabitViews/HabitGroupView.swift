@@ -10,6 +10,7 @@ import SwiftData
 
 struct HabitGroupView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appBackground) private var appBackground
 
     var habits: [Habit]
     
@@ -46,16 +47,16 @@ struct HabitGroupView: View {
                             
                             VStack {
                                 Text("No Habits Yet")
-                                    .font(.system(.title2, design: .rounded))
+                                    .font(.title2)
                                 
                                 Text("Tap the + button to create your first habit.")
-                                    .font(.system(.body, design: .rounded))
+                                    .font(.body)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 40)
                             }
                         }
                         .padding(.top, 100)
-                        .font(.system(.caption, design: .rounded))
+                        .font(.caption)
                         .kerning(1.0)
                         .opacity(0.5)
                         .foregroundStyle(.white)
@@ -165,7 +166,7 @@ struct HabitGroupView: View {
                     }
                     .background {
                         ZStack {
-                            Color.black
+                            appBackground
                         }
                         .ignoresSafeArea(edges: .top)
                     }

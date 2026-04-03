@@ -10,6 +10,7 @@ import SwiftData
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appBackground) private var appBackground
     
     // Fetch all items
     @Query(sort: \UserTask.dateCreated, order: .reverse) private var tasks: [UserTask]
@@ -205,7 +206,7 @@ struct HomeView: View {
                     }
                     .background {
                         ZStack {
-                            Color.black
+                            appBackground
                         }
                         .ignoresSafeArea(edges: .top)
                     }

@@ -11,43 +11,106 @@ import SwiftData
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    
+    @Environment(\.appBackground) private var appBackground
+
     // MARK: - Data Queries
     @Query private var tasks: [UserTask]
     @Query private var habits: [Habit]
-    
+
     // State for Settings Sheet
     @State private var showSettings = false
-    
+
     // MARK: - Computed Stats
-    
+
+    private var totalHabitCompletions: Int {
+        habits.reduce(0) { $0 + $1.totalCount }
+    }
+
     private var totalTasksCompleted: Int {
         tasks.filter { $0.isCompleted }.count
     }
-    
+
+    private var activeDays: Int {
+        var dates = Set<String>()
+        for habit in habits {
+            for (date, count) in habit.completionHistory where count > 0 {
+                dates.insert(date)
+            }
+        }
+        return dates.count
+    }
+
+    private var currentStreak: Int {
+        let dailyHabits = habits.filter { $0.frequencyUnit == .daily }
+        guard !dailyHabits.isEmpty else { return 0 }
+
+        let calendar = Calendar.current
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+
+        var streak = 0
+        var checkDate = calendar.startOfDay(for: Date())
+
+        // If today isn't fully done yet, start counting from yesterday
+        let todayKey = formatter.string(from: checkDate)
+        let todayDone = dailyHabits.allSatisfy {
+            ($0.completionHistory[todayKey] ?? 0) >= $0.frequencyCount
+        }
+
+        if !todayDone {
+            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: checkDate) else { return 0 }
+            checkDate = yesterday
+        }
+
+        while true {
+            let key = formatter.string(from: checkDate)
+            // Only check habits that existed on this date
+            let relevant = dailyHabits.filter {
+                calendar.startOfDay(for: $0.dateCreated) <= checkDate
+            }
+            guard !relevant.isEmpty else { break }
+
+            let allDone = relevant.allSatisfy {
+                ($0.completionHistory[key] ?? 0) >= $0.frequencyCount
+            }
+
+            if allDone {
+                streak += 1
+                guard let prev = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
+                checkDate = prev
+            } else {
+                break
+            }
+        }
+
+        return streak
+    }
+
     private var strongestHabits: [Habit] {
-        let sorted = habits.sorted { $0.currentCount > $1.currentCount }
-        return Array(sorted.prefix(3))
+        habits.sorted { $0.totalCount > $1.totalCount }.prefix(3).map { $0 }
     }
-    
+
     private var weakestHabits: [Habit] {
-        let sorted = habits.sorted { $0.currentCount < $1.currentCount }
-        return Array(sorted.prefix(3))
+        habits.sorted { $0.totalCount < $1.totalCount }.prefix(3).map { $0 }
     }
-    
+
+    // Grid layout
+    private let statColumns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+
     var body: some View {
         ZStack {
-            // Background
-            Color.black.ignoresSafeArea()
-            
+            appBackground.ignoresSafeArea()
+
             ScrollView {
-                VStack(spacing: 32) { // Increased spacing to match InfoView rhythm
-                    
+                VStack(spacing: 32) {
+
                     // MARK: - Top Nav
                     HStack {
-                        Button {
-                            showSettings = true
-                        } label: {
+                        Button { showSettings = true } label: {
                             Image(systemName: "gearshape.fill")
                                 .font(.system(size: 16))
                                 .foregroundStyle(.white.opacity(0.6))
@@ -55,76 +118,76 @@ struct ProfileView: View {
                                 .background(.white.opacity(0.1))
                                 .clipShape(Circle())
                         }
-                        
                         Spacer()
                     }
                     .padding(.top, 20)
-                    
+
                     // MARK: - Profile Hero
                     VStack(spacing: 20) {
-                        // Avatar
                         ZStack {
                             Circle()
-                                .fill(LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .fill(LinearGradient(
+                                    colors: [.blue, .purple],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
                                 .frame(width: 80, height: 80)
                                 .shadow(color: .blue.opacity(0.5), radius: 10, x: 0, y: 5)
-                            
-                            Text("LA") // Initials
+
+                            Text("LA")
                                 .font(.title)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                         }
-                        
-                        // Text Info
+
                         VStack(spacing: 8) {
                             Text("Lloyd Alba")
-                                .font(.title2) // Matches Hero Title in InfoViews
+                                .font(.title2)
                                 .foregroundStyle(.white)
-                            
-                            Text("CS Student • Texas A&M")
+
+                            Text("CS Student")
                                 .font(.subheadline)
                                 .foregroundStyle(.white.opacity(0.5))
                         }
                     }
-                    
-                    // MARK: - Main Stat (Tasks)
+
+                    // MARK: - Overview Stats
                     VStack(alignment: .leading, spacing: 10) {
-                        // Section Header Style
-                        Text("LIFETIME STATS")
+                        Text("OVERVIEW")
                             .font(.caption2)
                             .textCase(.uppercase)
                             .kerning(1.0)
                             .opacity(0.5)
                             .foregroundStyle(.white)
-                        
-                        HStack {
-                            VStack(alignment: .leading, spacing: 0) {
-                                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                    Text("\(totalTasksCompleted)")
-                                        .font(.system(size: 42, weight: .regular)) // Cleaner number font
-                                        .foregroundStyle(.white)
-                                    
-                                    Text("tasks")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.white.opacity(0.5))
-                                }
-                                
-                                Text("Total completed")
-                                    .font(.caption)
-                                    .foregroundStyle(.white.opacity(0.4))
-                            }
-                            Spacer()
-                            
-                            Image(systemName: "checkmark.seal.fill")
-                                .font(.system(size: 32))
-                                .foregroundStyle(LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom))
-                                .shadow(color: .orange.opacity(0.3), radius: 8)
+
+                        LazyVGrid(columns: statColumns, spacing: 12) {
+                            ProfileStatCard(
+                                title: "Completions",
+                                value: "\(totalHabitCompletions)",
+                                icon: "flame.fill",
+                                color: .orange
+                            )
+                            ProfileStatCard(
+                                title: "Tasks Done",
+                                value: "\(totalTasksCompleted)",
+                                icon: "checkmark.circle.fill",
+                                color: .green
+                            )
+                            ProfileStatCard(
+                                title: "Day Streak",
+                                value: "\(currentStreak)",
+                                icon: "bolt.fill",
+                                color: .yellow
+                            )
+                            ProfileStatCard(
+                                title: "Active Days",
+                                value: "\(activeDays)",
+                                icon: "calendar",
+                                color: .blue
+                            )
                         }
-                        .padding(20)
-                        .background(.white.opacity(0.05)) // Matches InfoView container style
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
-                    
+
                     // MARK: - Strongest Habits
                     if !strongestHabits.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
@@ -134,16 +197,20 @@ struct ProfileView: View {
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
-                            
+
                             VStack(spacing: 8) {
-                                ForEach(strongestHabits) { habit in
-                                    StatRow(habit: habit, type: .strong)
+                                ForEach(Array(strongestHabits.enumerated()), id: \.element.id) { index, habit in
+                                    HabitStatRow(
+                                        rank: index + 1,
+                                        habit: habit,
+                                        type: .strong
+                                    )
                                 }
                             }
                         }
                     }
-                    
-                    // MARK: - Weakest Habits
+
+                    // MARK: - Needs Improvement
                     if !weakestHabits.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("NEEDS IMPROVEMENT")
@@ -152,35 +219,80 @@ struct ProfileView: View {
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
-                            
+
                             VStack(spacing: 8) {
-                                ForEach(weakestHabits) { habit in
-                                    StatRow(habit: habit, type: .weak)
+                                ForEach(Array(weakestHabits.enumerated()), id: \.element.id) { index, habit in
+                                    HabitStatRow(
+                                        rank: index + 1,
+                                        habit: habit,
+                                        type: .weak
+                                    )
                                 }
                             }
                         }
                     }
-                    
+
                     Color.clear.frame(height: 50)
                 }
-                .padding(.horizontal, 25) // Matches padding in InfoViews
+                .padding(.horizontal, 25)
             }
             .scrollIndicators(.hidden)
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
         }
     }
 }
 
-// MARK: - Helper Views
+// MARK: - Profile Stat Card
+
+struct ProfileStatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.subheadline)
+                    .foregroundStyle(color)
+                    .padding(8)
+                    .background(color.opacity(0.15))
+                    .clipShape(Circle())
+
+                Spacer()
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(.white)
+
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.5))
+                    .textCase(.uppercase)
+            }
+        }
+        .padding(15)
+        .background {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.ultraThinMaterial.opacity(0.1))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(.white.opacity(0.15), lineWidth: 1)
+        }
+    }
+}
+
+// MARK: - Habit Stat Row
 
 enum StatType {
-    case strong
-    case weak
-    
+    case strong, weak
+
     var color: Color {
         switch self {
         case .strong: return .green
@@ -189,41 +301,47 @@ enum StatType {
     }
 }
 
-struct StatRow: View {
+struct HabitStatRow: View {
+    let rank: Int
     let habit: Habit
     let type: StatType
-    
+
     var body: some View {
-        HStack {
-            // Simple Dot Indicator
-            Circle()
-                .fill(type.color.opacity(0.8))
-                .frame(width: 8, height: 8)
-            
+        HStack(spacing: 12) {
+            // Rank number
+            Text("\(rank)")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundStyle(type.color.opacity(0.8))
+                .frame(width: 20)
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(habit.title)
-                    .font(.subheadline) // Matches subtask text style
+                    .font(.subheadline)
                     .foregroundStyle(.white)
-                
-                Text("\(habit.currentCount) completions")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.5))
+                    .lineLimit(1)
+
+                Text("\(habit.totalCount) lifetime completions")
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.4))
             }
-            
+
             Spacer()
-            
-            // Minimal Badge
-            Text(type == .strong ? "TOP" : "LOW")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(type.color)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(type.color.opacity(0.1))
-                .clipShape(Capsule())
+
+            Text("\(habit.totalCount)")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(type.color.opacity(0.8))
         }
-        .padding(16)
-        .background(.white.opacity(0.05)) // Matches subtask container
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(15)
+        .background {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.ultraThinMaterial.opacity(0.1))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(.white.opacity(0.15), lineWidth: 1)
+        }
     }
 }
 

@@ -11,6 +11,7 @@ import SwiftData
 struct UserTaskInfoView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appBackground) private var appBackground
     
     // 1. Bind to your UserTask model
     @Bindable var userTask: UserTask
@@ -330,7 +331,7 @@ struct UserTaskInfoView: View {
             .foregroundStyle(.white)
             .presentationDragIndicator(.hidden)
 //            .presentationBackground(.ultraThickMaterial.opacity(0.5))
-            .presentationBackground(.black)
+            .presentationBackground(appBackground)
             .presentationCornerRadius(40)
             // Shiny Border Overlay
             .overlay {

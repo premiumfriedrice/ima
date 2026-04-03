@@ -12,10 +12,10 @@ enum AppTab: Int, CaseIterable, Identifiable {
     case habits    = 1
     case usertasks = 2
     case profile   = 3
-    
+
     // Conforms to Identifiable for the ScrollView ID
     var id: AppTab { self }
-    
+
     var title: String {
         switch self {
         case .home: return "Home"
@@ -29,163 +29,159 @@ enum AppTab: Int, CaseIterable, Identifiable {
 struct NavFooterView: View {
     @Binding var showingCreateSheet: Bool
     @Binding var selectedTab: AppTab
-    
+    @Environment(\.appBackground) private var appBackground
     var body: some View {
         VStack(spacing: 0) {
-            
-            // MARK: - 1. The Top Line (Edge to Edge)
-            // Matches card overlay color (.white.opacity(0.15))
+            // Gradient hairline — fades at edges for a refined look
             Rectangle()
-                .fill(.white.opacity(0.15))
-                .frame(height: 1)
-            
-            // MARK: - 2. The Tab Buttons
+                .fill(
+                    LinearGradient(
+                        colors: [.clear, .white.opacity(0.1), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(height: 0.5)
+
+            // Tab buttons
             HStack(spacing: 0) {
-                
-                // --- Home ---
-                TabButton(
-                    isActive: selectedTab == .home,
-                    action: { selectedTab = .home }
-                ) {
-                    Image(systemName: "rectangle.grid.1x3.fill")
-                        .font(.title2)
-                }
-                
-                // --- Habits ---
-                TabButton(
-                    isActive: selectedTab == .habits,
-                    action: {
-                        if selectedTab == .habits {
-                            showingCreateSheet = true
-                        } else {
-                            selectedTab = .habits
-                        }
-                    }
-                ) {
-                    DottedRingTabIcon(isActive: selectedTab == .habits)
-                }
-                
-                // --- Tasks ---
-                TabButton(
-                    isActive: selectedTab == .usertasks,
-                    action: {
-                        if selectedTab == .usertasks {
-                            showingCreateSheet = true
-                        } else {
-                            selectedTab = .usertasks
-                        }
-                    }
-                ) {
-                    TaskRingTabIcon(isActive: selectedTab == .usertasks)
-                }
-                
-                // --- Profile ---
-                TabButton(
-                    isActive: selectedTab == .profile,
-                    action: { selectedTab = .profile }
-                ) {
-                    Image(systemName: "person.fill")
-                        .font(.title)
+                ForEach(AppTab.allCases) { tab in
+                    navTab(tab)
                 }
             }
-            .frame(height: 40) // Compact height for the buttons
-            .padding(.top, 10)  // Slight breathing room below the line
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+            .padding(.horizontal, 16)
         }
-        // MARK: - 3. Edge-to-Edge Background
         .background {
             ZStack {
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                
-                Color.black
+                appBackground
+                // Subtle depth gradient at the top edge
+                LinearGradient(
+                    colors: [.white.opacity(0.02), .clear],
+                    startPoint: .top,
+                    endPoint: .center
+                )
             }
-            .ignoresSafeArea() // Extends behind the Home Indicator
+            .ignoresSafeArea()
+        }
+    }
+
+    // MARK: - Individual Tab
+    @ViewBuilder
+    private func navTab(_ tab: AppTab) -> some View {
+        let active = selectedTab == tab
+
+        Button {
+            if selectedTab == tab && (tab == .habits || tab == .usertasks) {
+                showingCreateSheet = true
+            } else {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
+                    selectedTab = tab
+                }
+            }
+        } label: {
+            tabIcon(tab, active: active)
+                .frame(height: 30)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Tab Icons
+    @ViewBuilder
+    private func tabIcon(_ tab: AppTab, active: Bool) -> some View {
+        let tint: Color = active ? .white : .white.opacity(0.32)
+
+        switch tab {
+        case .home:
+            Image(systemName: "square.grid.2x2")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(tint)
+                .shadow(color: active ? .white.opacity(0.15) : .clear, radius: 8)
+
+        case .habits:
+            AtomTabIcon(isActive: active)
+
+        case .usertasks:
+            TaskTabIcon(isActive: active)
+
+        case .profile:
+            Image(systemName: "person.fill")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(tint)
+                .shadow(color: active ? .white.opacity(0.15) : .clear, radius: 8)
         }
     }
 }
 
-// MARK: - Custom Icons
-struct DottedRingTabIcon: View {
+// MARK: - Atom Tab Icon (Habits)
+/// 7 orbital dots around a nucleus — echoes the habit card's atom motif
+struct AtomTabIcon: View {
     var isActive: Bool
-    
-    // Configurable properties for "Dense" look
-    let dotCount = 7 // Increased count for density
-    let ringRadius: CGFloat = 16 // Tighter radius (pulled in from 20)
-    let dotSize: CGFloat = 3 // Larger dots (up from 3)
-    
+
+    private let dotCount = 7
+    private let nucleusSize: CGFloat = 9
+    private let orbitRadius: CGFloat = 11
+    private let electronSize: CGFloat = 2.5
+
     var body: some View {
+        let tint: Color = isActive ? .white : .white.opacity(0.32)
+
         ZStack {
+            // Nucleus
             Circle()
-                .fill(isActive ? .white : .white.opacity(0.5))
-                .frame(width: 24, height: 24) // Solid core
-            
-            // 2. The Ring of Dots (Studs)
-            ForEach(0..<dotCount, id: \.self) { index in
+                .fill(tint)
+                .frame(width: nucleusSize, height: nucleusSize)
+
+            // 7 Electrons — days of the week
+            ForEach(0..<dotCount, id: \.self) { i in
+                let angle = Angle.degrees(360.0 / Double(dotCount) * Double(i) - 90)
                 Circle()
-                    .fill(isActive ? .white : .white.opacity(0.5))
-                    .frame(width: dotSize, height: dotSize)
-                    .offset(y: -ringRadius)
-                    .rotationEffect(.degrees(Double(index) / Double(dotCount) * 360))
+                    .fill(tint)
+                    .frame(width: electronSize, height: electronSize)
+                    .offset(
+                        x: orbitRadius * cos(angle.radians),
+                        y: orbitRadius * sin(angle.radians)
+                    )
             }
-            
-            // 3. The Central Plus (Cutout style)
-            // We make this black (or clear) to simulate the 'filled icon' cutout look
-            Image(systemName: "plus")
-                .font(.headline)
-                .foregroundStyle(isActive ? .black : .clear)
         }
-        .frame(width: 50, height: 50)
-        // Optional: Add a shadow to make it pop like a 3D button
-        .shadow(color: isActive ? .white.opacity(0.3) : .clear, radius: 5)
+        .shadow(color: isActive ? .white.opacity(0.15) : .clear, radius: 8)
     }
 }
 
-struct TaskRingTabIcon: View {
+// MARK: - Task Tab Icon
+/// Circle outline with checkmark — mirrors the task completion ring
+struct TaskTabIcon: View {
     var isActive: Bool
-    
+
     var body: some View {
+        let tint: Color = isActive ? .white : .white.opacity(0.32)
+
         ZStack {
-            // 1. The Ring (No dots, just a stroke)
             Circle()
-                .fill(isActive ? .white : .white.opacity(0.5))
-                .frame(width: 28, height: 28) // Solid core
-            
-            // 2. The Checkmark (Only obvious when active, or dimmed when inactive)
-            Image(systemName: isActive ? "plus" : "checkmark") // Switched to Plus when active as requested previously, or keep checkmark?
-            // Reverting to your previous request: "active task tab button with the plus in it"
-                .font(isActive ? .headline : .footnote)
-                 .foregroundColor(.black)
+                .stroke(tint, lineWidth: 1.5)
+                .frame(width: 17, height: 17)
+
+            Image(systemName: "checkmark")
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(tint)
         }
-        .frame(width: 50, height: 50)
-        .background(Color.clear) // Explicitly transparent
+        .shadow(color: isActive ? .white.opacity(0.15) : .clear, radius: 8)
     }
 }
 
-// MARK: - Helper Views
-struct TabButton<Content: View>: View {
-    let isActive: Bool
-    let action: () -> Void
-    let content: () -> Content
-    
-    var body: some View {
-        Button(action: { action() } ) {
-            VStack(spacing: 4) {
-                content()
-            }
-            .foregroundColor(isActive ? .white : .white.opacity(0.4))
-            .scaleEffect(isActive ? 1.0 : 0.9)
-            .frame(maxWidth: .infinity)
-            .contentShape(Rectangle())
-        }
-    }
-}
-
+// MARK: - Preview
 #Preview {
     ZStack {
-        Color.gray // To see the gradient
+        Color.black.ignoresSafeArea()
         VStack {
             Spacer()
-            NavFooterView(showingCreateSheet: .constant(false), selectedTab: .constant(.habits))
+            NavFooterView(
+                showingCreateSheet: .constant(false),
+                selectedTab: .constant(.habits)
+            )
         }
     }
 }

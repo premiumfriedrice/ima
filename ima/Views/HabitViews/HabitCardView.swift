@@ -34,13 +34,11 @@ struct HabitCardView: View {
             // MARK: - Right Side: Button
             ProgressRingWithDots(habit: habit, fillFactor: 1.0) {
                 Button(action: { incrementHabit() }) {
-                    Image(systemName: habit.isFullyDone ? "checkmark" : "")
-                        .font(.caption)
-                        .foregroundColor(habit.isFullyDone ? .clear : .white)
-                        .frame(width: 25, height: 25) // Fixed button size for small card
-                        .background(.clear)
-                        .clipShape(Circle())
+                    Color.clear
+                        .frame(width: 25, height: 25)
+                        .contentShape(Circle())
                 }
+                .buttonStyle(.plain)
             }
             .frame(width: 45, height: 45)
             
@@ -58,7 +56,8 @@ struct HabitCardView: View {
                 )
             
         }
-        .opacity(habit.isFullyDone ? 0.3 : 1.0)
+        .opacity(habit.isFullyDone ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 0.5), value: habit.isFullyDone)
         .shadow(
             color: .white.opacity(habit.isFullyDone ? 0.0 : 0.1),
             radius: habit.isFullyDone ? 0 : 5,

@@ -15,15 +15,21 @@ struct ContentView: View {
     @Query(sort: \Habit.title) private var habits: [Habit]
     @Query(sort: \UserTask.dateCreated) private var tasks: [UserTask]
     
+    @AppStorage("appBackground") private var backgroundRaw: String = AppBackground.pureBlack.rawValue
+
     @State private var selectedTab: AppTab = .home
     @State private var showingCreateSheet = false
     
     private let dayChanged = NotificationCenter.default.publisher(for: .NSCalendarDayChanged)
     
+    private var bgColor: Color {
+        AppBackground(rawValue: backgroundRaw)?.color ?? .black
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             // 1. Background (Global)
-            Color.clear.ignoresSafeArea()
+            bgColor.ignoresSafeArea()
 //            AnimatedRadialBackground()
             
             // 2. Main Content (Swipeable)
@@ -77,6 +83,7 @@ struct ContentView: View {
         .onReceive(dayChanged) { _ in
             Habit.resetHabitsIfNeeded(habits: habits)
         }
+        .environment(\.appBackground, bgColor)
     }
 }
 

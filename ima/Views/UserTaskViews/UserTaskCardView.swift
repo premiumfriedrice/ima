@@ -70,22 +70,38 @@ struct UserTaskCardView: View {
                     
                 } else {
                     Button(action: { toggleTaskCompletion() }) {
-                        Image(systemName: task.isCompleted ? "checkmark" : "")
-                            .font(.footnote)
-                            .foregroundColor(task.isCompleted ? .black : .clear)
-                            .frame(width: 25, height: 25)
-                            .background(task.isCompleted ? .green : .clear)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .stroke(task.isCompleted ? .clear : .white.opacity(0.3), lineWidth: 2.5)
-                            )
+                        ZStack {
+                            Circle()
+                                .fill(task.isCompleted ? .green : .clear)
+                                .frame(width: 20, height: 20)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            task.isCompleted ? .clear : .white.opacity(0.2),
+                                            lineWidth: 1.5
+                                        )
+                                )
+                                .shadow(
+                                    color: task.isCompleted ? .green.opacity(0.4) : .clear,
+                                    radius: 8
+                                )
+
+                            if task.isCompleted {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(.black)
+                                    .transition(.scale(scale: 0.5).combined(with: .opacity))
+                            }
+                        }
+                        .frame(width: 25, height: 25)
+                        .contentShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     .frame(width: 45, height: 45)
                     .accessibilityIdentifier("CompleteTaskButton")
                 }
             }
-            .frame(width: 40, height: 40)
+            .frame(width: 45, height: 45)
         }
         .padding(15)
         .background {

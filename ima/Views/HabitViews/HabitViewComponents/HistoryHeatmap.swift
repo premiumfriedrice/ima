@@ -24,7 +24,7 @@ struct HistoryHeatmap: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("HISTORY")
-                    .font(.system(.caption, design: .rounded))
+                    .font(.caption)
                     .textCase(.uppercase)
                     .kerning(1.0)
                     .opacity(0.5)

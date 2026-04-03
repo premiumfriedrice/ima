@@ -18,7 +18,7 @@ struct ContentView: View {
     @AppStorage("appBackground") private var backgroundRaw: String = AppBackground.pureBlack.rawValue
 
     @State private var selectedTab: AppTab = .home
-    @State private var showingCreateSheet = false
+    @State private var activeCreateSheet: CreateSheetType?
     
     private let dayChanged = NotificationCenter.default.publisher(for: .NSCalendarDayChanged)
     
@@ -61,15 +61,12 @@ struct ContentView: View {
             .ignoresSafeArea()
             
             // 3. Footer (Floats on top)
-            NavFooterView(showingCreateSheet: $showingCreateSheet, selectedTab: $selectedTab)
+            NavFooterView(activeCreateSheet: $activeCreateSheet, selectedTab: $selectedTab)
         }
-        .sheet(isPresented: $showingCreateSheet) {
-            if selectedTab == .habits {
-                CreateHabitView()
-            } else if selectedTab == .usertasks {
-                CreateTaskView()
-            } else {
-                CreateTaskView()
+        .sheet(item: $activeCreateSheet) { type in
+            switch type {
+            case .habit: CreateHabitView()
+            case .task: CreateTaskView()
             }
         }
         .onAppear {

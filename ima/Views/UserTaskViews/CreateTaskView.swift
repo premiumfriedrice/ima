@@ -11,6 +11,7 @@ import SwiftData
 struct CreateTaskView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appBackground) private var appBackground
     
     // MARK: - Form State
     @State private var title: String = ""
@@ -323,7 +324,10 @@ struct CreateTaskView: View {
                     .padding(.bottom, 50)
                 }
             }
-            .presentationBackground(.ultraThickMaterial.opacity(0.5))
+            .presentationBackground(appBackground)
+            .presentationCornerRadius(40)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.hidden)
             .foregroundStyle(.white)
             .overlay {
                 RoundedRectangle(cornerRadius: 40)
@@ -337,7 +341,7 @@ struct CreateTaskView: View {
                             startPoint: .top,
                             endPoint: .bottom
                         ),
-                        lineWidth: 1.5
+                        lineWidth: 3
                     )
                     .ignoresSafeArea()
                     .allowsHitTesting(false)

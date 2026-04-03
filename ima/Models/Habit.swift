@@ -18,7 +18,14 @@ final class Habit {
     var frequencyCount: Int
     var frequencyUnitRaw: String
     var dateCreated: Date
-    
+
+    // 0 = ongoing, >0 = temporary (number of perfect cycles to reach)
+    var goalTarget: Int = 0
+    // Target completion rate for ongoing habits (0–100, default 80%)
+    var targetRate: Int = 80
+
+    var isTemporary: Bool { goalTarget > 0 }
+
     // Computed property to handle the Enum conversion
     var frequencyUnit: FrequencyUnit {
         get { FrequencyUnit(rawValue: frequencyUnitRaw) ?? .daily }
@@ -46,7 +53,9 @@ final class Habit {
         totalCount: Int = 0,
         currentCount: Int = 0,
         frequencyCount: Int,
-        frequencyUnit: FrequencyUnit
+        frequencyUnit: FrequencyUnit,
+        goalTarget: Int = 0,
+        targetRate: Int = 80
     ) {
         self.id = UUID()
         self.title = title
@@ -55,6 +64,8 @@ final class Habit {
         self.frequencyCount = frequencyCount
         self.frequencyUnitRaw = frequencyUnit.rawValue
         self.dateCreated = Date()
+        self.goalTarget = goalTarget
+        self.targetRate = targetRate
     }
     
     // MARK: - Instance Methods

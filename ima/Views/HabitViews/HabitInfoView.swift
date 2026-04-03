@@ -17,12 +17,13 @@ struct HabitInfoView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingResetConfirmation = false
     @State private var isEditing = false
+    @State private var animatedRate: Double = 0
     @State private var currentDetent: PresentationDetent = .medium
     
     // Grid layout for statistics
     private let statColumns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8)
     ]
     
     var body: some View {
@@ -96,16 +97,23 @@ struct HabitInfoView: View {
                                     .kerning(1.0)
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
-                                Text(habit.title)
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
+                                if isEditing {
+                                    TextField("Habit name", text: $habit.title)
+                                        .font(.title)
+                                        .foregroundStyle(.white)
+                                        .tint(.blue)
+                                } else {
+                                    Text(habit.title)
+                                        .font(.title)
+                                        .foregroundStyle(.white)
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 25)
                             
-                            // MARK: - Today's Progress
+                            // MARK: - Progress
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("TODAY'S PROGRESS")
+                                Text(progressSectionLabel)
                                     .font(.caption2)
                                     .textCase(.uppercase)
                                     .kerning(1.0)
@@ -156,7 +164,84 @@ struct HabitInfoView: View {
                             
                             // MARK: - History Heatmap
                             HistoryHeatmap(habit: habit)
-                            
+
+                            // MARK: - Goal Rate
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text(habit.isTemporary ? "GOAL PROGRESS" : "GOAL COMPLETION RATE")
+                                    .font(.caption2)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+
+                                VStack(spacing: 10) {
+                                    GeometryReader { geo in
+                                        ZStack(alignment: .leading) {
+                                            Capsule()
+                                                .fill(.white.opacity(0.1))
+
+                                            Capsule()
+                                                .fill(habit.statusColor)
+                                                .frame(width: geo.size.width * animatedRate)
+
+                                            // Target marker for ongoing habits
+                                            if !habit.isTemporary && habit.targetRate > 0 && habit.targetRate < 100 {
+                                                Rectangle()
+                                                    .fill(.white.opacity(0.5))
+                                                    .frame(width: 2, height: 12)
+                                                    .offset(x: geo.size.width * Double(habit.targetRate) / 100.0 - 1)
+                                            }
+                                        }
+                                    }
+                                    .frame(height: 6)
+
+                                    HStack {
+                                        if habit.isTemporary {
+                                            Text("\(perfectCount) / \(habit.goalTarget)")
+                                                .font(.headline)
+                                                .foregroundStyle(.white)
+                                        } else {
+                                            Text("\(Int(completionRate * 100))%")
+                                                .font(.headline)
+                                                .foregroundStyle(.white)
+                                        }
+
+                                        Spacer()
+
+                                        if habit.isTemporary {
+                                            let remaining = max(0, habit.goalTarget - perfectCount)
+                                            Text(remaining == 0 ? "Goal reached" : "\(remaining) \(cycleUnitLabel) to go")
+                                                .font(.caption2)
+                                                .foregroundStyle(.white.opacity(0.4))
+                                        } else {
+                                            Text("\(perfectCount) of \(totalElapsedCycles) \(cycleUnitLabel) · \(habit.targetRate)% target")
+                                                .font(.caption2)
+                                                .foregroundStyle(.white.opacity(0.4))
+                                        }
+                                    }
+                                }
+                                .padding(15)
+                                .background {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(.ultraThinMaterial.opacity(0.1))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(.white.opacity(0.15), lineWidth: 1)
+                                }
+                            }
+                            .padding(.horizontal, 25)
+                            .onAppear {
+                                withAnimation(.easeOut(duration: 0.8).delay(0.3)) {
+                                    animatedRate = goalBarProgress
+                                }
+                            }
+                            .onChange(of: habit.currentCount) {
+                                withAnimation(.easeOut(duration: 0.4)) {
+                                    animatedRate = goalBarProgress
+                                }
+                            }
+
                             // MARK: - Statistics Section
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("STATISTICS")
@@ -166,67 +251,154 @@ struct HabitInfoView: View {
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
                                 
-                                LazyVGrid(columns: statColumns, spacing: 15) {
-                                    // 1. Average Completion Rate
-                                    StatCard(
-                                        title: "Avg. Completion",
-                                        value: completionRateString,
-                                        icon: "chart.bar.fill",
-                                        color: .blue
-                                    )
-                                    
-                                    // 2. Perfect Days/Weeks/Months
-                                    StatCard(
-                                        title: perfectCountLabel,
-                                        value: "\(perfectCount)",
-                                        icon: "star.fill",
-                                        color: .yellow
-                                    )
+                                LazyVGrid(columns: statColumns, spacing: 8) {
+                                    StatCard(title: perfectCountLabel, value: "\(perfectCount)")
+                                    StatCard(title: "Current Streak", value: "\(currentStreak)")
+                                    StatCard(title: "Best Streak", value: "\(bestStreak)")
+                                    StatCard(title: "Total Completions", value: "\(habit.totalCount)")
                                 }
                             }
                             .padding(.horizontal, 25)
                             
-                            // MARK: - Adjust Goal
+                            // MARK: - Edit Section
                             if isEditing {
-                                VStack(alignment: .leading, spacing: 0) {
-                                    Text("ADJUST YOUR GOAL")
-                                        .font(.caption)
-                                        .textCase(.uppercase)
-                                        .kerning(1.0)
-                                        .opacity(0.5)
-                                        .foregroundStyle(.white)
-                                    
-                                    HStack(spacing: 0) {
-                                        Picker("Count", selection: $habit.frequencyCount) {
-                                            ForEach(1...50, id: \.self) { number in
-                                                Text("\(number)")
-                                                    .font(.system(size: 28))
-                                                    .foregroundStyle(.white)
-                                                    .tag(number)
+                                VStack(spacing: 24) {
+                                    // Type toggle
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        Text("TYPE")
+                                            .font(.caption2)
+                                            .textCase(.uppercase)
+                                            .kerning(1.0)
+                                            .opacity(0.5)
+                                            .foregroundStyle(.white)
+
+                                        HStack(spacing: 10) {
+                                            EditTypeOption(
+                                                label: "Ongoing",
+                                                caption: "Track with a target rate",
+                                                isSelected: !habit.isTemporary
+                                            ) {
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                                    habit.goalTarget = 0
+                                                    if habit.targetRate == 0 { habit.targetRate = 80 }
+                                                }
+                                            }
+
+                                            EditTypeOption(
+                                                label: "Goal",
+                                                caption: "Reach a set number",
+                                                isSelected: habit.isTemporary
+                                            ) {
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                                    if habit.goalTarget == 0 { habit.goalTarget = 30 }
+                                                    habit.targetRate = 0
+                                                }
                                             }
                                         }
-                                        .pickerStyle(.wheel)
-                                        .frame(width: 72, height: 128)
-                                        .compositingGroup()
-                                        
-                                        Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                            .font(.system(size: 28))
-                                            .foregroundStyle(.white.opacity(0.4))
-                                            .padding(.horizontal, 8)
-                                        
-                                        Picker("Frequency", selection: $habit.frequencyUnitRaw) {
-                                            ForEach(FrequencyUnit.allCases, id: \.self) { unit in
-                                                Text(unit.rawValue.capitalized)
-                                                    .font(.system(size: 28))
-                                                    .foregroundStyle(.white)
-                                                    .tag(unit.rawValue)
-                                            }
-                                        }
-                                        .pickerStyle(.wheel)
-                                        .frame(width: 136, height: 128)
-                                        .compositingGroup()
                                     }
-                                    .frame(maxWidth: .infinity)
+
+                                    // Frequency
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        Text("FREQUENCY")
+                                            .font(.caption2)
+                                            .textCase(.uppercase)
+                                            .kerning(1.0)
+                                            .opacity(0.5)
+                                            .foregroundStyle(.white)
+
+                                        HStack(spacing: 0) {
+                                            Picker("Count", selection: $habit.frequencyCount) {
+                                                ForEach(1...50, id: \.self) { number in
+                                                    Text("\(number)")
+                                                        .font(.system(size: 28))
+                                                        .foregroundStyle(.white)
+                                                        .tag(number)
+                                                }
+                                            }
+                                            .pickerStyle(.wheel)
+                                            .frame(width: 72, height: 128)
+                                            .compositingGroup()
+
+                                            Text(habit.frequencyCount == 1 ? "time per" : "times per")
+                                                .font(.system(size: 28))
+                                                .foregroundStyle(.white.opacity(0.4))
+                                                .padding(.horizontal, 8)
+
+                                            Picker("Frequency", selection: $habit.frequencyUnitRaw) {
+                                                ForEach(FrequencyUnit.allCases, id: \.self) { unit in
+                                                    Text(unit.rawValue.capitalized)
+                                                        .font(.system(size: 28))
+                                                        .foregroundStyle(.white)
+                                                        .tag(unit.rawValue)
+                                                }
+                                            }
+                                            .pickerStyle(.wheel)
+                                            .frame(width: 136, height: 128)
+                                            .compositingGroup()
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                    }
+
+                                    // Type-specific target
+                                    if habit.isTemporary {
+                                        VStack(alignment: .leading, spacing: 0) {
+                                            Text("TARGET")
+                                                .font(.caption2)
+                                                .textCase(.uppercase)
+                                                .kerning(1.0)
+                                                .opacity(0.5)
+                                                .foregroundStyle(.white)
+
+                                            HStack(spacing: 0) {
+                                                Picker("Goal", selection: $habit.goalTarget) {
+                                                    ForEach(1...365, id: \.self) { n in
+                                                        Text("\(n)")
+                                                            .font(.system(size: 28))
+                                                            .foregroundStyle(.white)
+                                                            .tag(n)
+                                                    }
+                                                }
+                                                .pickerStyle(.wheel)
+                                                .frame(width: 80, height: 128)
+                                                .compositingGroup()
+
+                                                Text("perfect \(cycleUnitLabel)")
+                                                    .font(.system(size: 28))
+                                                    .foregroundStyle(.white.opacity(0.4))
+                                            }
+                                            .frame(maxWidth: .infinity)
+                                        }
+                                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                    } else {
+                                        VStack(alignment: .leading, spacing: 0) {
+                                            Text("MINIMUM RATE")
+                                                .font(.caption2)
+                                                .textCase(.uppercase)
+                                                .kerning(1.0)
+                                                .opacity(0.5)
+                                                .foregroundStyle(.white)
+
+                                            HStack(spacing: 0) {
+                                                Picker("Rate", selection: $habit.targetRate) {
+                                                    ForEach([50, 60, 70, 80, 90, 100], id: \.self) { rate in
+                                                        Text("\(rate)%")
+                                                            .font(.system(size: 28))
+                                                            .foregroundStyle(.white)
+                                                            .tag(rate)
+                                                    }
+                                                }
+                                                .pickerStyle(.wheel)
+                                                .frame(width: 100, height: 128)
+                                                .compositingGroup()
+
+                                                Text("completion target")
+                                                    .font(.system(size: 28))
+                                                    .foregroundStyle(.white.opacity(0.4))
+                                            }
+                                            .frame(maxWidth: .infinity)
+                                        }
+                                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                    }
                                 }
                                 .padding(.horizontal, 25)
                                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -301,12 +473,12 @@ struct HabitInfoView: View {
             isPresented: $showingResetConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Reset Todays Progress", role: .destructive) {
+            Button("Reset Progress", role: .destructive) {
                 withAnimation { habit.resetCurrentProgress() }
             }
             Button("Cancel") { }
         } message: {
-            Text("This action will reset progress for this habit for today.")
+            Text("This will reset progress for the current cycle.")
         }
     }
     
@@ -327,7 +499,15 @@ struct HabitInfoView: View {
     }
     
     // MARK: - Computed Statistics
-    
+
+    private var progressSectionLabel: String {
+        switch habit.frequencyUnit {
+        case .daily: return "TODAY'S PROGRESS"
+        case .weekly: return "THIS WEEK'S PROGRESS"
+        case .monthly: return "THIS MONTH'S PROGRESS"
+        }
+    }
+
     private var perfectCountLabel: String {
         switch habit.frequencyUnit {
         case .daily: return "Perfect Days"
@@ -335,119 +515,226 @@ struct HabitInfoView: View {
         case .monthly: return "Perfect Months"
         }
     }
-    
+
     private var perfectCount: Int {
-        let history = habit.completionHistory
         let goal = habit.frequencyCount
-        
+        let cycleMax = buildCycleMaxMap()
+        return cycleMax.values.filter { $0 >= goal }.count
+    }
+
+    private var currentStreak: Int {
+        let calendar = Calendar.current
+        let goal = habit.frequencyCount
+        let cycleMax = buildCycleMaxMap()
+
+        var streak = 0
+        var checkDate = Date()
+        let currentKey = cycleKey(for: checkDate)
+
+        // If current cycle isn't done, start from previous
+        if (cycleMax[currentKey] ?? 0) < goal {
+            guard let prev = calendar.date(byAdding: cycleComponent, value: -1, to: checkDate) else { return 0 }
+            checkDate = prev
+        }
+
+        while true {
+            let key = cycleKey(for: checkDate)
+            if (cycleMax[key] ?? 0) >= goal {
+                streak += 1
+                guard let prev = calendar.date(byAdding: cycleComponent, value: -1, to: checkDate) else { break }
+                checkDate = prev
+            } else {
+                break
+            }
+        }
+        return streak
+    }
+
+    private var bestStreak: Int {
+        let calendar = Calendar.current
+        let goal = habit.frequencyCount
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+
+        let cycleMax = buildCycleMaxMap()
+
+        // Get perfect cycle dates sorted chronologically
+        let perfectDates: [Date] = cycleMax
+            .filter { $0.value >= goal }
+            .compactMap { key, _ in
+                // Find any date belonging to this cycle
+                habit.completionHistory.keys
+                    .compactMap { formatter.date(from: $0) }
+                    .first { cycleKey(for: $0) == key }
+            }
+            .sorted()
+
+        guard !perfectDates.isEmpty else { return 0 }
+
+        var best = 1
+        var current = 1
+
+        for i in 1..<perfectDates.count {
+            let gap = calendar.dateComponents([cycleCalendarComponent], from: perfectDates[i - 1], to: perfectDates[i])
+            let distance = gap.value(for: cycleCalendarComponent) ?? 0
+            if distance == 1 {
+                current += 1
+                best = max(best, current)
+            } else if distance > 1 {
+                current = 1
+            }
+            // distance == 0 means same cycle, skip
+        }
+        return best
+    }
+
+    // MARK: - Cycle Helpers
+
+    /// Maps each cycle (day/week/month) to the max completionHistory value in that cycle
+    private func buildCycleMaxMap() -> [String: Int] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+
+        var maxMap: [String: Int] = [:]
+        for (dateStr, count) in habit.completionHistory {
+            if let date = formatter.date(from: dateStr) {
+                let key = cycleKey(for: date)
+                maxMap[key] = max(maxMap[key] ?? 0, count)
+            }
+        }
+        return maxMap
+    }
+
+    private func cycleKey(for date: Date) -> String {
+        let calendar = Calendar.current
         switch habit.frequencyUnit {
         case .daily:
-            // Count days where value >= goal
-            return history.values.filter { $0 >= goal }.count
-            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.timeZone = .current
+            return formatter.string(from: date)
         case .weekly:
-            // Aggregate daily counts into weeks
-            var weeklySums: [String: Int] = [:] // Key: "Year-Week"
-            let calendar = Calendar.current
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            
-            for (dateStr, count) in history {
-                if let date = formatter.date(from: dateStr) {
-                    let year = calendar.component(.yearForWeekOfYear, from: date)
-                    let week = calendar.component(.weekOfYear, from: date)
-                    let key = "\(year)-\(week)"
-                    weeklySums[key, default: 0] += count
-                }
-            }
-            return weeklySums.values.filter { $0 >= goal }.count
-            
+            let year = calendar.component(.yearForWeekOfYear, from: date)
+            let week = calendar.component(.weekOfYear, from: date)
+            return "\(year)-W\(week)"
         case .monthly:
-            // Aggregate daily counts into months
-            var monthlySums: [String: Int] = [:] // Key: "Year-Month"
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            
-            for (dateStr, count) in history {
-                if let date = formatter.date(from: dateStr) {
-                    let comps = Calendar.current.dateComponents([.year, .month], from: date)
-                    let key = "\(comps.year!)-\(comps.month!)"
-                    monthlySums[key, default: 0] += count
-                }
-            }
-            return monthlySums.values.filter { $0 >= goal }.count
+            let comps = calendar.dateComponents([.year, .month], from: date)
+            return "\(comps.year!)-M\(comps.month!)"
         }
     }
-    
-    private var completionRateString: String {
+
+    private var cycleComponent: Calendar.Component {
+        switch habit.frequencyUnit {
+        case .daily: return .day
+        case .weekly: return .weekOfYear
+        case .monthly: return .month
+        }
+    }
+
+    private var cycleCalendarComponent: Calendar.Component {
+        cycleComponent
+    }
+
+    // MARK: - Goal Rate
+
+    /// The fill value for the progress bar (0–1)
+    private var goalBarProgress: Double {
+        if habit.isTemporary {
+            guard habit.goalTarget > 0 else { return 0 }
+            return min(1.0, Double(perfectCount) / Double(habit.goalTarget))
+        } else {
+            return completionRate
+        }
+    }
+
+    private var completionRate: Double {
+        guard totalElapsedCycles > 0 else { return 0 }
+        return min(1.0, Double(perfectCount) / Double(totalElapsedCycles))
+    }
+
+    private var totalElapsedCycles: Int {
         let calendar = Calendar.current
         let now = Date()
-        
-        // Calculate total units elapsed since creation
-        var totalElapsedUnits: Int = 1
-        
         switch habit.frequencyUnit {
         case .daily:
-            // Days elapsed (minimum 1 to avoid division by zero)
-            if let days = calendar.dateComponents([.day], from: habit.dateCreated, to: now).day {
-                totalElapsedUnits = max(1, days + 1)
-            }
+            return max(1, (calendar.dateComponents([.day], from: habit.dateCreated, to: now).day ?? 0) + 1)
         case .weekly:
-            // Weeks elapsed
-            if let weeks = calendar.dateComponents([.weekOfYear], from: habit.dateCreated, to: now).weekOfYear {
-                totalElapsedUnits = max(1, weeks + 1)
-            }
+            return max(1, (calendar.dateComponents([.weekOfYear], from: habit.dateCreated, to: now).weekOfYear ?? 0) + 1)
         case .monthly:
-            // Months elapsed
-            if let months = calendar.dateComponents([.month], from: habit.dateCreated, to: now).month {
-                totalElapsedUnits = max(1, months + 1)
-            }
+            return max(1, (calendar.dateComponents([.month], from: habit.dateCreated, to: now).month ?? 0) + 1)
         }
-        
-        let rate = Double(perfectCount) / Double(totalElapsedUnits)
-        let percentage = Int(rate * 100)
-        return "\(percentage)%"
+    }
+
+    private var cycleUnitLabel: String {
+        switch habit.frequencyUnit {
+        case .daily: return "days"
+        case .weekly: return "weeks"
+        case .monthly: return "months"
+        }
     }
 }
 
 // MARK: - Helper View for Statistics
+// MARK: - Edit Type Option Card
+private struct EditTypeOption: View {
+    let label: String
+    let caption: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Text(label)
+                    .font(.subheadline)
+                    .fontWeight(isSelected ? .semibold : .regular)
+                    .foregroundStyle(isSelected ? .white : .white.opacity(0.4))
+
+                Text(caption)
+                    .font(.caption2)
+                    .foregroundStyle(isSelected ? .white.opacity(0.5) : .white.opacity(0.25))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.ultraThinMaterial.opacity(isSelected ? 0.15 : 0.05))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.white.opacity(isSelected ? 0.2 : 0.08), lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct StatCard: View {
     let title: String
     let value: String
-    let icon: String
-    let color: Color
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top) {
-                Image(systemName: icon)
-                    .font(.subheadline)
-                    .foregroundStyle(color.gradient)
-                    .padding(10)
-                    .background(color.opacity(0.2))
-                    .clipShape(Circle())
-                
-                Spacer()
-                
-                Text(value)
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-            }
-            
+        VStack(alignment: .leading, spacing: 4) {
+            Text(value)
+                .font(.headline)
+                .foregroundStyle(.white)
+
             Text(title)
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.6))
-                .textCase(.uppercase)
-                .fontWeight(.medium)
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.4))
         }
-        .padding(16)
-        .background(Color.white.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-        )
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(15)
+        .background {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.ultraThinMaterial.opacity(0.1))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(.white.opacity(0.15), lineWidth: 1)
+        }
     }
 }
 

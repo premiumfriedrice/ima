@@ -11,11 +11,15 @@ import SwiftData
 struct CreateHabitView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    
+    @Environment(\.appBackground) private var appBackground
+
     @State private var title: String = ""
+    @State private var isTemporary: Bool = false
     @State private var frequencyCount: Int = 1
     @State private var frequencyUnit: FrequencyUnit = .daily
-    
+    @State private var goalTarget: Int = 30
+    @State private var targetRate: Int = 80
+
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -24,15 +28,12 @@ struct CreateHabitView: View {
                     .fill(Color.white.opacity(0.5))
                     .frame(width: 36, height: 5)
                     .padding(.top, 20)
-                
+
                 // MARK: - Header
                 HStack {
                     Spacer()
-                    
-                    // Create Button (Checkmark)
-                    Button {
-                        saveHabit()
-                    } label: {
+
+                    Button { saveHabit() } label: {
                         Image(systemName: "checkmark")
                             .font(.title3)
                             .foregroundStyle(!title.isEmpty ? .white : .white.opacity(0.3))
@@ -40,33 +41,29 @@ struct CreateHabitView: View {
                             .background(
                                 ZStack {
                                     if !title.isEmpty {
-                                        // Gradient when active
                                         LinearGradient(
                                             colors: [Color.blue, Color.purple],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
                                     } else {
-                                        // Subtle gray background when disabled
                                         Color.white.opacity(0.1)
                                     }
                                 }
                             )
                             .clipShape(Circle())
-                            // Add a glow when active
                             .shadow(color: !title.isEmpty ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
                             .animation(.smooth, value: !title.isEmpty)
                     }
                     .disabled(title.isEmpty)
                     .accessibilityIdentifier("SaveHabitButton")
-
                 }
                 .padding(.horizontal, 20)
 
                 ScrollView {
-                    VStack(spacing: 32) {
-                        
-                        // MARK: - Title Input
+                    VStack(spacing: 28) {
+
+                        // MARK: - Title
                         VStack(alignment: .leading, spacing: 10) {
                             Text("HABIT")
                                 .font(.caption2)
@@ -74,25 +71,58 @@ struct CreateHabitView: View {
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
-                            
+
                             TextField("e.g., Read, Meditate...", text: $title)
-                                .font(.title2)
+                                .font(.title)
                                 .tint(.blue)
                                 .autocorrectionDisabled()
                                 .accessibilityIdentifier("HabitTitleInput")
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading) // Pushes text to the left
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
-                        
-                        // MARK: - Set Goal
+
+                        // MARK: - Type Toggle
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("SET YOUR GOAL")
+                            Text("TYPE")
                                 .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
-                            
+
+                            HStack(spacing: 10) {
+                                TypeOption(
+                                    label: "Ongoing",
+                                    caption: "Track with a target rate",
+                                    isSelected: !isTemporary
+                                ) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        isTemporary = false
+                                    }
+                                }
+
+                                TypeOption(
+                                    label: "Goal",
+                                    caption: "Reach a set number",
+                                    isSelected: isTemporary
+                                ) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        isTemporary = true
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 25)
+
+                        // MARK: - Frequency
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("FREQUENCY")
+                                .font(.caption2)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
+
                             HStack(spacing: 0) {
                                 Picker("Count", selection: $frequencyCount) {
                                     ForEach(1...50, id: \.self) { number in
@@ -106,12 +136,10 @@ struct CreateHabitView: View {
                                 .frame(width: 72, height: 96)
                                 .compositingGroup()
 
-                                // Dimmed Connector Text
                                 Text(frequencyCount == 1 ? "time per" : "times per")
-                                    .font(.title)
+                                    .font(.title3)
                                     .foregroundStyle(.white.opacity(0.4))
-                                
-                                // Rolling Frequency
+
                                 Picker("Frequency", selection: $frequencyUnit) {
                                     ForEach(FrequencyUnit.allCases, id: \.self) { unit in
                                         Text(unit.rawValue.capitalized)
@@ -127,10 +155,74 @@ struct CreateHabitView: View {
                             .frame(maxWidth: .infinity)
                         }
                         .padding(.horizontal, 25)
-                        
+
+                        // MARK: - Type-Specific Target
+                        if isTemporary {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("TARGET")
+                                    .font(.caption2)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+
+                                HStack(spacing: 0) {
+                                    Picker("Goal", selection: $goalTarget) {
+                                        ForEach(1...365, id: \.self) { n in
+                                            Text("\(n)")
+                                                .font(.title)
+                                                .foregroundStyle(.white)
+                                                .tag(n)
+                                        }
+                                    }
+                                    .pickerStyle(.wheel)
+                                    .frame(width: 80, height: 96)
+                                    .compositingGroup()
+
+                                    Text(goalTarget == 1 ? "perfect \(cycleSingular)" : "perfect \(cyclePlural)")
+                                        .font(.title3)
+                                        .foregroundStyle(.white.opacity(0.4))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .padding(.horizontal, 25)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        } else {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("MINIMUM RATE")
+                                    .font(.caption2)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+
+                                HStack(spacing: 0) {
+                                    Picker("Rate", selection: $targetRate) {
+                                        ForEach([50, 60, 70, 80, 90, 100], id: \.self) { rate in
+                                            Text("\(rate)%")
+                                                .font(.title)
+                                                .foregroundStyle(.white)
+                                                .tag(rate)
+                                        }
+                                    }
+                                    .pickerStyle(.wheel)
+                                    .frame(width: 100, height: 96)
+                                    .compositingGroup()
+
+                                    Text("completion target")
+                                        .font(.title3)
+                                        .foregroundStyle(.white.opacity(0.4))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .padding(.horizontal, 25)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        }
                     }
                     .padding(.top, 20)
+                    .padding(.bottom, 40)
                 }
+                .scrollIndicators(.hidden)
             }
             .foregroundStyle(.white)
             .overlay {
@@ -138,34 +230,89 @@ struct CreateHabitView: View {
                     .stroke(
                         LinearGradient(
                             stops: [
-                                .init(color: .white.opacity(0.2), location: 0.0),  // Exact match to InfoView
+                                .init(color: .white.opacity(0.2), location: 0.0),
                                 .init(color: .white.opacity(0.05), location: 0.2),
                                 .init(color: .clear, location: 0.5)
                             ],
                             startPoint: .top,
                             endPoint: .bottom
                         ),
-                        lineWidth: 3 // Thicker line catches more "light"
+                        lineWidth: 3
                     )
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
         }
-        // MARK: - Sheet Configuration
-        .presentationBackground(.ultraThickMaterial.opacity(0.5))
-        .presentationDetents([.medium]) // Locks sheet to half height
+        .presentationBackground(appBackground)
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
+        .presentationCornerRadius(40)
     }
-    
+
+    // MARK: - Helpers
+
+    private var cycleSingular: String {
+        switch frequencyUnit {
+        case .daily: return "day"
+        case .weekly: return "week"
+        case .monthly: return "month"
+        }
+    }
+
+    private var cyclePlural: String {
+        switch frequencyUnit {
+        case .daily: return "days"
+        case .weekly: return "weeks"
+        case .monthly: return "months"
+        }
+    }
+
     private func saveHabit() {
         let newHabit = Habit(
             title: title,
             frequencyCount: frequencyCount,
-            frequencyUnit: frequencyUnit
+            frequencyUnit: frequencyUnit,
+            goalTarget: isTemporary ? goalTarget : 0,
+            targetRate: isTemporary ? 0 : targetRate
         )
         modelContext.insert(newHabit)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()
+    }
+}
+
+// MARK: - Type Option Card
+
+private struct TypeOption: View {
+    let label: String
+    let caption: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Text(label)
+                    .font(.subheadline)
+                    .fontWeight(isSelected ? .semibold : .regular)
+                    .foregroundStyle(isSelected ? .white : .white.opacity(0.4))
+
+                Text(caption)
+                    .font(.caption2)
+                    .foregroundStyle(isSelected ? .white.opacity(0.5) : .white.opacity(0.25))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.ultraThinMaterial.opacity(isSelected ? 0.15 : 0.05))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.white.opacity(isSelected ? 0.2 : 0.08), lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
 

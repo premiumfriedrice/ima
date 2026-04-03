@@ -88,17 +88,67 @@ struct ProfileView: View {
     }
 
     private var strongestHabits: [Habit] {
-        habits.sorted { $0.totalCount > $1.totalCount }.prefix(3).map { $0 }
+        habits.sorted { completionRate(for: $0) > completionRate(for: $1) }.prefix(3).map { $0 }
     }
 
     private var weakestHabits: [Habit] {
-        habits.sorted { $0.totalCount < $1.totalCount }.prefix(3).map { $0 }
+        habits.sorted { completionRate(for: $0) < completionRate(for: $1) }.prefix(3).map { $0 }
+    }
+
+    private func completionRate(for habit: Habit) -> Double {
+        let calendar = Calendar.current
+        let now = Date()
+        let goal = habit.frequencyCount
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+
+        // Count perfect cycles
+        var perfectCount: Int
+        switch habit.frequencyUnit {
+        case .daily:
+            perfectCount = habit.completionHistory.values.filter { $0 >= goal }.count
+        case .weekly:
+            var weeklyMax: [String: Int] = [:]
+            for (dateStr, count) in habit.completionHistory {
+                if let date = formatter.date(from: dateStr) {
+                    let y = calendar.component(.yearForWeekOfYear, from: date)
+                    let w = calendar.component(.weekOfYear, from: date)
+                    let key = "\(y)-W\(w)"
+                    weeklyMax[key] = max(weeklyMax[key] ?? 0, count)
+                }
+            }
+            perfectCount = weeklyMax.values.filter { $0 >= goal }.count
+        case .monthly:
+            var monthlyMax: [String: Int] = [:]
+            for (dateStr, count) in habit.completionHistory {
+                if let date = formatter.date(from: dateStr) {
+                    let comps = calendar.dateComponents([.year, .month], from: date)
+                    let key = "\(comps.year!)-M\(comps.month!)"
+                    monthlyMax[key] = max(monthlyMax[key] ?? 0, count)
+                }
+            }
+            perfectCount = monthlyMax.values.filter { $0 >= goal }.count
+        }
+
+        // Elapsed cycles
+        let elapsed: Int
+        switch habit.frequencyUnit {
+        case .daily:
+            elapsed = max(1, (calendar.dateComponents([.day], from: habit.dateCreated, to: now).day ?? 0) + 1)
+        case .weekly:
+            elapsed = max(1, (calendar.dateComponents([.weekOfYear], from: habit.dateCreated, to: now).weekOfYear ?? 0) + 1)
+        case .monthly:
+            elapsed = max(1, (calendar.dateComponents([.month], from: habit.dateCreated, to: now).month ?? 0) + 1)
+        }
+
+        return Double(perfectCount) / Double(elapsed)
     }
 
     // Grid layout
     private let statColumns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8)
     ]
 
     var body: some View {
@@ -160,31 +210,11 @@ struct ProfileView: View {
                             .opacity(0.5)
                             .foregroundStyle(.white)
 
-                        LazyVGrid(columns: statColumns, spacing: 12) {
-                            ProfileStatCard(
-                                title: "Completions",
-                                value: "\(totalHabitCompletions)",
-                                icon: "flame.fill",
-                                color: .orange
-                            )
-                            ProfileStatCard(
-                                title: "Tasks Done",
-                                value: "\(totalTasksCompleted)",
-                                icon: "checkmark.circle.fill",
-                                color: .green
-                            )
-                            ProfileStatCard(
-                                title: "Day Streak",
-                                value: "\(currentStreak)",
-                                icon: "bolt.fill",
-                                color: .yellow
-                            )
-                            ProfileStatCard(
-                                title: "Active Days",
-                                value: "\(activeDays)",
-                                icon: "calendar",
-                                color: .blue
-                            )
+                        LazyVGrid(columns: statColumns, spacing: 8) {
+                            ProfileStatCard(title: "Completions", value: "\(totalHabitCompletions)")
+                            ProfileStatCard(title: "Tasks Done", value: "\(totalTasksCompleted)")
+                            ProfileStatCard(title: "Day Streak", value: "\(currentStreak)")
+                            ProfileStatCard(title: "Active Days", value: "\(activeDays)")
                         }
                     }
 
@@ -203,6 +233,7 @@ struct ProfileView: View {
                                     HabitStatRow(
                                         rank: index + 1,
                                         habit: habit,
+                                        rate: completionRate(for: habit),
                                         type: .strong
                                     )
                                 }
@@ -225,6 +256,7 @@ struct ProfileView: View {
                                     HabitStatRow(
                                         rank: index + 1,
                                         habit: habit,
+                                        rate: completionRate(for: habit),
                                         type: .weak
                                     )
                                 }
@@ -249,33 +281,18 @@ struct ProfileView: View {
 struct ProfileStatCard: View {
     let title: String
     let value: String
-    let icon: String
-    let color: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.subheadline)
-                    .foregroundStyle(color)
-                    .padding(8)
-                    .background(color.opacity(0.15))
-                    .clipShape(Circle())
+        VStack(alignment: .leading, spacing: 4) {
+            Text(value)
+                .font(.headline)
+                .foregroundStyle(.white)
 
-                Spacer()
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(value)
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(.white)
-
-                Text(title)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.5))
-                    .textCase(.uppercase)
-            }
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.4))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(15)
         .background {
             RoundedRectangle(cornerRadius: 24)
@@ -304,11 +321,11 @@ enum StatType {
 struct HabitStatRow: View {
     let rank: Int
     let habit: Habit
+    let rate: Double
     let type: StatType
 
     var body: some View {
         HStack(spacing: 12) {
-            // Rank number
             Text("\(rank)")
                 .font(.caption)
                 .fontWeight(.bold)
@@ -321,14 +338,14 @@ struct HabitStatRow: View {
                     .foregroundStyle(.white)
                     .lineLimit(1)
 
-                Text("\(habit.totalCount) lifetime completions")
+                Text("\(Int(rate * 100))% completion rate")
                     .font(.caption2)
                     .foregroundStyle(.white.opacity(0.4))
             }
 
             Spacer()
 
-            Text("\(habit.totalCount)")
+            Text("\(Int(rate * 100))%")
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .foregroundStyle(type.color.opacity(0.8))

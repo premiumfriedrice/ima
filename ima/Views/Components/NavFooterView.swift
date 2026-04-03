@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+enum CreateSheetType: Identifiable {
+    case habit, task
+    var id: Self { self }
+}
+
 enum AppTab: Int, CaseIterable, Identifiable {
     case home      = 0
     case habits    = 1
@@ -27,7 +32,7 @@ enum AppTab: Int, CaseIterable, Identifiable {
 }
 
 struct NavFooterView: View {
-    @Binding var showingCreateSheet: Bool
+    @Binding var activeCreateSheet: CreateSheetType?
     @Binding var selectedTab: AppTab
     @Environment(\.appBackground) private var appBackground
     var body: some View {
@@ -73,8 +78,10 @@ struct NavFooterView: View {
         let active = selectedTab == tab
 
         Button {
-            if selectedTab == tab && (tab == .habits || tab == .usertasks) {
-                showingCreateSheet = true
+            if selectedTab == tab && tab == .habits {
+                activeCreateSheet = .habit
+            } else if selectedTab == tab && tab == .usertasks {
+                activeCreateSheet = .task
             } else {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
                     selectedTab = tab
@@ -179,7 +186,7 @@ struct TaskTabIcon: View {
         VStack {
             Spacer()
             NavFooterView(
-                showingCreateSheet: .constant(false),
+                activeCreateSheet: .constant(nil),
                 selectedTab: .constant(.habits)
             )
         }

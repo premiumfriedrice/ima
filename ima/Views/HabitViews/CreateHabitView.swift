@@ -304,11 +304,11 @@ private struct TypeOption: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background {
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 24)
                     .fill(.ultraThinMaterial.opacity(isSelected ? 0.15 : 0.05))
             }
             .overlay {
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 24)
                     .stroke(.white.opacity(isSelected ? 0.2 : 0.08), lineWidth: 1)
             }
         }

@@ -84,7 +84,21 @@ struct HabitInfoView: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                
+                .padding(.bottom, 8)
+                .background {
+                    appBackground.ignoresSafeArea()
+                }
+                .overlay(alignment: .bottom) {
+                    LinearGradient(
+                        colors: [appBackground, .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 12)
+                    .offset(y: 12)
+                }
+                .zIndex(1)
+
                 ScrollViewReader { proxy in
                     ScrollView {
                         VStack(spacing: 32) {
@@ -119,45 +133,45 @@ struct HabitInfoView: View {
                                     .kerning(1.0)
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
-                                
-                                HStack(spacing: 20) {
+
+                                HStack {
                                     Button { decrementProgress() } label: {
                                         Image(systemName: "minus")
-                                            .font(.callout)
+                                            .font(.callout.weight(.semibold))
                                             .foregroundStyle(.white)
-                                            .frame(width: 50, height: 50)
+                                            .frame(width: 44, height: 44)
                                             .background(.white.opacity(0.1))
                                             .clipShape(Circle())
                                     }
-                                    .padding(.bottom, 25)
-                                    
-                                    GeometryReader { geo in
-                                        ProgressRingWithDots(habit: habit, fillFactor: 0.9) {
-                                            VStack(spacing: 0) {
-                                                Text("\(habit.currentCount)")
-                                                    .font(.largeTitle)
-                                                    .bold()
-                                                    .foregroundStyle(.white)
-                                                    .contentTransition(.numericText(value: Double(habit.currentCount)))
-                                                
-                                                Text("/ \(habit.frequencyCount)")
-                                                    .font(.callout)
-                                                    .foregroundStyle(.white.opacity(0.5))
-                                            }
+
+                                    Spacer()
+
+                                    ProgressRingWithDots(habit: habit, fillFactor: 0.9) {
+                                        VStack(spacing: 0) {
+                                            Text("\(habit.currentCount)")
+                                                .font(.largeTitle)
+                                                .bold()
+                                                .foregroundStyle(.white)
+                                                .contentTransition(.numericText(value: Double(habit.currentCount)))
+
+                                            Text("/ \(habit.frequencyCount)")
+                                                .font(.callout)
+                                                .foregroundStyle(.white.opacity(0.5))
                                         }
                                     }
-                                    .frame(height: 250)
-                                    
+                                    .frame(width: 200, height: 200)
+
+                                    Spacer()
+
                                     Button { incrementProgress() } label: {
                                         Image(systemName: "plus")
-                                            .font(.callout)
+                                            .font(.callout.weight(.semibold))
                                             .foregroundStyle(.black)
-                                            .frame(width: 50, height: 50)
+                                            .frame(width: 44, height: 44)
                                             .background(.white)
                                             .clipShape(Circle())
-                                            .shadow(color: .white.opacity(0.2), radius: 10, x: 0, y: 0)
+                                            .shadow(color: .white.opacity(0.15), radius: 8)
                                     }
-                                    .padding(.bottom, 25)
                                 }
                             }
                             .padding(.horizontal, 25)
@@ -699,11 +713,11 @@ private struct EditTypeOption: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background {
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 24)
                     .fill(.ultraThinMaterial.opacity(isSelected ? 0.15 : 0.05))
             }
             .overlay {
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 24)
                     .stroke(.white.opacity(isSelected ? 0.2 : 0.08), lineWidth: 1)
             }
         }

@@ -38,6 +38,22 @@ struct ProgressRingWithDots<Content: View>: View {
             let strokeWidth = 1.5 * scale
 
             ZStack {
+                // Ambient glow
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                habit.statusColor.opacity(habit.isFullyDone ? 0.25 : Double(habit.currentCount) / Double(max(habit.frequencyCount, 1)) * 0.15),
+                                .clear
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: size * 0.45
+                        )
+                    )
+                    .frame(width: size, height: size)
+                    .blur(radius: 8 * scale)
+                    .animation(.easeInOut(duration: 0.5), value: habit.currentCount)
 
                 // A. Nucleus
                 Circle()

@@ -30,7 +30,7 @@ struct UserTaskInfoView: View {
                 Capsule()
                     .fill(Color.white.opacity(0.5))
                     .frame(width: 36, height: 5)
-                    .padding(.top, 20)
+                    .padding(.top, 12)
                 
                 // MARK: - Header
                 HStack {
@@ -324,7 +324,7 @@ struct UserTaskInfoView: View {
                             .foregroundStyle(.white)
                             .padding(.bottom, 40)
                     }
-                    .padding(.top, 20)
+                    .padding(.top, 12)
                 }
                 .scrollIndicators(.hidden)
             }

@@ -35,7 +35,7 @@ struct CreateTaskView: View {
                 Capsule()
                     .fill(Color.white.opacity(0.5))
                     .frame(width: 36, height: 5)
-                    .padding(.top, 20)
+                    .padding(.top, 12)
                 
                 // MARK: - Header
                 HStack {
@@ -320,7 +320,7 @@ struct CreateTaskView: View {
                         
                         Spacer()
                     }
-                    .padding(.top, 20)
+                    .padding(.top, 12)
                     .padding(.bottom, 50)
                 }
             }

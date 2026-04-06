@@ -34,7 +34,7 @@ struct HabitInfoView: View {
                 Capsule()
                     .fill(Color.white.opacity(0.5))
                     .frame(width: 36, height: 5)
-                    .padding(.top, 20)
+                    .padding(.top, 12)
                 
                 // MARK: - Header
                 HStack {
@@ -181,7 +181,7 @@ struct HabitInfoView: View {
 
                             // MARK: - Goal Rate
                             VStack(alignment: .leading, spacing: 10) {
-                                Text(habit.isTemporary ? "GOAL PROGRESS" : "GOAL COMPLETION RATE")
+                                Text(habit.isGoalHabit ? "GOAL PROGRESS" : "GOAL COMPLETION RATE")
                                     .font(.caption2)
                                     .textCase(.uppercase)
                                     .kerning(1.0)
@@ -199,7 +199,7 @@ struct HabitInfoView: View {
                                                 .frame(width: geo.size.width * animatedRate)
 
                                             // Target marker for ongoing habits
-                                            if !habit.isTemporary && habit.targetRate > 0 && habit.targetRate < 100 {
+                                            if habit.isPerpetual && habit.targetRate > 0 && habit.targetRate < 100 {
                                                 Rectangle()
                                                     .fill(.white.opacity(0.5))
                                                     .frame(width: 2, height: 12)
@@ -210,7 +210,7 @@ struct HabitInfoView: View {
                                     .frame(height: 6)
 
                                     HStack {
-                                        if habit.isTemporary {
+                                        if habit.isGoalHabit {
                                             Text("\(perfectCount) / \(habit.goalTarget)")
                                                 .font(.headline)
                                                 .foregroundStyle(.white)
@@ -222,7 +222,7 @@ struct HabitInfoView: View {
 
                                         Spacer()
 
-                                        if habit.isTemporary {
+                                        if habit.isGoalHabit {
                                             let remaining = max(0, habit.goalTarget - perfectCount)
                                             Text(remaining == 0 ? "Goal reached" : "\(remaining) \(cycleUnitLabel) to go")
                                                 .font(.caption2)
@@ -266,10 +266,26 @@ struct HabitInfoView: View {
                                     .foregroundStyle(.white)
                                 
                                 LazyVGrid(columns: statColumns, spacing: 8) {
-                                    StatCard(title: perfectCountLabel, value: "\(perfectCount)")
-                                    StatCard(title: "Current Streak", value: "\(currentStreak)")
-                                    StatCard(title: "Best Streak", value: "\(bestStreak)")
-                                    StatCard(title: "Total Completions", value: "\(habit.totalCount)")
+                                    StatCard(
+                                        title: perfectCountLabel,
+                                        value: "\(perfectCount)",
+                                        description: "Number of \(cycleUnitLabel) where you fully met your goal."
+                                    )
+                                    StatCard(
+                                        title: "Current Streak",
+                                        value: "\(currentStreak)",
+                                        description: "Consecutive \(cycleUnitLabel) where you hit your goal, counting back from now."
+                                    )
+                                    StatCard(
+                                        title: "Best Streak",
+                                        value: "\(bestStreak)",
+                                        description: "Longest consecutive run of perfect \(cycleUnitLabel) ever recorded."
+                                    )
+                                    StatCard(
+                                        title: "Total Completions",
+                                        value: "\(habit.totalCount)",
+                                        description: "Lifetime number of times you've incremented this habit."
+                                    )
                                 }
                             }
                             .padding(.horizontal, 25)
@@ -288,9 +304,9 @@ struct HabitInfoView: View {
 
                                         HStack(spacing: 10) {
                                             EditTypeOption(
-                                                label: "Ongoing",
+                                                label: "Perpetual",
                                                 caption: "Track with a target rate",
-                                                isSelected: !habit.isTemporary
+                                                isSelected: habit.isPerpetual
                                             ) {
                                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                                     habit.goalTarget = 0
@@ -301,7 +317,7 @@ struct HabitInfoView: View {
                                             EditTypeOption(
                                                 label: "Goal",
                                                 caption: "Reach a set number",
-                                                isSelected: habit.isTemporary
+                                                isSelected: habit.isGoalHabit
                                             ) {
                                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                                     if habit.goalTarget == 0 { habit.goalTarget = 30 }
@@ -354,7 +370,7 @@ struct HabitInfoView: View {
                                     }
 
                                     // Type-specific target
-                                    if habit.isTemporary {
+                                    if habit.isGoalHabit {
                                         VStack(alignment: .leading, spacing: 0) {
                                             Text("TARGET")
                                                 .font(.caption2)
@@ -655,7 +671,7 @@ struct HabitInfoView: View {
 
     /// The fill value for the progress bar (0–1)
     private var goalBarProgress: Double {
-        if habit.isTemporary {
+        if habit.isGoalHabit {
             guard habit.goalTarget > 0 else { return 0 }
             return min(1.0, Double(perfectCount) / Double(habit.goalTarget))
         } else {
@@ -728,26 +744,50 @@ private struct EditTypeOption: View {
 struct StatCard: View {
     let title: String
     let value: String
+    var description: String = ""
+
+    @State private var showingInfo = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.headline)
-                .foregroundStyle(.white)
+        Button {
+            if !description.isEmpty {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                showingInfo = true
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .top) {
+                    Text(value)
+                        .font(.headline)
+                        .foregroundStyle(.white)
 
-            Text(title)
-                .font(.caption2)
-                .foregroundStyle(.white.opacity(0.4))
+                    Spacer()
+
+                    if !description.isEmpty {
+                        Image(systemName: "info.circle")
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.25))
+                    }
+                }
+
+                Text(title)
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.4))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(15)
+            .background {
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(.ultraThinMaterial.opacity(0.1))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 24)
+                    .stroke(.white.opacity(0.15), lineWidth: 1)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(15)
-        .background {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial.opacity(0.1))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(.white.opacity(0.15), lineWidth: 1)
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showingInfo) {
+            StatInfoSheet(title: title, value: value, description: description, compact: true)
         }
     }
 }

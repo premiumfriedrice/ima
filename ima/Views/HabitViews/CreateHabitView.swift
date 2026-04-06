@@ -14,7 +14,7 @@ struct CreateHabitView: View {
     @Environment(\.appBackground) private var appBackground
 
     @State private var title: String = ""
-    @State private var isTemporary: Bool = false
+    @State private var isGoalHabit: Bool = false
     @State private var frequencyCount: Int = 1
     @State private var frequencyUnit: FrequencyUnit = .daily
     @State private var goalTarget: Int = 30
@@ -27,7 +27,7 @@ struct CreateHabitView: View {
                 Capsule()
                     .fill(Color.white.opacity(0.5))
                     .frame(width: 36, height: 5)
-                    .padding(.top, 20)
+                    .padding(.top, 12)
 
                 // MARK: - Header
                 HStack {
@@ -92,22 +92,22 @@ struct CreateHabitView: View {
 
                             HStack(spacing: 10) {
                                 TypeOption(
-                                    label: "Ongoing",
+                                    label: "Perpetual",
                                     caption: "Track with a target rate",
-                                    isSelected: !isTemporary
+                                    isSelected: !isGoalHabit
                                 ) {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        isTemporary = false
+                                        isGoalHabit = false
                                     }
                                 }
 
                                 TypeOption(
                                     label: "Goal",
                                     caption: "Reach a set number",
-                                    isSelected: isTemporary
+                                    isSelected: isGoalHabit
                                 ) {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        isTemporary = true
+                                        isGoalHabit = true
                                     }
                                 }
                             }
@@ -157,7 +157,7 @@ struct CreateHabitView: View {
                         .padding(.horizontal, 25)
 
                         // MARK: - Type-Specific Target
-                        if isTemporary {
+                        if isGoalHabit {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("TARGET")
                                     .font(.caption2)
@@ -272,8 +272,8 @@ struct CreateHabitView: View {
             title: title,
             frequencyCount: frequencyCount,
             frequencyUnit: frequencyUnit,
-            goalTarget: isTemporary ? goalTarget : 0,
-            targetRate: isTemporary ? 0 : targetRate
+            goalTarget: isGoalHabit ? goalTarget : 0,
+            targetRate: isGoalHabit ? 0 : targetRate
         )
         modelContext.insert(newHabit)
         UINotificationFeedbackGenerator().notificationOccurred(.success)

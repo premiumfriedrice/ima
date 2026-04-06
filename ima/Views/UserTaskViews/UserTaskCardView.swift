@@ -72,7 +72,11 @@ struct UserTaskCardView: View {
                     Button(action: { toggleTaskCompletion() }) {
                         ZStack {
                             Circle()
-                                .fill(task.isCompleted ? .green : .clear)
+                                .fill(
+                                    task.isCompleted
+                                        ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                        : AnyShapeStyle(Color.clear)
+                                )
                                 .frame(width: 20, height: 20)
                                 .overlay(
                                     Circle()
@@ -89,7 +93,7 @@ struct UserTaskCardView: View {
                             if task.isCompleted {
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 10, weight: .bold))
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(.white)
                                     .transition(.scale(scale: 0.5).combined(with: .opacity))
                             }
                         }

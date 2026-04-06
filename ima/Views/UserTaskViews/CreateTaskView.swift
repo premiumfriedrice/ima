@@ -45,15 +45,15 @@ struct CreateTaskView: View {
                         createTask()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.title3)
                             .foregroundStyle(!title.isEmpty ? .white : .white.opacity(0.3))
-                            .frame(width: 50, height: 50) // Fixed size for a perfect circle
+                            .padding(10)
                             .background(
                                 ZStack {
                                     if !title.isEmpty {
                                         // Gradient when active
                                         LinearGradient(
-                                            colors: [Color.blue, Color.purple],
+                                            colors: [.green, .mint],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
@@ -65,14 +65,28 @@ struct CreateTaskView: View {
                             )
                             .clipShape(Circle())
                             // Add a glow when active
-                            .shadow(color: !title.isEmpty ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
+                            .shadow(color: !title.isEmpty ? Color.green.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
                             .animation(.smooth, value: !title.isEmpty)
                     }
                     .disabled(title.isEmpty)
                     .accessibilityIdentifier("CreateUserTaskButton")
                 }
                 .padding(.horizontal, 20)
-                
+                .padding(.bottom, 12)
+                .background {
+                    appBackground.ignoresSafeArea()
+                }
+                .overlay(alignment: .bottom) {
+                    LinearGradient(
+                        colors: [appBackground, .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 12)
+                    .offset(y: 12)
+                }
+                .zIndex(1)
+
                 ScrollView {
                     VStack(spacing: 32) {
                         
@@ -86,7 +100,7 @@ struct CreateTaskView: View {
                                 .foregroundStyle(.white)
                             
                             TextField("e.g., Shopping, Laundry", text: $title)
-                                .font(.title2)
+                                .font(.title)
                                 .foregroundStyle(.white)
                                 .tint(.white)
                                 .submitLabel(.next)
@@ -221,8 +235,10 @@ struct CreateTaskView: View {
                                     .colorScheme(.dark)
                                     .tint(.white)
                                     .padding()
-                                    .background(.white.opacity(0.05))
-                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(.ultraThinMaterial.opacity(0.1))
+                                    }
                                     .transition(.move(edge: .top).combined(with: .opacity))
                                     .frame(maxWidth: .infinity)
                                     .padding(.horizontal, 25)
@@ -232,18 +248,24 @@ struct CreateTaskView: View {
                         // MARK: - Details Section
                         VStack(alignment: .leading, spacing: 10) {
                             Text("DETAILS")
-                                .font(.footnote)
+                                .font(.caption2)
                                 .textCase(.uppercase)
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
                             TextField("Add notes, context, or descriptions...", text: $newDetailsInput, axis: .vertical)
-                                .font(.caption2)
+                                .font(.subheadline)
                                 .foregroundStyle(.white)
-                                .padding(16)
-                                .background(.white.opacity(0.05))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .padding(15)
+                                .background {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(.ultraThinMaterial.opacity(0.1))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(.white.opacity(0.15), lineWidth: 1)
+                                }
                                 .lineLimit(3...6)
                                 .autocorrectionDisabled()
                         }
@@ -280,9 +302,15 @@ struct CreateTaskView: View {
                                                 .clipShape(Circle())
                                         }
                                     }
-                                    .padding(16)
-                                    .background(.white.opacity(0.05))
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .padding(15)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(.ultraThinMaterial.opacity(0.1))
+                                    }
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                                    }
                                 }
                                 
                                 HStack(spacing: 12) {
@@ -307,21 +335,23 @@ struct CreateTaskView: View {
                                         }
                                     }
                                 }
-                                .padding(16)
-                                .background(.white.opacity(0.05))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(.white.opacity(0.1), lineWidth: 1)
-                                )
+                                .padding(15)
+                                .background {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(.ultraThinMaterial.opacity(0.1))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(.white.opacity(0.15), lineWidth: 1)
+                                }
                             }
                         }
                         .padding(.horizontal, 25)
                         
                         Spacer()
                     }
-                    .padding(.top, 12)
-                    .padding(.bottom, 50)
+                    .padding(.top, 20)
+                    .padding(.bottom, 40)
                 }
             }
             .presentationBackground(appBackground)

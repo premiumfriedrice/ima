@@ -261,7 +261,7 @@ struct ProfileView: View {
                                 ) {
                                     Text("\(overallCompletionRate)%")
                                         .font(.system(size: 36, weight: .bold))
-                                        .foregroundStyle(.green)
+                                        .foregroundStyle(.green.gradient)
 
                                     VStack(spacing: 8) {
                                         ForEach(Array(perpetualHabits.enumerated()), id: \.element.id) { index, habit in
@@ -309,7 +309,7 @@ struct ProfileView: View {
                                             let done = progress >= habit.goalTarget
                                             HStack(spacing: 10) {
                                                 Image(systemName: done ? "checkmark.circle.fill" : "circle")
-                                                    .foregroundStyle(done ? .green : .white.opacity(0.3))
+                                                    .foregroundStyle(done ? AnyShapeStyle(.green.gradient) : AnyShapeStyle(.white.opacity(0.3)))
                                                     .font(.subheadline)
 
                                                 Text(habit.title)
@@ -361,7 +361,7 @@ struct ProfileView: View {
                                         VStack(spacing: 6) {
                                             Text("\(perpetualHabits.count)")
                                                 .font(.title2.bold())
-                                                .foregroundStyle(.green)
+                                                .foregroundStyle(.green.gradient)
                                             Text("Perpetual")
                                                 .font(.caption2)
                                                 .foregroundStyle(.white.opacity(0.5))
@@ -370,7 +370,7 @@ struct ProfileView: View {
                                         .padding(.vertical, 12)
                                         .background {
                                             RoundedRectangle(cornerRadius: 16)
-                                                .fill(.green.opacity(0.1))
+                                                .fill(.green.gradient.opacity(0.1))
                                         }
 
                                         VStack(spacing: 6) {
@@ -405,7 +405,7 @@ struct ProfileView: View {
                                 ) {
                                     Text("\(Int(completionRate(for: top) * 100))%")
                                         .font(.system(size: 36, weight: .bold))
-                                        .foregroundStyle(.green)
+                                        .foregroundStyle(.green.gradient)
 
                                     Text(top.title)
                                         .font(.title3)
@@ -480,7 +480,7 @@ struct ProfileView: View {
                                 ) {
                                     Text("\(tasksCompleted)")
                                         .font(.system(size: 36, weight: .bold))
-                                        .foregroundStyle(.green)
+                                        .foregroundStyle(.green.gradient)
 
                                     let total = tasks.count
                                     if total > 0 {
@@ -697,7 +697,7 @@ struct HabitStatRow: View {
             Text("\(rank)")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundStyle(type.color.opacity(0.8))
+                .foregroundStyle(type.color.gradient.opacity(0.8))
                 .frame(width: 20)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -716,7 +716,7 @@ struct HabitStatRow: View {
             Text("\(Int(rate * 100))%")
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundStyle(type.color.opacity(0.8))
+                .foregroundStyle(type.color.gradient.opacity(0.8))
         }
         .padding(15)
         .background {

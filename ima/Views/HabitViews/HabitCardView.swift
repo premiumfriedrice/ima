@@ -56,7 +56,7 @@ struct HabitCardView: View {
                 )
             
         }
-        .opacity(habit.isFullyDone ? 0.5 : 1.0)
+        .opacity(habit.isFullyDone ? 0.3 : 1.0)
         .animation(.easeInOut(duration: 0.5), value: habit.isFullyDone)
         .shadow(
             color: .white.opacity(habit.isFullyDone ? 0.0 : 0.1),

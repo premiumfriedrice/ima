@@ -42,7 +42,7 @@ struct CreateHabitView: View {
                                 ZStack {
                                     if !title.isEmpty {
                                         LinearGradient(
-                                            colors: [Color.blue, Color.purple],
+                                            colors: [.green, .mint],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
@@ -52,7 +52,7 @@ struct CreateHabitView: View {
                                 }
                             )
                             .clipShape(Circle())
-                            .shadow(color: !title.isEmpty ? Color.blue.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
+                            .shadow(color: !title.isEmpty ? Color.green.opacity(0.5) : .clear, radius: 10, x: 0, y: 5)
                             .animation(.smooth, value: !title.isEmpty)
                     }
                     .disabled(title.isEmpty)

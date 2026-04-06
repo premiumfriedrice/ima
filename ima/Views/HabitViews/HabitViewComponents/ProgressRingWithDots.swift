@@ -57,7 +57,11 @@ struct ProgressRingWithDots<Content: View>: View {
 
                 // A. Nucleus
                 Circle()
-                    .fill(habit.isFullyDone ? habit.statusColor : .clear)
+                    .fill(
+                        habit.isFullyDone
+                            ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            : AnyShapeStyle(Color.clear)
+                    )
                     .frame(width: ringRadius * 2, height: ringRadius * 2)
                     .overlay(
                         Circle()
@@ -83,7 +87,7 @@ struct ProgressRingWithDots<Content: View>: View {
                         let isCompleted = index < habit.currentCount
 
                         Circle()
-                            .fill(isCompleted ? habit.statusColor : Color.white.opacity(0.25))
+                            .fill(isCompleted ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(Color.white.opacity(0.25)))
                             .frame(width: dotSize, height: dotSize)
                             .shadow(
                                 color: isCompleted ? habit.statusColor.opacity(0.6) : .clear,
@@ -116,7 +120,7 @@ struct ProgressRingWithDots<Content: View>: View {
                     if habit.isFullyDone {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12 * scale, weight: .bold))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.white)
                             .transition(.scale(scale: 0.5).combined(with: .opacity))
                     } else {
                         innerContent()

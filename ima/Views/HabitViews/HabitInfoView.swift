@@ -52,7 +52,7 @@ struct HabitInfoView: View {
                             .background(
                                 ZStack {
                                     if isEditing {
-                                        LinearGradient(colors: [Color.blue, Color.purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
                                     } else {
                                         Color.white.opacity(0.1)
                                     }
@@ -175,7 +175,8 @@ struct HabitInfoView: View {
                                 }
                             }
                             .padding(.horizontal, 25)
-                            
+                            .padding(.bottom, 40)
+
                             // MARK: - History Heatmap
                             HistoryHeatmap(habit: habit)
 
@@ -195,7 +196,7 @@ struct HabitInfoView: View {
                                                 .fill(.white.opacity(0.1))
 
                                             Capsule()
-                                                .fill(habit.statusColor)
+                                                .fill(LinearGradient(colors: [.green, .mint], startPoint: .leading, endPoint: .trailing))
                                                 .frame(width: geo.size.width * animatedRate)
 
                                             // Target marker for ongoing habits

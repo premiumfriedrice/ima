@@ -18,37 +18,75 @@ struct UserTaskInfoView: View {
     
     @State private var showingDeleteConfirmation = false
     @State private var newSubtaskTitle: String = ""
+    @State private var currentDetent: PresentationDetent = .medium
     @FocusState private var isInputFocused: Bool
-    
+
     // State for the calendar animation
     @State private var isCalendarVisible: Bool = false
-    
+
     var body: some View {
         ZStack {
-            
+
             VStack(spacing: 0) {
                 Capsule()
                     .fill(Color.white.opacity(0.5))
                     .frame(width: 36, height: 5)
                     .padding(.top, 12)
-                
+
                 // MARK: - Header
                 HStack {
+                    // Complete button
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            userTask.isCompleted.toggle()
+                            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                        }
+                    } label: {
+                        Image(systemName: userTask.isCompleted ? "checkmark" : "circle")
+                            .font(.callout)
+                            .foregroundStyle(userTask.isCompleted ? .white : .white.opacity(0.6))
+                            .padding(10)
+                            .background(
+                                ZStack {
+                                    if userTask.isCompleted {
+                                        LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    } else {
+                                        Color.white.opacity(0.1)
+                                    }
+                                }
+                            )
+                            .clipShape(Circle())
+                    }
+
                     Spacer()
-                    
+
                     // Delete button
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true
                     } label: {
                         Image(systemName: "trash")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.callout)
                             .foregroundStyle(.red.opacity(0.8))
-                            .padding(12)
+                            .padding(10)
                             .background(.red.opacity(0.1))
                             .clipShape(Circle())
                     }
                 }
                 .padding(.horizontal, 20)
+                .padding(.bottom, 12)
+                .background {
+                    appBackground.ignoresSafeArea()
+                }
+                .overlay(alignment: .bottom) {
+                    LinearGradient(
+                        colors: [appBackground, .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 12)
+                    .offset(y: 12)
+                }
+                .zIndex(1)
                 
                 ScrollView {
                     VStack(spacing: 32) {
@@ -64,7 +102,7 @@ struct UserTaskInfoView: View {
                             
                             // Editable title
                             TextField("Task Title", text: $userTask.title)
-                                .font(.title2)
+                                .font(.title)
                                 .foregroundStyle(.white)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -216,9 +254,15 @@ struct UserTaskInfoView: View {
                             TextField("Add notes, context, or descriptions...", text: $userTask.details, axis: .vertical)
                                 .font(.subheadline)
                                 .foregroundStyle(.white)
-                                .padding(16)
-                                .background(.white.opacity(0.05))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .padding(15)
+                                .background {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(.ultraThinMaterial.opacity(0.1))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(.white.opacity(0.15), lineWidth: 1)
+                                }
                                 .lineLimit(3...6)
                                 .autocorrectionDisabled()
                         }
@@ -246,7 +290,7 @@ struct UserTaskInfoView: View {
                                         } label: {
                                             Image(systemName: subtask.isCompleted ? "checkmark.circle.fill" : "circle")
                                                 .font(.system(size: 24))
-                                                .foregroundStyle(subtask.isCompleted ? .green : .white.opacity(0.3))
+                                                .foregroundStyle(subtask.isCompleted ? AnyShapeStyle(.green.gradient) : AnyShapeStyle(.white.opacity(0.3)))
                                         }
                                         
                                         // Text Input (Editable)
@@ -272,9 +316,15 @@ struct UserTaskInfoView: View {
                                                 .clipShape(Circle())
                                         }
                                     }
-                                    .padding(16)
-                                    .background(.white.opacity(0.05))
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .padding(15)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(.ultraThinMaterial.opacity(0.1))
+                                    }
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                                    }
                                 }
                                 
                                 // 2. Add Subtask Input
@@ -302,13 +352,15 @@ struct UserTaskInfoView: View {
                                         }
                                     }
                                 }
-                                .padding(16)
-                                .background(.white.opacity(0.05))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(.white.opacity(0.1), lineWidth: 1)
-                                )
+                                .padding(15)
+                                .background {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(.ultraThinMaterial.opacity(0.1))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(.white.opacity(0.15), lineWidth: 1)
+                                }
                             }
                         }
                         .padding(.horizontal, 25)
@@ -329,11 +381,10 @@ struct UserTaskInfoView: View {
                 .scrollIndicators(.hidden)
             }
             .foregroundStyle(.white)
+            .presentationDetents([.medium, .large], selection: $currentDetent)
             .presentationDragIndicator(.hidden)
-//            .presentationBackground(.ultraThickMaterial.opacity(0.5))
             .presentationBackground(appBackground)
             .presentationCornerRadius(40)
-            // Shiny Border Overlay
             .overlay {
                 RoundedRectangle(cornerRadius: 40)
                     .stroke(
@@ -346,7 +397,7 @@ struct UserTaskInfoView: View {
                             startPoint: .top,
                             endPoint: .bottom
                         ),
-                        lineWidth: 1.5
+                        lineWidth: 3
                     )
                     .ignoresSafeArea()
                     .allowsHitTesting(false)

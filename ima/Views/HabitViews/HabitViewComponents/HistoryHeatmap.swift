@@ -39,7 +39,7 @@ struct HistoryHeatmap: View {
                 HStack(spacing: 2) {
                     ForEach(1...4, id: \.self) { i in
                         RoundedRectangle(cornerRadius: 2)
-                            .fill(.green.opacity(Double(i) * 0.25))
+                            .fill(.green.gradient.opacity(Double(i) * 0.25))
                             .frame(width: 8, height: 8)
                     }
                 }
@@ -82,8 +82,8 @@ struct HistoryHeatmap: View {
                                     RoundedRectangle(cornerRadius: 2)
                                         .fill(
                                             intensity > 0
-                                            ? .green.opacity(intensity)
-                                            : .white.opacity(0.06)
+                                            ? AnyShapeStyle(.green.gradient.opacity(intensity))
+                                            : AnyShapeStyle(.white.opacity(0.06))
                                         )
                                         .frame(width: 12, height: 12)
                                         .overlay {

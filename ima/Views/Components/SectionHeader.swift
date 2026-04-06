@@ -24,7 +24,7 @@ struct SectionHeader: View {
             HStack(spacing: 5) {
                 Image(systemName: icon)
                     .font(.subheadline)
-                    .foregroundStyle(color)
+                    .foregroundStyle(color.gradient)
                 
                 Text(title)
                     .font(.subheadline)

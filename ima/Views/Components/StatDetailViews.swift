@@ -167,7 +167,7 @@ struct AnimatedBar: View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 Capsule().fill(.white.opacity(0.1))
-                Capsule().fill(color)
+                Capsule().fill(color.gradient)
                     .frame(width: geo.size.width * animatedProgress)
             }
         }

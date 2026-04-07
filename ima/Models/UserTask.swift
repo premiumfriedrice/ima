@@ -62,6 +62,7 @@ final class UserTask {
     
     var details: String
     var dueDate: Date?
+    var dateCompleted: Date?
     var priority: TaskPriority
     
     // Relationship: Deletes subtasks when Task is deleted

@@ -10,7 +10,21 @@ import SwiftData
 
 struct HabitCardView: View {
     @Bindable var habit: Habit
-    // REMOVED: @State private var showingInfoSheet
+    var readOnly: Bool = false
+    var displayDate: Date? = nil
+
+    private var displayCount: Int {
+        guard let date = displayDate else { return habit.currentCount }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+        let key = formatter.string(from: date)
+        return habit.completionHistory[key] ?? 0
+    }
+
+    private var displayDone: Bool {
+        displayCount >= habit.frequencyCount
+    }
     
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
@@ -23,7 +37,7 @@ struct HabitCardView: View {
                     .lineLimit(1)
                 
                 HStack {
-                    Text("\(habit.currentCount)/\(habit.frequencyCount) \(timePeriodString)")
+                    Text("\(displayCount)/\(habit.frequencyCount) \(timePeriodString)")
                 }
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.7))
@@ -32,13 +46,17 @@ struct HabitCardView: View {
             Spacer()
             
             // MARK: - Right Side: Button
-            ProgressRingWithDots(habit: habit, fillFactor: 1.0) {
-                Button(action: { incrementHabit() }) {
-                    Color.clear
-                        .frame(width: 25, height: 25)
-                        .contentShape(Circle())
+            ProgressRingWithDots(habit: habit, fillFactor: 1.0, readOnly: readOnly, overrideCount: displayDate != nil ? displayCount : nil) {
+                if readOnly {
+                    Color.clear.frame(width: 25, height: 25)
+                } else {
+                    Button(action: { incrementHabit() }) {
+                        Color.clear
+                            .frame(width: 25, height: 25)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .frame(width: 45, height: 45)
             
@@ -56,11 +74,11 @@ struct HabitCardView: View {
                 )
             
         }
-        .opacity(habit.isFullyDone ? 0.3 : 1.0)
-        .animation(.easeInOut(duration: 0.5), value: habit.isFullyDone)
+        .opacity(displayDone ? 0.3 : 1.0)
+        .animation(.easeInOut(duration: 0.5), value: displayDone)
         .shadow(
-            color: .white.opacity(habit.isFullyDone ? 0.0 : 0.1),
-            radius: habit.isFullyDone ? 0 : 5,
+            color: .white.opacity(displayDone ? 0.0 : 0.1),
+            radius: displayDone ? 0 : 5,
             x: 0, y: 0
         )
         .padding(.horizontal, 20)

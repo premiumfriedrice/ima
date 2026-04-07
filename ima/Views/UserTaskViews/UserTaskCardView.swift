@@ -10,7 +10,7 @@ import SwiftData
 
 struct UserTaskCardView: View {
     @Bindable var task: UserTask
-    // REMOVED: @State private var showingEditSheet
+    var readOnly: Bool = false
     
     private var subtaskProgress: Double {
         guard !task.subtasks.isEmpty else { return task.isCompleted ? 1.0 : 0.0 }
@@ -68,7 +68,7 @@ struct UserTaskCardView: View {
                     }
                     .frame(width: 45, height: 45)
                     
-                } else {
+                } else if !readOnly {
                     Button(action: { toggleTaskCompletion() }) {
                         ZStack {
                             Circle()
@@ -132,6 +132,7 @@ struct UserTaskCardView: View {
     private func toggleTaskCompletion() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             task.isCompleted.toggle()
+            task.dateCompleted = task.isCompleted ? Date() : nil
             if task.isCompleted {
                 UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
             }

@@ -36,6 +36,7 @@ struct HabitGroupView: View {
     }()
     
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             ZStack(alignment: .bottom) {
                 ScrollView {
@@ -147,6 +148,45 @@ struct HabitGroupView: View {
                                     }
                                 }
                             }
+
+                            // MARK: - Achieved Card
+                            if !achievedGoalHabits.isEmpty {
+                                NavigationLink {
+                                    AchievedHabitsView(habits: achievedGoalHabits)
+                                } label: {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "trophy.fill")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.yellow.gradient)
+
+                                        Text("Achieved")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.white.opacity(0.5))
+
+                                        Spacer()
+
+                                        Text("\(achievedGoalHabits.count)")
+                                            .font(.caption)
+                                            .foregroundStyle(.white.opacity(0.4))
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption2)
+                                            .foregroundStyle(.white.opacity(0.3))
+                                    }
+                                    .padding(15)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(.ultraThinMaterial.opacity(0.1))
+                                    }
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 16)
+                            }
                         }
                         .padding(.bottom, 200)
                     }
@@ -176,6 +216,9 @@ struct HabitGroupView: View {
         .sheet(item: $selectedHabit) { habit in
             HabitInfoView(habit: habit)
         }
+        .background(appBackground)
+        .navigationBarHidden(true)
+        }
     }
     
     // MARK: - Filtering & Sorting Logic
@@ -190,6 +233,39 @@ struct HabitGroupView: View {
     
     private var monthlyHabits: [Habit] {
         habits.filter { $0.frequencyUnit == .monthly }.sorted { !$0.isFullyDone && $1.isFullyDone }
+    }
+
+    private var achievedGoalHabits: [Habit] {
+        habits.filter { habit in
+            guard habit.isGoalHabit else { return false }
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.timeZone = .current
+            let calendar = Calendar.current
+            let goal = habit.frequencyCount
+
+            // Build cycle max map
+            var cycleMax: [String: Int] = [:]
+            for (dateStr, count) in habit.completionHistory {
+                if let date = formatter.date(from: dateStr) {
+                    let key: String
+                    switch habit.frequencyUnit {
+                    case .daily:
+                        key = formatter.string(from: date)
+                    case .weekly:
+                        let y = calendar.component(.yearForWeekOfYear, from: date)
+                        let w = calendar.component(.weekOfYear, from: date)
+                        key = "\(y)-W\(w)"
+                    case .monthly:
+                        let comps = calendar.dateComponents([.year, .month], from: date)
+                        key = "\(comps.year!)-M\(comps.month!)"
+                    }
+                    cycleMax[key] = max(cycleMax[key] ?? 0, count)
+                }
+            }
+            let perfectCount = cycleMax.values.filter { $0 >= goal }.count
+            return perfectCount >= habit.goalTarget
+        }
     }
     
     private var currentWeekRange: String {

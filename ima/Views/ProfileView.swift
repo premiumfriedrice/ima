@@ -104,6 +104,10 @@ struct ProfileView: View {
             .map { $0 }
     }
 
+    private var achievedGoalHabits: [Habit] {
+        goalHabits.filter { perfectCount(for: $0) >= $0.goalTarget }
+    }
+
     // MARK: - Task Stats
 
     private var tasksCompleted: Int {

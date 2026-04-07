@@ -10,8 +10,13 @@ import SwiftUI
 struct ProgressRingWithDots<Content: View>: View {
     var habit: Habit
     var fillFactor: CGFloat = 1.0
+    var readOnly: Bool = false
+    var overrideCount: Int? = nil
 
     @ViewBuilder var innerContent: () -> Content
+
+    private var displayCount: Int { overrideCount ?? habit.currentCount }
+    private var displayDone: Bool { displayCount >= habit.frequencyCount }
 
     // Tracks the slow, continuous "electron" orbit (Unfinished state)
     @State private var orbitRotation: Double = 0
@@ -43,7 +48,7 @@ struct ProgressRingWithDots<Content: View>: View {
                     .fill(
                         RadialGradient(
                             colors: [
-                                habit.statusColor.opacity(habit.isFullyDone ? 0.25 : Double(habit.currentCount) / Double(max(habit.frequencyCount, 1)) * 0.15),
+                                habit.statusColor.opacity(displayDone ? 0.25 : Double(displayCount) / Double(max(habit.frequencyCount, 1)) * 0.15),
                                 .clear
                             ],
                             center: .center,
@@ -53,12 +58,12 @@ struct ProgressRingWithDots<Content: View>: View {
                     )
                     .frame(width: size, height: size)
                     .blur(radius: 8 * scale)
-                    .animation(.easeInOut(duration: 0.5), value: habit.currentCount)
+                    .animation(.easeInOut(duration: 0.5), value: displayCount)
 
                 // A. Nucleus
                 Circle()
                     .fill(
-                        habit.isFullyDone
+                        displayDone
                             ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing))
                             : AnyShapeStyle(Color.clear)
                     )
@@ -66,15 +71,15 @@ struct ProgressRingWithDots<Content: View>: View {
                     .overlay(
                         Circle()
                             .stroke(
-                                habit.isFullyDone ? .clear : .white.opacity(0.2),
+                                displayDone ? .clear : .white.opacity(0.2),
                                 lineWidth: strokeWidth
                             )
                     )
                     .shadow(
-                        color: habit.isFullyDone ? habit.statusColor.opacity(0.4) : .clear,
+                        color: displayDone ? habit.statusColor.opacity(0.4) : .clear,
                         radius: 8 * scale
                     )
-                    .animation(.spring(response: 0.6, dampingFraction: 0.7), value: habit.isFullyDone)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.7), value: displayDone)
 
                 // B. Electrons (always present, animated visibility)
                 ZStack {
@@ -84,7 +89,7 @@ struct ProgressRingWithDots<Content: View>: View {
                     ForEach(0..<totalSteps, id: \.self) { index in
                         let anglePerStep = 360.0 / Double(totalSteps)
                         let angle = anglePerStep * Double(index + 1) - 90
-                        let isCompleted = index < habit.currentCount
+                        let isCompleted = index < displayCount
 
                         Circle()
                             .fill(isCompleted ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(Color.white.opacity(0.25)))
@@ -100,7 +105,7 @@ struct ProgressRingWithDots<Content: View>: View {
                             .animation(
                                 .spring(response: 0.4, dampingFraction: 0.6)
                                     .delay(Double(index) * 0.03),
-                                value: habit.currentCount
+                                value: displayCount
                             )
                     }
                 }
@@ -109,15 +114,18 @@ struct ProgressRingWithDots<Content: View>: View {
                 .scaleEffect(electronsVisible ? 1.0 : 0.3)
                 .opacity(electronsVisible ? 1.0 : 0.0)
                 .onAppear {
-                    // Start the slow continuous orbit
-                    withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) {
-                        orbitRotation = 360
+                    if readOnly {
+                        orbitRotation = Double.random(in: 0..<360)
+                    } else {
+                        withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) {
+                            orbitRotation = 360
+                        }
                     }
                 }
 
                 // C. Center Content (Checkmark or Custom)
                 Group {
-                    if habit.isFullyDone {
+                    if displayDone {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12 * scale, weight: .bold))
                             .foregroundStyle(.white)
@@ -127,7 +135,7 @@ struct ProgressRingWithDots<Content: View>: View {
                             .transition(.scale(scale: 0.8).combined(with: .opacity))
                     }
                 }
-                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: habit.isFullyDone)
+                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: displayDone)
                 // Counter-rotate so text stays upright during success spin
                 .rotationEffect(.degrees(-successRotation))
             }
@@ -138,9 +146,9 @@ struct ProgressRingWithDots<Content: View>: View {
             // 4. Success Spin
             .rotationEffect(.degrees(successRotation))
             .onAppear {
-                electronsVisible = !habit.isFullyDone
+                electronsVisible = !displayDone
             }
-            .onChange(of: habit.isFullyDone) { _, isDone in
+            .onChange(of: displayDone) { _, isDone in
                 if isDone {
                     // Electrons collapse inward
                     withAnimation(.easeIn(duration: 0.4)) {

@@ -21,9 +21,10 @@ struct UserTaskGroupView: View {
     @State private var isHighPriorityExpanded = true
     @State private var isMediumPriorityExpanded = true
     @State private var isLowPriorityExpanded = true
-    @State private var isCompletedExpanded = true // Set to false if you want it closed by default
+    @State private var showingCreate = false
     
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             ZStack(alignment: .bottom) {
                 ScrollView {
@@ -135,32 +136,44 @@ struct UserTaskGroupView: View {
                                     }
                                 }
                             }
-                            
-                            // MARK: - Completed
+
+                            // MARK: - Archive Card
                             if !completedTasks.isEmpty {
-                                Section(header: SectionHeader(
-                                    title: "Completed",
-                                    subtitle: "\(completedTasks.count) DONE",
-                                    icon: "checkmark.circle.fill",
-                                    color: .green,
-                                    isExpanded: isCompletedExpanded,
-                                    coordinateSpace: "taskScroll"
-                                )
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                        isCompletedExpanded.toggle()
+                                NavigationLink {
+                                    TaskArchiveView(tasks: completedTasks)
+                                } label: {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "archivebox")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.white.opacity(0.5))
+
+                                        Text("Archive")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.white.opacity(0.5))
+
+                                        Spacer()
+
+                                        Text("\(completedTasks.count)")
+                                            .font(.caption)
+                                            .foregroundStyle(.white.opacity(0.4))
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption2)
+                                            .foregroundStyle(.white.opacity(0.3))
+                                    }
+                                    .padding(15)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(.ultraThinMaterial.opacity(0.1))
+                                    }
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(.white.opacity(0.15), lineWidth: 1)
                                     }
                                 }
-                                ) {
-                                    if isCompletedExpanded {
-                                        ForEach(completedTasks) { task in
-                                            UserTaskCardView(task: task)
-                                                .onTapGesture { selectedTask = task }
-                                                .padding(.bottom, 10)
-                                        }
-                                    }
-                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 16)
                             }
                         }
                         .padding(.bottom, 200)
@@ -171,14 +184,23 @@ struct UserTaskGroupView: View {
                 
                 // MARK: - STICKY HEADER
                 .safeAreaInset(edge: .top, spacing: 0) {
-                    VStack(spacing: 0) {
+                    HStack {
                         Text("Tasks")
                             .foregroundStyle(.white)
                             .font(.title)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 20)
-                            .zIndex(1)
+
+                        Spacer()
+
+                        Button { showingCreate = true } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16))
+                                .foregroundStyle(.white.opacity(0.6))
+                                .padding(10)
+                                .background(.white.opacity(0.1))
+                                .clipShape(Circle())
+                        }
                     }
+                    .padding(.horizontal, 20)
                     .background {
                         ZStack {
                             appBackground
@@ -190,6 +212,12 @@ struct UserTaskGroupView: View {
         }
         .sheet(item: $selectedTask) { task in
             UserTaskInfoView(userTask: task)
+        }
+        .sheet(isPresented: $showingCreate) {
+            CreateTaskView()
+        }
+        .background(appBackground)
+        .navigationBarHidden(true)
         }
     }
     

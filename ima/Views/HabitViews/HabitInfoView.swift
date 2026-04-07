@@ -13,7 +13,8 @@ struct HabitInfoView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.appBackground) private var appBackground
     @Bindable var habit: Habit
-    
+    var readOnly: Bool = false
+
     @State private var showingDeleteConfirmation = false
     @State private var showingResetConfirmation = false
     @State private var isEditing = false
@@ -37,54 +38,57 @@ struct HabitInfoView: View {
                     .padding(.top, 12)
                 
                 // MARK: - Header
-                HStack {
-                    // Edit Button
-                    Button {
-                        withAnimation(.snappy) {
-                            isEditing.toggle()
-                            if isEditing { currentDetent = .large }
-                        }
-                    } label: {
-                        Image(systemName: isEditing ? "checkmark" : "square.and.pencil")
-                            .font(.callout)
-                            .foregroundStyle(isEditing ? .white : .white.opacity(0.6))
-                            .padding(10)
-                            .background(
-                                ZStack {
-                                    if isEditing {
-                                        LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    } else {
-                                        Color.white.opacity(0.1)
-                                    }
+                Group {
+                    if !readOnly {
+                        HStack {
+                            Button {
+                                withAnimation(.snappy) {
+                                    isEditing.toggle()
+                                    if isEditing { currentDetent = .large }
                                 }
-                            )
-                            .clipShape(Circle())
-                    }
-                    
-                    // Reset Button
-                    Button { showingResetConfirmation = true } label: {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.callout)
-                            .foregroundStyle(.white.opacity(0.6))
-                            .padding(10)
-                            .background(.white.opacity(0.1))
-                            .clipShape(Circle())
-                    }
-                    
-                    Spacer()
-                    
-                    // Delete Button
-                    Button(role: .destructive) { showingDeleteConfirmation = true } label: {
-                        Image(systemName: "trash")
-                            .font(.callout)
-                            .foregroundStyle(.red.opacity(0.8))
-                            .padding(10)
-                            .background(.red.opacity(0.1))
-                            .clipShape(Circle())
+                            } label: {
+                                Image(systemName: isEditing ? "checkmark" : "square.and.pencil")
+                                    .font(.callout)
+                                    .foregroundStyle(isEditing ? Color.primary : Color.primary.opacity(0.6))
+                                    .padding(10)
+                                    .background(
+                                        ZStack {
+                                            if isEditing {
+                                                LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                            } else {
+                                                Color.white.opacity(0.1)
+                                            }
+                                        }
+                                    )
+                                    .clipShape(Circle())
+                            }
+
+                            Button { showingResetConfirmation = true } label: {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.callout)
+                                    .foregroundStyle(.white.opacity(0.6))
+                                    .padding(10)
+                                    .background(.white.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+
+                            Spacer()
+
+                            Button(role: .destructive) { showingDeleteConfirmation = true } label: {
+                                Image(systemName: "trash")
+                                    .font(.callout)
+                                    .foregroundStyle(.red.opacity(0.8))
+                                    .padding(10)
+                                    .background(.red.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
+                    } else {
+                        Color.clear.frame(height: 0)
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
                 .background {
                     appBackground.ignoresSafeArea()
                 }
@@ -135,18 +139,20 @@ struct HabitInfoView: View {
                                     .foregroundStyle(.white)
 
                                 HStack {
-                                    Button { decrementProgress() } label: {
-                                        Image(systemName: "minus")
-                                            .font(.callout.weight(.semibold))
-                                            .foregroundStyle(.white)
-                                            .frame(width: 44, height: 44)
-                                            .background(.white.opacity(0.1))
-                                            .clipShape(Circle())
+                                    if !readOnly {
+                                        Button { decrementProgress() } label: {
+                                            Image(systemName: "minus")
+                                                .font(.callout.weight(.semibold))
+                                                .foregroundStyle(.white)
+                                                .frame(width: 44, height: 44)
+                                                .background(.white.opacity(0.1))
+                                                .clipShape(Circle())
+                                        }
                                     }
 
                                     Spacer()
 
-                                    ProgressRingWithDots(habit: habit, fillFactor: 0.9) {
+                                    ProgressRingWithDots(habit: habit, fillFactor: 0.9, readOnly: readOnly) {
                                         VStack(spacing: 0) {
                                             Text("\(habit.currentCount)")
                                                 .font(.largeTitle)
@@ -163,14 +169,16 @@ struct HabitInfoView: View {
 
                                     Spacer()
 
-                                    Button { incrementProgress() } label: {
-                                        Image(systemName: "plus")
-                                            .font(.callout.weight(.semibold))
-                                            .foregroundStyle(.black)
-                                            .frame(width: 44, height: 44)
-                                            .background(.white)
-                                            .clipShape(Circle())
-                                            .shadow(color: .white.opacity(0.15), radius: 8)
+                                    if !readOnly {
+                                        Button { incrementProgress() } label: {
+                                            Image(systemName: "plus")
+                                                .font(.callout.weight(.semibold))
+                                                .foregroundStyle(.black)
+                                                .frame(width: 44, height: 44)
+                                                .background(.white)
+                                                .clipShape(Circle())
+                                                .shadow(color: .white.opacity(0.15), radius: 8)
+                                        }
                                     }
                                 }
                             }
@@ -516,13 +524,15 @@ struct HabitInfoView: View {
     // MARK: - Logic & Actions
     
     private func incrementProgress() {
+        guard !readOnly else { return }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             habit.increment()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
     }
-    
+
     private func decrementProgress() {
+        guard !readOnly else { return }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             habit.decrement()
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()

@@ -83,9 +83,7 @@ struct NavFooterView: View {
             } else if selectedTab == tab && tab == .usertasks {
                 activeCreateSheet = .task
             } else {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
-                    selectedTab = tab
-                }
+                selectedTab = tab
             }
         } label: {
             tabIcon(tab, active: active)

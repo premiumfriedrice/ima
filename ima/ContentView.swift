@@ -32,33 +32,21 @@ struct ContentView: View {
             bgColor.ignoresSafeArea()
 //            AnimatedRadialBackground()
             
-            // 2. Main Content (Swipeable)
-            TabView(selection: $selectedTab) {
-                // Page 1: Home
-                HomeView()
-                    .tag(AppTab.home)
-                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
-                
-                // Page 2: Habits
-                HabitGroupView(habits: habits)
-                    .accessibilityIdentifier("HabitList")
-                    .tag(AppTab.habits)
-                    // Added bottom inset for footer space
-                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
-                
-                // Page 3: User Tasks
-                UserTaskGroupView(userTasks: tasks)
-                    .tag(AppTab.usertasks)
-                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
-                
-                // Page 4: Profile
-                ProfileView()
-                    .tag(AppTab.profile)
-                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
+            // 2. Main Content
+            Group {
+                switch selectedTab {
+                case .home:
+                    HomeView()
+                case .habits:
+                    HabitGroupView(habits: habits)
+                        .accessibilityIdentifier("HabitList")
+                case .usertasks:
+                    UserTaskGroupView(userTasks: tasks)
+                case .profile:
+                    ProfileView()
+                }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            // FIXED: Ignore ALL safe areas so pages go behind the Notch/Dynamic Island
-            .ignoresSafeArea()
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
             
             // 3. Footer (Floats on top)
             NavFooterView(activeCreateSheet: $activeCreateSheet, selectedTab: $selectedTab)

@@ -15,7 +15,8 @@ struct UserTaskInfoView: View {
     
     // 1. Bind to your UserTask model
     @Bindable var userTask: UserTask
-    
+    var readOnly: Bool = false
+
     @State private var showingDeleteConfirmation = false
     @State private var newSubtaskTitle: String = ""
     @State private var currentDetent: PresentationDetent = .medium
@@ -34,46 +35,51 @@ struct UserTaskInfoView: View {
                     .padding(.top, 12)
 
                 // MARK: - Header
-                HStack {
-                    // Complete button
-                    Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            userTask.isCompleted.toggle()
-                            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
-                        }
-                    } label: {
-                        Image(systemName: userTask.isCompleted ? "checkmark" : "circle")
-                            .font(.callout)
-                            .foregroundStyle(userTask.isCompleted ? .white : .white.opacity(0.6))
-                            .padding(10)
-                            .background(
-                                ZStack {
-                                    if userTask.isCompleted {
-                                        LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    } else {
-                                        Color.white.opacity(0.1)
-                                    }
+                Group {
+                    if !readOnly {
+                        HStack {
+                            Button {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                    userTask.isCompleted.toggle()
+                                    userTask.dateCompleted = userTask.isCompleted ? Date() : nil
+                                    UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
                                 }
-                            )
-                            .clipShape(Circle())
-                    }
+                            } label: {
+                                Image(systemName: userTask.isCompleted ? "checkmark" : "circle")
+                                    .font(.callout)
+                                    .foregroundStyle(userTask.isCompleted ? .white : .white.opacity(0.6))
+                                    .padding(10)
+                                    .background(
+                                        ZStack {
+                                            if userTask.isCompleted {
+                                                LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                            } else {
+                                                Color.white.opacity(0.1)
+                                            }
+                                        }
+                                    )
+                                    .clipShape(Circle())
+                            }
 
-                    Spacer()
+                            Spacer()
 
-                    // Delete button
-                    Button(role: .destructive) {
-                        showingDeleteConfirmation = true
-                    } label: {
-                        Image(systemName: "trash")
-                            .font(.callout)
-                            .foregroundStyle(.red.opacity(0.8))
-                            .padding(10)
-                            .background(.red.opacity(0.1))
-                            .clipShape(Circle())
+                            Button(role: .destructive) {
+                                showingDeleteConfirmation = true
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.callout)
+                                    .foregroundStyle(.red.opacity(0.8))
+                                    .padding(10)
+                                    .background(.red.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+                        }
+                    } else {
+                        Color.clear.frame(height: 0)
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 12)
+                .padding(.bottom, readOnly ? 0 : 12)
                 .background {
                     appBackground.ignoresSafeArea()
                 }

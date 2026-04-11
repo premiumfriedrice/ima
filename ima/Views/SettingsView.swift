@@ -26,16 +26,25 @@ struct SettingsView: View {
                         .padding(.top, 12)
 
                     // MARK: - Header
-                    Text("Settings")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 25)
-                        .padding(.top, 24)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("PREFERENCES")
+                            .font(.caption2)
+                            .textCase(.uppercase)
+                            .kerning(1.0)
+                            .opacity(0.5)
+                            .foregroundStyle(.white)
+
+                        Text("Settings")
+                            .font(.title)
+                            .foregroundStyle(.white)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 25)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
 
                     ScrollView {
-                        VStack(spacing: 24) {
+                        VStack(spacing: 28) {
 
                             // MARK: - Appearance
                             VStack(alignment: .leading, spacing: 10) {
@@ -45,58 +54,8 @@ struct SettingsView: View {
                                     .kerning(1.0)
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
-                                    .padding(.leading, 5)
 
-                                HStack(spacing: 0) {
-                                    ForEach(AppBackground.allCases) { bg in
-                                        Button {
-                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                backgroundRaw = bg.rawValue
-                                            }
-                                        } label: {
-                                            VStack(spacing: 6) {
-                                                Circle()
-                                                    .fill(bg.color)
-                                                    .frame(width: 40, height: 40)
-                                                    .overlay(
-                                                        Circle()
-                                                            .stroke(
-                                                                backgroundRaw == bg.rawValue
-                                                                    ? .white.opacity(0.8)
-                                                                    : .white.opacity(0.15),
-                                                                lineWidth: backgroundRaw == bg.rawValue ? 2 : 1
-                                                            )
-                                                    )
-                                                    .shadow(
-                                                        color: backgroundRaw == bg.rawValue
-                                                            ? .white.opacity(0.15)
-                                                            : .clear,
-                                                        radius: 6
-                                                    )
-
-                                                Text(bg.rawValue)
-                                                    .font(.system(size: 9))
-                                                    .foregroundStyle(
-                                                        backgroundRaw == bg.rawValue
-                                                            ? .white.opacity(0.8)
-                                                            : .white.opacity(0.4)
-                                                    )
-                                                    .lineLimit(1)
-                                            }
-                                            .frame(maxWidth: .infinity)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                                .padding(16)
-                                .background {
-                                    RoundedRectangle(cornerRadius: 24)
-                                        .fill(.ultraThinMaterial.opacity(0.1))
-                                }
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 24)
-                                        .stroke(.white.opacity(0.15), lineWidth: 1)
-                                }
+                                colorRow(options: Array(AppBackground.allCases))
                             }
 
                             // MARK: - Support & Legal
@@ -107,81 +66,71 @@ struct SettingsView: View {
                                     .kerning(1.0)
                                     .opacity(0.5)
                                     .foregroundStyle(.white)
-                                    .padding(.leading, 5)
 
                                 VStack(spacing: 0) {
-                                    // Contact Us
                                     Link(destination: URL(string: "mailto:support@ima.app")!) {
-                                        SettingsRow(
-                                            icon: "envelope.fill",
-                                            title: "Contact Us",
-                                            color: .pink
-                                        ) {
+                                        SettingsRow(icon: "envelope.fill", title: "Contact Us", color: .pink) {
                                             Image(systemName: "arrow.up.right")
                                                 .font(.system(size: 12, weight: .bold))
                                                 .foregroundStyle(.white.opacity(0.3))
                                         }
                                     }
 
-                                    Divider()
-                                        .background(.white.opacity(0.08))
+                                    Rectangle()
+                                        .fill(.white.opacity(0.1))
+                                        .frame(height: 0.5)
                                         .padding(.leading, 56)
 
-                                    // Privacy Policy (in-app)
                                     NavigationLink {
-                                        PrivacyPolicyView()
+                                        LegalPageView(title: "Privacy Policy", content: "This privacy policy will be updated soon.")
                                     } label: {
-                                        SettingsRow(
-                                            icon: "hand.raised.fill",
-                                            title: "Privacy Policy",
-                                            color: .blue
-                                        ) {
+                                        SettingsRow(icon: "hand.raised.fill", title: "Privacy Policy", color: .blue) {
                                             Image(systemName: "chevron.right")
                                                 .font(.system(size: 12, weight: .bold))
                                                 .foregroundStyle(.white.opacity(0.3))
                                         }
                                     }
 
-                                    Divider()
-                                        .background(.white.opacity(0.08))
+                                    Rectangle()
+                                        .fill(.white.opacity(0.1))
+                                        .frame(height: 0.5)
                                         .padding(.leading, 56)
 
-                                    // Terms & Conditions
                                     NavigationLink {
-                                        TermsView()
+                                        LegalPageView(title: "Terms & Conditions", content: "Terms and conditions will be updated soon.")
                                     } label: {
-                                        SettingsRow(
-                                            icon: "doc.text.fill",
-                                            title: "Terms & Conditions",
-                                            color: .yellow
-                                        ) {
+                                        SettingsRow(icon: "doc.text.fill", title: "Terms & Conditions", color: .yellow) {
                                             Image(systemName: "chevron.right")
                                                 .font(.system(size: 12, weight: .bold))
                                                 .foregroundStyle(.white.opacity(0.3))
                                         }
                                     }
                                 }
-                                .background(Color.white.opacity(0.05))
-                                .clipShape(RoundedRectangle(cornerRadius: 20))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
-                                )
+                                .background {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(.ultraThinMaterial.opacity(0.1))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(.white.opacity(0.15), lineWidth: 1)
+                                }
                             }
+
+                            // Version
+                            Text("Version 1.0.0")
+                                .font(.caption2)
+                                .foregroundStyle(.white.opacity(0.25))
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 8)
                         }
                         .padding(.horizontal, 25)
-                        .padding(.top, 24)
+                        .padding(.top, 16)
+                        .padding(.bottom, 40)
                     }
                     .scrollIndicators(.hidden)
-
-                    Spacer()
-
-                    Text("Version 1.0.0")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.3))
-                        .padding(.bottom, 20)
                 }
             }
+            .background(appBackground)
             .navigationBarHidden(true)
         }
         .presentationDetents([.medium, .large])
@@ -204,6 +153,51 @@ struct SettingsView: View {
                 )
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
+        }
+    }
+
+    // MARK: - Color Row Helper
+    @ViewBuilder
+    private func colorRow(options: [AppBackground]) -> some View {
+        HStack(spacing: 0) {
+            ForEach(options) { bg in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        backgroundRaw = bg.rawValue
+                    }
+                } label: {
+                    VStack(spacing: 6) {
+                        Circle()
+                            .fill(bg.color)
+                            .frame(width: 36, height: 36)
+                            .overlay(
+                                Circle()
+                                    .stroke(
+                                        backgroundRaw == bg.rawValue
+                                            ? Color.white.opacity(0.8)
+                                            : Color.white.opacity(0.15),
+                                        lineWidth: backgroundRaw == bg.rawValue ? 2 : 1
+                                    )
+                            )
+                            .shadow(
+                                color: backgroundRaw == bg.rawValue
+                                    ? Color.white.opacity(0.15) : .clear,
+                                radius: 6
+                            )
+
+                        Text(bg.rawValue)
+                            .font(.system(size: 8))
+                            .foregroundStyle(
+                                backgroundRaw == bg.rawValue
+                                    ? Color.white.opacity(0.8)
+                                    : Color.white.opacity(0.4)
+                            )
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 }
@@ -244,62 +238,64 @@ struct SettingsRow<Content: View>: View {
 
 // MARK: - Privacy Policy
 
-struct PrivacyPolicyView: View {
+struct LegalPageView: View {
+    let title: String
+    let content: String
     @Environment(\.appBackground) private var appBackground
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack {
             appBackground.ignoresSafeArea()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Privacy Policy")
-                        .font(.title2)
-                        .fontWeight(.bold)
+            VStack(spacing: 0) {
+                // Drag pill
+                Capsule()
+                    .fill(Color.white.opacity(0.5))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 12)
+
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.callout)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .padding(10)
+                            .background(.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("LEGAL")
+                        .font(.caption2)
+                        .textCase(.uppercase)
+                        .kerning(1.0)
+                        .opacity(0.5)
                         .foregroundStyle(.white)
 
-                    Text("This privacy policy will be updated soon.")
-                        .font(.body)
-                        .foregroundStyle(.white.opacity(0.5))
-                }
-                .padding(.horizontal, 25)
-                .padding(.top, 20)
-            }
-            .scrollIndicators(.hidden)
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(appBackground, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-    }
-}
-
-// MARK: - Terms & Conditions
-
-struct TermsView: View {
-    @Environment(\.appBackground) private var appBackground
-
-    var body: some View {
-        ZStack {
-            appBackground.ignoresSafeArea()
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Terms & Conditions")
-                        .font(.title2)
-                        .fontWeight(.bold)
+                    Text(title)
+                        .font(.title)
                         .foregroundStyle(.white)
-
-                    Text("Terms and conditions will be updated soon.")
-                        .font(.body)
-                        .foregroundStyle(.white.opacity(0.5))
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 25)
-                .padding(.top, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 16)
+
+                ScrollView {
+                    Text(content)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.5))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 25)
+                }
+                .scrollIndicators(.hidden)
             }
-            .scrollIndicators(.hidden)
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(appBackground, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }

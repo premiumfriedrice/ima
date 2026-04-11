@@ -19,6 +19,14 @@ struct ProfileView: View {
 
     // State for Settings Sheet
     @State private var showSettings = false
+    @State private var showEmojiPicker = false
+    @State private var isEditingName = false
+    @State private var isEditingTagline = false
+
+    // Profile data
+    @AppStorage("profileEmoji") private var profileEmoji: String = "🎯"
+    @AppStorage("profileName") private var profileName: String = ""
+    @AppStorage("profileTagline") private var profileTagline: String = ""
 
     // MARK: - Habit Stats
 
@@ -26,8 +34,8 @@ struct ProfileView: View {
         habits.filter { $0.isPerpetual }
     }
 
-    private var goalHabits: [Habit] {
-        habits.filter { $0.isGoalHabit }
+    private var challengeHabits: [Habit] {
+        habits.filter { $0.isChallengeHabit }
     }
 
     private var overallCompletionRate: Int {
@@ -37,7 +45,7 @@ struct ProfileView: View {
     }
 
     private var goalsReached: Int {
-        goalHabits.filter { habit in
+        challengeHabits.filter { habit in
             let perfect = perfectCount(for: habit)
             return perfect >= habit.goalTarget
         }.count
@@ -88,8 +96,8 @@ struct ProfileView: View {
         return streak
     }
 
-    private var closestGoalHabit: Habit? {
-        goalHabits
+    private var closestChallengeHabit: Habit? {
+        challengeHabits
             .filter { perfectCount(for: $0) < $0.goalTarget }
             .max { a, b in
                 Double(perfectCount(for: a)) / Double(a.goalTarget) <
@@ -104,8 +112,8 @@ struct ProfileView: View {
             .map { $0 }
     }
 
-    private var achievedGoalHabits: [Habit] {
-        goalHabits.filter { perfectCount(for: $0) >= $0.goalTarget }
+    private var achievedChallengeHabits: [Habit] {
+        challengeHabits.filter { perfectCount(for: $0) >= $0.goalTarget }
     }
 
     // MARK: - Task Stats
@@ -188,6 +196,16 @@ struct ProfileView: View {
         }
     }
 
+    private var personalityTitle: String {
+        if currentStreak >= 7 { return "Streak Warrior" }
+        if overallCompletionRate >= 90 { return "Habit Machine" }
+        if challengeHabits.count > perpetualHabits.count { return "Challenge Hunter" }
+        if tasksCompleted > 20 { return "Task Crusher" }
+        if habits.count >= 5 { return "The Dedicated" }
+        if habits.count > 0 || tasks.count > 0 { return "On the Rise" }
+        return "Getting Started"
+    }
+
     // Grid layout
     private let statColumns = [
         GridItem(.flexible(), spacing: 8),
@@ -205,7 +223,7 @@ struct ProfileView: View {
                     HStack {
                         Button { showSettings = true } label: {
                             Image(systemName: "gearshape.fill")
-                                .font(.system(size: 16))
+                                .font(.callout)
                                 .foregroundStyle(.white.opacity(0.6))
                                 .padding(10)
                                 .background(.white.opacity(0.1))
@@ -216,31 +234,84 @@ struct ProfileView: View {
                     .padding(.top, 20)
 
                     // MARK: - Profile Hero
-                    VStack(spacing: 20) {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient(
-                                    colors: [.blue, .purple],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
-                                .frame(width: 80, height: 80)
-                                .shadow(color: .blue.opacity(0.5), radius: 10, x: 0, y: 5)
+                    VStack(spacing: 16) {
+                        // Emoji Avatar
+                        Button { showEmojiPicker = true } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(.ultraThinMaterial.opacity(0.2))
+                                    .frame(width: 80, height: 80)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                                    )
 
-                            Text("LA")
-                                .font(.title)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.white)
+                                Text(profileEmoji)
+                                    .font(.system(size: 40))
+                            }
                         }
 
-                        VStack(spacing: 8) {
-                            Text("Lloyd Alba")
-                                .font(.title2)
-                                .foregroundStyle(.white)
+                        // Personality title
+                        Text(personalityTitle.uppercased())
+                            .font(.caption2)
+                            .textCase(.uppercase)
+                            .kerning(1.0)
+                            .foregroundStyle(.white.opacity(0.4))
 
-                            Text("CS Student")
-                                .font(.subheadline)
-                                .foregroundStyle(.white.opacity(0.5))
+                        // Editable name
+                        VStack(spacing: 6) {
+                            if isEditingName {
+                                TextField("Your Name", text: $profileName)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.white)
+                                    .multilineTextAlignment(.center)
+                                    .submitLabel(.done)
+                                    .onSubmit { isEditingName = false }
+                            } else {
+                                Text(profileName.isEmpty ? "Your Name" : profileName)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(profileName.isEmpty ? .white.opacity(0.3) : .white)
+                                    .onTapGesture { isEditingName = true }
+                            }
+
+                            // Editable tagline
+                            if isEditingTagline {
+                                TextField("Add a tagline...", text: $profileTagline)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                                    .submitLabel(.done)
+                                    .onSubmit { isEditingTagline = false }
+                            } else {
+                                Text(profileTagline.isEmpty ? "Add a tagline..." : profileTagline)
+                                    .font(.subheadline)
+                                    .foregroundStyle(profileTagline.isEmpty ? .white.opacity(0.25) : .white.opacity(0.5))
+                                    .onTapGesture { isEditingTagline = true }
+                            }
+                        }
+
+                        // Streak badge
+                        if currentStreak > 0 {
+                            HStack(spacing: 4) {
+                                Text("🔥")
+                                    .font(.caption)
+                                Text("\(currentStreak) day streak")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(.orange)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background {
+                                Capsule()
+                                    .fill(.orange.opacity(0.1))
+                            }
+                            .overlay {
+                                Capsule()
+                                    .stroke(.orange.opacity(0.2), lineWidth: 1)
+                            }
                         }
                     }
 
@@ -295,20 +366,20 @@ struct ProfileView: View {
                             }
 
                             // Goals Reached
-                            ProfileStatCard(title: "Goals Reached", value: "\(goalsReached)") {
+                            ProfileStatCard(title: "Challenges Won", value: "\(goalsReached)") {
                                 ProfileStatDetailShell(
                                     icon: "target",
-                                    title: "Goals Reached",
+                                    title: "Challenges Won",
 
                                     color: .blue,
-                                    description: "Goal habits where you've completed the required number of perfect cycles."
+                                    description: "Challenge habits where you've completed the required number of perfect cycles."
                                 ) {
-                                    Text("\(goalsReached) of \(goalHabits.count)")
+                                    Text("\(goalsReached) of \(challengeHabits.count)")
                                         .font(.system(size: 36, weight: .bold))
                                         .foregroundStyle(.blue)
 
                                     VStack(spacing: 8) {
-                                        ForEach(goalHabits) { habit in
+                                        ForEach(challengeHabits) { habit in
                                             let progress = perfectCount(for: habit)
                                             let done = progress >= habit.goalTarget
                                             HStack(spacing: 10) {
@@ -378,10 +449,10 @@ struct ProfileView: View {
                                         }
 
                                         VStack(spacing: 6) {
-                                            Text("\(goalHabits.count)")
+                                            Text("\(challengeHabits.count)")
                                                 .font(.title2.bold())
                                                 .foregroundStyle(.blue)
-                                            Text("Goal")
+                                            Text("Challenge")
                                                 .font(.caption2)
                                                 .foregroundStyle(.white.opacity(0.5))
                                         }
@@ -427,12 +498,12 @@ struct ProfileView: View {
                         }
 
                         // Closest Goal
-                        if let closest = closestGoalHabit {
+                        if let closest = closestChallengeHabit {
                             let progress = perfectCount(for: closest)
-                            ProfileStatCard(title: "Closest Goal", value: closest.title, subtitle: "\(progress)/\(closest.goalTarget)") {
+                            ProfileStatCard(title: "Closest Challenge", value: closest.title, subtitle: "\(progress)/\(closest.goalTarget)") {
                                 ProfileStatDetailShell(
                                     icon: "flag.fill",
-                                    title: "Closest Goal",
+                                    title: "Closest Challenge",
                                     color: .blue,
                                     description: "The goal habit nearest to completion."
                                 ) {
@@ -473,6 +544,37 @@ struct ProfileView: View {
                             .foregroundStyle(.white)
 
                         LazyVGrid(columns: statColumns, spacing: 8) {
+                            // Pending
+                            ProfileStatCard(title: "Pending", value: "\(tasksPending)") {
+                                ProfileStatDetailShell(
+                                    icon: "clock.fill",
+                                    title: "Pending",
+
+                                    color: .yellow,
+                                    description: "Tasks that haven't been completed yet."
+                                ) {
+                                    Text("\(tasksPending)")
+                                        .font(.system(size: 36, weight: .bold))
+                                        .foregroundStyle(.yellow)
+
+                                    VStack(spacing: 8) {
+                                        ForEach(tasks.filter { !$0.isCompleted }.prefix(5)) { task in
+                                            HStack(spacing: 10) {
+                                                Circle()
+                                                    .fill(task.priority.color)
+                                                    .frame(width: 8, height: 8)
+                                                Text(task.title)
+                                                    .font(.subheadline)
+                                                    .foregroundStyle(.white.opacity(0.8))
+                                                    .lineLimit(1)
+                                                Spacer()
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 20)
+                                }
+                            }
+
                             // Completed
                             ProfileStatCard(title: "Completed", value: "\(tasksCompleted)") {
                                 ProfileStatDetailShell(
@@ -502,37 +604,6 @@ struct ProfileView: View {
                                         }
                                         .padding(.horizontal, 20)
                                     }
-                                }
-                            }
-
-                            // Pending
-                            ProfileStatCard(title: "Pending", value: "\(tasksPending)") {
-                                ProfileStatDetailShell(
-                                    icon: "clock.fill",
-                                    title: "Pending",
-
-                                    color: .yellow,
-                                    description: "Tasks that haven't been completed yet."
-                                ) {
-                                    Text("\(tasksPending)")
-                                        .font(.system(size: 36, weight: .bold))
-                                        .foregroundStyle(.yellow)
-
-                                    VStack(spacing: 8) {
-                                        ForEach(tasks.filter { !$0.isCompleted }.prefix(5)) { task in
-                                            HStack(spacing: 10) {
-                                                Circle()
-                                                    .fill(task.priority.color)
-                                                    .frame(width: 8, height: 8)
-                                                Text(task.title)
-                                                    .font(.subheadline)
-                                                    .foregroundStyle(.white.opacity(0.8))
-                                                    .lineLimit(1)
-                                                Spacer()
-                                            }
-                                        }
-                                    }
-                                    .padding(.horizontal, 20)
                                 }
                             }
 
@@ -612,9 +683,106 @@ struct ProfileView: View {
             }
             .scrollIndicators(.hidden)
         }
+        .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
+        .sheet(isPresented: $showEmojiPicker) {
+            EmojiPickerView(selected: $profileEmoji)
+        }
+    }
+}
+
+// MARK: - Emoji Picker
+
+struct EmojiPickerView: View {
+    @Binding var selected: String
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.appBackground) private var appBackground
+    @State private var emojiInput: String = ""
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Capsule()
+                .fill(Color.white.opacity(0.5))
+                .frame(width: 36, height: 5)
+                .padding(.top, 12)
+
+            Text("CHOOSE AVATAR")
+                .font(.caption2)
+                .textCase(.uppercase)
+                .kerning(1.0)
+                .foregroundStyle(.white.opacity(0.5))
+
+            // Preview
+            ZStack {
+                Circle()
+                    .fill(.ultraThinMaterial.opacity(0.2))
+                    .frame(width: 100, height: 100)
+                    .overlay(
+                        Circle()
+                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                    )
+
+                Text(emojiInput.isEmpty ? selected : emojiInput)
+                    .font(.system(size: 50))
+            }
+
+            // Hidden text field that opens emoji keyboard
+            TextField("", text: $emojiInput)
+                .focused($isFocused)
+                .frame(width: 1, height: 1)
+                .opacity(0.01)
+                .onChange(of: emojiInput) { _, newValue in
+                    // Only keep the last emoji character
+                    let emojis = newValue.filter { $0.isEmoji }
+                    if let last = emojis.last {
+                        selected = String(last)
+                        emojiInput = String(last)
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
+                }
+
+            Text("Tap below to open emoji keyboard")
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.3))
+
+            Button {
+                isFocused = true
+            } label: {
+                Text("Choose Emoji")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background {
+                        Capsule()
+                            .fill(.ultraThinMaterial.opacity(0.2))
+                    }
+                    .overlay {
+                        Capsule()
+                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                    }
+            }
+
+            Spacer()
+        }
+        .presentationDetents([.height(340)])
+        .presentationDragIndicator(.hidden)
+        .presentationBackground(appBackground)
+        .presentationCornerRadius(40)
+        .onAppear {
+            emojiInput = selected
+        }
+    }
+}
+
+extension Character {
+    var isEmoji: Bool {
+        guard let scalar = unicodeScalars.first else { return false }
+        return scalar.properties.isEmoji && (scalar.value > 0x238C || unicodeScalars.count > 1)
     }
 }
 

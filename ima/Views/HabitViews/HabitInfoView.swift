@@ -14,6 +14,15 @@ struct HabitInfoView: View {
     @Environment(\.appBackground) private var appBackground
     @Bindable var habit: Habit
     var readOnly: Bool = false
+    var displayDate: Date? = nil
+
+    private var displayCount: Int {
+        guard let date = displayDate else { return habit.currentCount }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+        return habit.completionHistory[formatter.string(from: date)] ?? 0
+    }
 
     @State private var showingDeleteConfirmation = false
     @State private var showingResetConfirmation = false
@@ -39,30 +48,38 @@ struct HabitInfoView: View {
                 
                 // MARK: - Header
                 Group {
-                    if !readOnly {
+                    if readOnly {
+                        Color.clear.frame(height: 0)
+                    } else if isEditing {
                         HStack {
+                            Text("EDITING")
+                                .font(.caption2)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .foregroundStyle(.white.opacity(0.4))
+
+                            Spacer()
+
                             Button {
                                 withAnimation(.snappy) {
-                                    isEditing.toggle()
-                                    if isEditing { currentDetent = .large }
+                                    isEditing = false
+                                    currentDetent = .medium
                                 }
                             } label: {
-                                Image(systemName: isEditing ? "checkmark" : "square.and.pencil")
+                                Image(systemName: "checkmark")
                                     .font(.callout)
-                                    .foregroundStyle(isEditing ? Color.primary : Color.primary.opacity(0.6))
+                                    .foregroundStyle(.white)
                                     .padding(10)
                                     .background(
-                                        ZStack {
-                                            if isEditing {
-                                                LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                            } else {
-                                                Color.white.opacity(0.1)
-                                            }
-                                        }
+                                        LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
                                     )
                                     .clipShape(Circle())
                             }
-
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
+                    } else {
+                        HStack {
                             Button { showingResetConfirmation = true } label: {
                                 Image(systemName: "arrow.clockwise")
                                     .font(.callout)
@@ -73,6 +90,20 @@ struct HabitInfoView: View {
                             }
 
                             Spacer()
+
+                            Button {
+                                withAnimation(.snappy) {
+                                    isEditing = true
+                                    currentDetent = .large
+                                }
+                            } label: {
+                                Image(systemName: "square.and.pencil")
+                                    .font(.callout)
+                                    .foregroundStyle(.white.opacity(0.6))
+                                    .padding(10)
+                                    .background(.white.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
 
                             Button(role: .destructive) { showingDeleteConfirmation = true } label: {
                                 Image(systemName: "trash")
@@ -85,8 +116,6 @@ struct HabitInfoView: View {
                         }
                         .padding(.horizontal, 20)
                         .padding(.bottom, 8)
-                    } else {
-                        Color.clear.frame(height: 0)
                     }
                 }
                 .background {
@@ -103,31 +132,40 @@ struct HabitInfoView: View {
                 }
                 .zIndex(1)
 
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        VStack(spacing: 32) {
-                            
-                            // MARK: - Hero Title
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("HABIT")
-                                    .font(.caption2)
-                                    .textCase(.uppercase)
-                                    .kerning(1.0)
-                                    .opacity(0.5)
+                ScrollView {
+                    VStack(spacing: 32) {
+                        // MARK: - Hero Title
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(habit.isChallengeHabit ? "CHALLENGE HABIT" : "PERPETUAL HABIT")
+                                .font(.caption2)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .opacity(0.5)
+                                .foregroundStyle(.white)
+
+                            if isEditing {
+                                TextField("Habit name", text: $habit.title, axis: .vertical)
+                                    .font(.title)
                                     .foregroundStyle(.white)
-                                if isEditing {
-                                    TextField("Habit name", text: $habit.title)
-                                        .font(.title)
-                                        .foregroundStyle(.white)
-                                        .tint(.blue)
-                                } else {
-                                    Text(habit.title)
-                                        .font(.title)
-                                        .foregroundStyle(.white)
-                                }
+                                    .tint(.blue)
+                                    .lineLimit(1...3)
+                                    .submitLabel(.done)
+                                    .onChange(of: habit.title) { _, newValue in
+                                        if newValue.contains("\n") {
+                                            habit.title = newValue.replacingOccurrences(of: "\n", with: "")
+                                            dismissKeyboard()
+                                        }
+                                    }
+                            } else {
+                                Text(habit.title)
+                                    .font(.title)
+                                    .foregroundStyle(.white)
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 25)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 25)
+
+                        if !isEditing {
                             
                             // MARK: - Progress
                             VStack(alignment: .leading, spacing: 10) {
@@ -152,13 +190,13 @@ struct HabitInfoView: View {
 
                                     Spacer()
 
-                                    ProgressRingWithDots(habit: habit, fillFactor: 0.9, readOnly: readOnly) {
+                                    ProgressRingWithDots(habit: habit, fillFactor: 0.9, readOnly: readOnly, overrideCount: displayDate != nil ? displayCount : nil) {
                                         VStack(spacing: 0) {
-                                            Text("\(habit.currentCount)")
+                                            Text("\(displayCount)")
                                                 .font(.largeTitle)
                                                 .bold()
                                                 .foregroundStyle(.white)
-                                                .contentTransition(.numericText(value: Double(habit.currentCount)))
+                                                .contentTransition(.numericText(value: Double(displayCount)))
 
                                             Text("/ \(habit.frequencyCount)")
                                                 .font(.callout)
@@ -190,7 +228,7 @@ struct HabitInfoView: View {
 
                             // MARK: - Goal Rate
                             VStack(alignment: .leading, spacing: 10) {
-                                Text(habit.isGoalHabit ? "GOAL PROGRESS" : "GOAL COMPLETION RATE")
+                                Text(habit.isChallengeHabit ? "CHALLENGE PROGRESS" : "COMPLETION RATE")
                                     .font(.caption2)
                                     .textCase(.uppercase)
                                     .kerning(1.0)
@@ -219,7 +257,7 @@ struct HabitInfoView: View {
                                     .frame(height: 6)
 
                                     HStack {
-                                        if habit.isGoalHabit {
+                                        if habit.isChallengeHabit {
                                             Text("\(perfectCount) / \(habit.goalTarget)")
                                                 .font(.headline)
                                                 .foregroundStyle(.white)
@@ -231,7 +269,7 @@ struct HabitInfoView: View {
 
                                         Spacer()
 
-                                        if habit.isGoalHabit {
+                                        if habit.isChallengeHabit {
                                             let remaining = max(0, habit.goalTarget - perfectCount)
                                             Text(remaining == 0 ? "Goal reached" : "\(remaining) \(cycleUnitLabel) to go")
                                                 .font(.caption2)
@@ -298,154 +336,9 @@ struct HabitInfoView: View {
                                 }
                             }
                             .padding(.horizontal, 25)
-                            
-                            // MARK: - Edit Section
-                            if isEditing {
-                                VStack(spacing: 24) {
-                                    // Type toggle
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        Text("TYPE")
-                                            .font(.caption2)
-                                            .textCase(.uppercase)
-                                            .kerning(1.0)
-                                            .opacity(0.5)
-                                            .foregroundStyle(.white)
 
-                                        HStack(spacing: 10) {
-                                            EditTypeOption(
-                                                label: "Perpetual",
-                                                caption: "Track with a target rate",
-                                                isSelected: habit.isPerpetual
-                                            ) {
-                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                                    habit.goalTarget = 0
-                                                    if habit.targetRate == 0 { habit.targetRate = 80 }
-                                                }
-                                            }
-
-                                            EditTypeOption(
-                                                label: "Goal",
-                                                caption: "Reach a set number",
-                                                isSelected: habit.isGoalHabit
-                                            ) {
-                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                                    if habit.goalTarget == 0 { habit.goalTarget = 30 }
-                                                    habit.targetRate = 0
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // Frequency
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        Text("FREQUENCY")
-                                            .font(.caption2)
-                                            .textCase(.uppercase)
-                                            .kerning(1.0)
-                                            .opacity(0.5)
-                                            .foregroundStyle(.white)
-
-                                        HStack(spacing: 0) {
-                                            Picker("Count", selection: $habit.frequencyCount) {
-                                                ForEach(1...50, id: \.self) { number in
-                                                    Text("\(number)")
-                                                        .font(.system(size: 28))
-                                                        .foregroundStyle(.white)
-                                                        .tag(number)
-                                                }
-                                            }
-                                            .pickerStyle(.wheel)
-                                            .frame(width: 72, height: 128)
-                                            .compositingGroup()
-
-                                            Text(habit.frequencyCount == 1 ? "time per" : "times per")
-                                                .font(.system(size: 28))
-                                                .foregroundStyle(.white.opacity(0.4))
-                                                .padding(.horizontal, 8)
-
-                                            Picker("Frequency", selection: $habit.frequencyUnitRaw) {
-                                                ForEach(FrequencyUnit.allCases, id: \.self) { unit in
-                                                    Text(unit.rawValue.capitalized)
-                                                        .font(.system(size: 28))
-                                                        .foregroundStyle(.white)
-                                                        .tag(unit.rawValue)
-                                                }
-                                            }
-                                            .pickerStyle(.wheel)
-                                            .frame(width: 136, height: 128)
-                                            .compositingGroup()
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                    }
-
-                                    // Type-specific target
-                                    if habit.isGoalHabit {
-                                        VStack(alignment: .leading, spacing: 0) {
-                                            Text("TARGET")
-                                                .font(.caption2)
-                                                .textCase(.uppercase)
-                                                .kerning(1.0)
-                                                .opacity(0.5)
-                                                .foregroundStyle(.white)
-
-                                            HStack(spacing: 0) {
-                                                Picker("Goal", selection: $habit.goalTarget) {
-                                                    ForEach(1...365, id: \.self) { n in
-                                                        Text("\(n)")
-                                                            .font(.system(size: 28))
-                                                            .foregroundStyle(.white)
-                                                            .tag(n)
-                                                    }
-                                                }
-                                                .pickerStyle(.wheel)
-                                                .frame(width: 80, height: 128)
-                                                .compositingGroup()
-
-                                                Text("perfect \(cycleUnitLabel)")
-                                                    .font(.system(size: 28))
-                                                    .foregroundStyle(.white.opacity(0.4))
-                                            }
-                                            .frame(maxWidth: .infinity)
-                                        }
-                                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                                    } else {
-                                        VStack(alignment: .leading, spacing: 0) {
-                                            Text("MINIMUM RATE")
-                                                .font(.caption2)
-                                                .textCase(.uppercase)
-                                                .kerning(1.0)
-                                                .opacity(0.5)
-                                                .foregroundStyle(.white)
-
-                                            HStack(spacing: 0) {
-                                                Picker("Rate", selection: $habit.targetRate) {
-                                                    ForEach([50, 60, 70, 80, 90, 100], id: \.self) { rate in
-                                                        Text("\(rate)%")
-                                                            .font(.system(size: 28))
-                                                            .foregroundStyle(.white)
-                                                            .tag(rate)
-                                                    }
-                                                }
-                                                .pickerStyle(.wheel)
-                                                .frame(width: 100, height: 128)
-                                                .compositingGroup()
-
-                                                Text("completion target")
-                                                    .font(.system(size: 28))
-                                                    .foregroundStyle(.white.opacity(0.4))
-                                            }
-                                            .frame(maxWidth: .infinity)
-                                        }
-                                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                                    }
-                                }
-                                .padding(.horizontal, 25)
-                                .transition(.move(edge: .top).combined(with: .opacity))
-                                .id("AdjustGoalSection")
-                            }
-                            
                             Spacer()
-                            
+
                             Text("Created " + habit.dateCreated.formatted(date: .abbreviated, time: .shortened))
                                 .font(.caption2)
                                 .textCase(.uppercase)
@@ -453,18 +346,152 @@ struct HabitInfoView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                                 .padding(.bottom, 20)
-                        }
-                        .padding(.top, 20)
-                    }
-                    .onChange(of: isEditing) { _, newValue in
-                        if newValue {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                    proxy.scrollTo("AdjustGoalSection", anchor: .center)
+
+                        } else {
+                            // MARK: - Edit Mode Content (matches CreateHabitView)
+
+                            // Type
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("TYPE")
+                                    .font(.caption2)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+
+                                HStack(spacing: 10) {
+                                    EditTypeOption(
+                                        label: "Perpetual",
+                                        caption: "Track with a target rate",
+                                        isSelected: habit.isPerpetual
+                                    ) {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                            habit.goalTarget = 0
+                                            if habit.targetRate == 0 { habit.targetRate = 80 }
+                                        }
+                                    }
+
+                                    EditTypeOption(
+                                        label: "Challenge",
+                                        caption: "Reach a set number",
+                                        isSelected: habit.isChallengeHabit
+                                    ) {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                            if habit.goalTarget == 0 { habit.goalTarget = 30 }
+                                            habit.targetRate = 0
+                                        }
+                                    }
                                 }
+                            }
+                            .padding(.horizontal, 25)
+
+                            // Frequency
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("FREQUENCY")
+                                    .font(.caption2)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+
+                                HStack(spacing: 0) {
+                                    Picker("Count", selection: $habit.frequencyCount) {
+                                        ForEach(1...50, id: \.self) { number in
+                                            Text("\(number)")
+                                                .font(.title)
+                                                .foregroundStyle(.white)
+                                                .tag(number)
+                                        }
+                                    }
+                                    .pickerStyle(.wheel)
+                                    .frame(width: 72, height: 96)
+                                    .compositingGroup()
+
+                                    Text(habit.frequencyCount == 1 ? "time per" : "times per")
+                                        .font(.title3)
+                                        .foregroundStyle(.white.opacity(0.4))
+
+                                    Picker("Frequency", selection: $habit.frequencyUnitRaw) {
+                                        ForEach(FrequencyUnit.allCases, id: \.self) { unit in
+                                            Text(unit.rawValue.capitalized)
+                                                .font(.title)
+                                                .foregroundStyle(.white)
+                                                .tag(unit.rawValue)
+                                        }
+                                    }
+                                    .pickerStyle(.wheel)
+                                    .frame(width: 136, height: 96)
+                                    .compositingGroup()
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .padding(.horizontal, 25)
+
+                            // Type-specific target
+                            if habit.isChallengeHabit {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("TARGET")
+                                        .font(.caption2)
+                                        .textCase(.uppercase)
+                                        .kerning(1.0)
+                                        .opacity(0.5)
+                                        .foregroundStyle(.white)
+
+                                    HStack(spacing: 0) {
+                                        Picker("Goal", selection: $habit.goalTarget) {
+                                            ForEach(1...365, id: \.self) { n in
+                                                Text("\(n)")
+                                                    .font(.title)
+                                                    .foregroundStyle(.white)
+                                                    .tag(n)
+                                            }
+                                        }
+                                        .pickerStyle(.wheel)
+                                        .frame(width: 80, height: 96)
+                                        .compositingGroup()
+
+                                        Text(habit.goalTarget == 1 ? "perfect \(cycleSingularLabel)" : "perfect \(cycleUnitLabel)")
+                                            .font(.title3)
+                                            .foregroundStyle(.white.opacity(0.4))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .padding(.horizontal, 25)
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            } else {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("MINIMUM RATE")
+                                        .font(.caption2)
+                                        .textCase(.uppercase)
+                                        .kerning(1.0)
+                                        .opacity(0.5)
+                                        .foregroundStyle(.white)
+
+                                    HStack(spacing: 0) {
+                                        Picker("Rate", selection: $habit.targetRate) {
+                                            ForEach([50, 60, 70, 80, 90, 100], id: \.self) { rate in
+                                                Text("\(rate)%")
+                                                    .font(.title)
+                                                    .foregroundStyle(.white)
+                                                    .tag(rate)
+                                            }
+                                        }
+                                        .pickerStyle(.wheel)
+                                        .frame(width: 100, height: 96)
+                                        .compositingGroup()
+
+                                        Text("completion target")
+                                            .font(.title3)
+                                            .foregroundStyle(.white.opacity(0.4))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .padding(.horizontal, 25)
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
                             }
                         }
                     }
+                    .padding(.top, 20)
                 }
                 .scrollIndicators(.hidden)
             }
@@ -523,6 +550,10 @@ struct HabitInfoView: View {
     
     // MARK: - Logic & Actions
     
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
     private func incrementProgress() {
         guard !readOnly else { return }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
@@ -542,6 +573,10 @@ struct HabitInfoView: View {
     // MARK: - Computed Statistics
 
     private var progressSectionLabel: String {
+        if let date = displayDate, !Calendar.current.isDateInToday(date) {
+            let dayName = date.formatted(.dateTime.weekday(.wide)).uppercased()
+            return "\(dayName)'S PROGRESS"
+        }
         switch habit.frequencyUnit {
         case .daily: return "TODAY'S PROGRESS"
         case .weekly: return "THIS WEEK'S PROGRESS"
@@ -682,7 +717,7 @@ struct HabitInfoView: View {
 
     /// The fill value for the progress bar (0–1)
     private var goalBarProgress: Double {
-        if habit.isGoalHabit {
+        if habit.isChallengeHabit {
             guard habit.goalTarget > 0 else { return 0 }
             return min(1.0, Double(perfectCount) / Double(habit.goalTarget))
         } else {
@@ -713,6 +748,14 @@ struct HabitInfoView: View {
         case .daily: return "days"
         case .weekly: return "weeks"
         case .monthly: return "months"
+        }
+    }
+
+    private var cycleSingularLabel: String {
+        switch habit.frequencyUnit {
+        case .daily: return "day"
+        case .weekly: return "week"
+        case .monthly: return "month"
         }
     }
 }

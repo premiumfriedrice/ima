@@ -72,20 +72,6 @@ struct CreateTaskView: View {
                     .accessibilityIdentifier("CreateUserTaskButton")
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 12)
-                .background {
-                    appBackground.ignoresSafeArea()
-                }
-                .overlay(alignment: .bottom) {
-                    LinearGradient(
-                        colors: [appBackground, .clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: 12)
-                    .offset(y: 12)
-                }
-                .zIndex(1)
 
                 ScrollView {
                     VStack(spacing: 32) {
@@ -257,6 +243,7 @@ struct CreateTaskView: View {
                             TextField("Add notes, context, or descriptions...", text: $newDetailsInput, axis: .vertical)
                                 .font(.subheadline)
                                 .foregroundStyle(.white)
+                                .submitLabel(.done)
                                 .padding(15)
                                 .background {
                                     RoundedRectangle(cornerRadius: 24)
@@ -318,13 +305,19 @@ struct CreateTaskView: View {
                                         .font(.system(size: 24))
                                         .foregroundStyle(.white.opacity(0.3))
                                     
-                                    TextField("Add a subtask...", text: $newSubtaskInput, axis:.vertical)
+                                    TextField("Add a subtask...", text: $newSubtaskInput, axis: .vertical)
                                         .font(.subheadline)
                                         .foregroundStyle(.white)
+                                        .lineLimit(1...3)
                                         .submitLabel(.done)
                                         .focused($isInputFocused)
-                                        .onSubmit { addTempSubtask() }
                                         .autocorrectionDisabled()
+                                        .onChange(of: newSubtaskInput) { _, newValue in
+                                            if newValue.contains("\n") {
+                                                newSubtaskInput = newValue.replacingOccurrences(of: "\n", with: "")
+                                                addTempSubtask()
+                                            }
+                                        }
                                     
                                     if !newSubtaskInput.isEmpty {
                                         Button { addTempSubtask() } label: {

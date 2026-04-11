@@ -8,6 +8,12 @@
 import SwiftUI
 import SwiftData
 
+struct ReadOnlyHabitItem: Identifiable {
+    let habit: Habit
+    let date: Date
+    var id: UUID { habit.id }
+}
+
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.appBackground) private var appBackground
@@ -17,7 +23,7 @@ struct HomeView: View {
 
     @State private var selectedHabit: Habit?
     @State private var selectedTask: UserTask?
-    @State private var readOnlyHabit: Habit?
+    @State private var readOnlyHabit: ReadOnlyHabitItem?
     @State private var readOnlyTask: UserTask?
     @State private var selectedDay: Date = Calendar.current.startOfDay(for: Date())
 
@@ -203,11 +209,13 @@ struct HomeView: View {
                                     } else {
                                         ForEach(dayHabits) { habit in
                                             HabitCardView(habit: habit, readOnly: true, displayDate: day)
-                                                .onTapGesture { readOnlyHabit = habit }
+                                                .onTapGesture {
+                                                    readOnlyHabit = ReadOnlyHabitItem(habit: habit, date: day)
+                                                }
                                                 .padding(.bottom, 10)
                                         }
                                         ForEach(dayTasks) { task in
-                                            UserTaskCardView(task: task, readOnly: true)
+                                            UserTaskCardView(task: task, disableToggle: true)
                                                 .onTapGesture { readOnlyTask = task }
                                                 .padding(.bottom, 10)
                                         }
@@ -231,11 +239,30 @@ struct HomeView: View {
                             .foregroundStyle(.white)
                             .font(.title)
 
-                        Text(headerOverline)
-                            .font(.caption2)
-                            .textCase(.uppercase)
-                            .kerning(1.0)
-                            .foregroundStyle(.white.opacity(0.5))
+                        HStack(spacing: 0) {
+                            Text(headerOverline)
+                                .font(.caption2)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .foregroundStyle(.white.opacity(0.5))
+
+                            Spacer()
+
+                            // Week dots
+                            HStack(spacing: 6) {
+                                ForEach(weekDays, id: \.self) { day in
+                                    let isSelected = Calendar.current.isDate(day, inSameDayAs: selectedDay)
+                                    Circle()
+                                        .fill(
+                                            isSelected
+                                                ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                                : AnyShapeStyle(Color.white.opacity(0.2))
+                                        )
+                                        .frame(width: isSelected ? 7 : 5, height: isSelected ? 7 : 5)
+                                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedDay)
+                                }
+                            }
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
@@ -254,8 +281,8 @@ struct HomeView: View {
         .sheet(item: $selectedTask) { task in
             UserTaskInfoView(userTask: task)
         }
-        .sheet(item: $readOnlyHabit) { habit in
-            HabitInfoView(habit: habit, readOnly: true)
+        .sheet(item: $readOnlyHabit) { item in
+            HabitInfoView(habit: item.habit, readOnly: true, displayDate: item.date)
         }
         .sheet(item: $readOnlyTask) { task in
             UserTaskInfoView(userTask: task, readOnly: true)

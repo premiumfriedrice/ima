@@ -18,6 +18,7 @@ struct UserTaskInfoView: View {
     var readOnly: Bool = false
 
     @State private var showingDeleteConfirmation = false
+    @State private var isEditing = false
     @State private var newSubtaskTitle: String = ""
     @State private var currentDetent: PresentationDetent = .medium
     @FocusState private var isInputFocused: Bool
@@ -36,8 +37,37 @@ struct UserTaskInfoView: View {
 
                 // MARK: - Header
                 Group {
-                    if !readOnly {
+                    if readOnly {
+                        Color.clear.frame(height: 0)
+                    } else if isEditing {
                         HStack {
+                            Text("EDITING")
+                                .font(.caption2)
+                                .textCase(.uppercase)
+                                .kerning(1.0)
+                                .foregroundStyle(.white.opacity(0.4))
+
+                            Spacer()
+
+                            Button {
+                                withAnimation(.snappy) {
+                                    isEditing = false
+                                    dismissKeyboard()
+                                }
+                            } label: {
+                                Image(systemName: "checkmark")
+                                    .font(.callout)
+                                    .foregroundStyle(.white)
+                                    .padding(10)
+                                    .background(
+                                        LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    )
+                                    .clipShape(Circle())
+                            }
+                        }
+                    } else {
+                        HStack {
+                            // Complete button
                             Button {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                                     userTask.isCompleted.toggle()
@@ -63,6 +93,22 @@ struct UserTaskInfoView: View {
 
                             Spacer()
 
+                            // Edit button
+                            Button {
+                                withAnimation(.snappy) {
+                                    isEditing = true
+                                    currentDetent = .large
+                                }
+                            } label: {
+                                Image(systemName: "square.and.pencil")
+                                    .font(.callout)
+                                    .foregroundStyle(.white.opacity(0.6))
+                                    .padding(10)
+                                    .background(.white.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+
+                            // Delete button
                             Button(role: .destructive) {
                                 showingDeleteConfirmation = true
                             } label: {
@@ -74,8 +120,6 @@ struct UserTaskInfoView: View {
                                     .clipShape(Circle())
                             }
                         }
-                    } else {
-                        Color.clear.frame(height: 0)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -106,10 +150,25 @@ struct UserTaskInfoView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
                             
-                            // Editable title
-                            TextField("Task Title", text: $userTask.title)
-                                .font(.title)
-                                .foregroundStyle(.white)
+                            if isEditing {
+                                TextField("Task Title", text: $userTask.title, axis: .vertical)
+                                    .font(.title)
+                                    .foregroundStyle(.white)
+                                    .lineLimit(1...3)
+                            } else {
+                                Text(userTask.title)
+                                    .font(.title)
+                                    .foregroundStyle(.white)
+                            }
+
+                            if userTask.isCompleted, let completed = userTask.dateCompleted {
+                                Text("Completed " + completed.formatted(date: .abbreviated, time: .shortened))
+                                    .font(.caption2)
+                                    .textCase(.uppercase)
+                                    .kerning(1.0)
+                                    .opacity(0.5)
+                                    .foregroundStyle(.white)
+                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
@@ -247,7 +306,7 @@ struct UserTaskInfoView: View {
                                 .padding(.horizontal, 25)
                             }
                         }
-                        
+
                         // MARK: - Details Section
                         VStack(alignment: .leading, spacing: 10) {
                             Text("DETAILS")
@@ -256,24 +315,40 @@ struct UserTaskInfoView: View {
                                 .kerning(1.0)
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
-                            
-                            TextField("Add notes, context, or descriptions...", text: $userTask.details, axis: .vertical)
-                                .font(.subheadline)
-                                .foregroundStyle(.white)
-                                .padding(15)
-                                .background {
-                                    RoundedRectangle(cornerRadius: 24)
-                                        .fill(.ultraThinMaterial.opacity(0.1))
-                                }
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 24)
-                                        .stroke(.white.opacity(0.15), lineWidth: 1)
-                                }
-                                .lineLimit(3...6)
-                                .autocorrectionDisabled()
+
+                            if isEditing {
+                                TextField("Add notes, context, or descriptions...", text: $userTask.details, axis: .vertical)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white)
+                                    .padding(15)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(.ultraThinMaterial.opacity(0.1))
+                                    }
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                                    }
+                                    .lineLimit(4...10)
+                                    .frame(minHeight: 120, alignment: .top)
+                            } else {
+                                Text(userTask.details.isEmpty ? "No details" : userTask.details)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(userTask.details.isEmpty ? 0.3 : 0.8))
+                                    .padding(15)
+                                    .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(.ultraThinMaterial.opacity(0.1))
+                                    }
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(.white.opacity(0.15), lineWidth: 1)
+                                    }
+                            }
                         }
                         .padding(.horizontal, 25)
-                        
+
                         // MARK: - Subtasks Section
                         VStack(alignment: .leading, spacing: 15) {
                             Text("SUBTASKS")
@@ -299,27 +374,34 @@ struct UserTaskInfoView: View {
                                                 .foregroundStyle(subtask.isCompleted ? AnyShapeStyle(.green.gradient) : AnyShapeStyle(.white.opacity(0.3)))
                                         }
                                         
-                                        // Text Input (Editable)
-                                        // Bindable(subtask) allows us to create a binding to a SwiftData object's property inside a loop
-                                        TextField("Subtask", text: Bindable(subtask).title, axis: .vertical)
-                                            .font(.subheadline)
-                                            .strikethrough(subtask.isCompleted)
-                                            .foregroundStyle(subtask.isCompleted ? .white.opacity(0.5) : .white)
-                                        
+                                        if isEditing {
+                                            TextField("Subtask", text: Bindable(subtask).title, axis: .vertical)
+                                                .font(.subheadline)
+                                                .strikethrough(subtask.isCompleted)
+                                                .foregroundStyle(subtask.isCompleted ? .white.opacity(0.5) : .white)
+                                                .lineLimit(1...3)
+                                        } else {
+                                            Text(subtask.title)
+                                                .font(.subheadline)
+                                                .strikethrough(subtask.isCompleted)
+                                                .foregroundStyle(subtask.isCompleted ? .white.opacity(0.5) : .white)
+                                        }
+
                                         Spacer()
-                                        
-                                        // Delete Button
-                                        Button {
-                                            withAnimation {
-                                                modelContext.delete(subtask)
+
+                                        if isEditing {
+                                            Button {
+                                                withAnimation {
+                                                    modelContext.delete(subtask)
+                                                }
+                                            } label: {
+                                                Image(systemName: "xmark")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.white.opacity(0.3))
+                                                    .padding(5)
+                                                    .background(.white.opacity(0.05))
+                                                    .clipShape(Circle())
                                             }
-                                        } label: {
-                                            Image(systemName: "xmark")
-                                                .font(.caption2)
-                                                .foregroundStyle(.white.opacity(0.3))
-                                                .padding(5)
-                                                .background(.white.opacity(0.05))
-                                                .clipShape(Circle())
                                         }
                                     }
                                     .padding(15)
@@ -342,10 +424,15 @@ struct UserTaskInfoView: View {
                                     TextField("Add a subtask...", text: $newSubtaskTitle, axis: .vertical)
                                         .font(.subheadline)
                                         .foregroundStyle(.white)
-                                        .submitLabel(.done)
+                                        .lineLimit(1...3)
                                         .focused($isInputFocused)
-                                        .onSubmit { addSubtask() }
                                         .autocorrectionDisabled()
+                                        .onChange(of: newSubtaskTitle) { _, newValue in
+                                            if newValue.contains("\n") {
+                                                newSubtaskTitle = newValue.replacingOccurrences(of: "\n", with: "")
+                                                addSubtask()
+                                            }
+                                        }
                                     
                                     if !newSubtaskTitle.isEmpty {
                                         Button {
@@ -387,7 +474,7 @@ struct UserTaskInfoView: View {
                 .scrollIndicators(.hidden)
             }
             .foregroundStyle(.white)
-            .presentationDetents([.medium, .large], selection: $currentDetent)
+                .presentationDetents([.medium, .large], selection: $currentDetent)
             .presentationDragIndicator(.hidden)
             .presentationBackground(appBackground)
             .presentationCornerRadius(40)
@@ -429,6 +516,10 @@ struct UserTaskInfoView: View {
     
     // MARK: - Logic
     
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
     private func addSubtask() {
         guard !newSubtaskTitle.isEmpty else { return }
         

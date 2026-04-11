@@ -11,6 +11,7 @@ import SwiftData
 struct UserTaskCardView: View {
     @Bindable var task: UserTask
     var readOnly: Bool = false
+    var disableToggle: Bool = false
     
     private var subtaskProgress: Double {
         guard !task.subtasks.isEmpty else { return task.isCompleted ? 1.0 : 0.0 }
@@ -31,29 +32,35 @@ struct UserTaskCardView: View {
             
             // MARK: - Left Side: Text Info
             VStack(alignment: .leading, spacing: 5) {
-                Text(task.title)
-                    .font(.body)
-                    .foregroundStyle(.white)
-                    .strikethrough(task.isCompleted, color: .gray)
-                    .opacity(task.isCompleted ? 0.4 : 1.0)
-                    .lineLimit(1)
+                MarqueeText(
+                    text: task.title,
+                    font: .body,
+                    foregroundStyle: task.isCompleted ? .white.opacity(0.4) : .white
+                )
                 
-                HStack(spacing: 5) {
-                    Image(systemName: "exclamationmark.circle.fill")
-                        .foregroundStyle(task.priority.color)
-                    
-                    if let date = task.dueDate {
-                        Text(date.formatted(.dateTime.month().day()))
-                            .foregroundStyle(.white.opacity(0.7))
+                if task.isCompleted, let completed = task.dateCompleted {
+                    Text("Completed " + completed.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption2)
+                        .textCase(.uppercase)
+                        .kerning(1.0)
+                        .foregroundStyle(.white.opacity(0.5))
+                } else {
+                    HStack(spacing: 5) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundStyle(task.priority.color)
+
+                        if let date = task.dueDate {
+                            Text(date.formatted(.dateTime.month().day()))
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
                     }
+                    .font(.caption2)
+                    .textCase(.uppercase)
+                    .kerning(1.0)
                 }
-                .font(.caption2)
-                .textCase(.uppercase)
-                .kerning(1.0)
             }
-            
-            Spacer()
-            
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             // MARK: - Right Side: Interaction Area
             ZStack {
                 if showCounts {
@@ -69,7 +76,7 @@ struct UserTaskCardView: View {
                     .frame(width: 45, height: 45)
                     
                 } else if !readOnly {
-                    Button(action: { toggleTaskCompletion() }) {
+                    Button(action: { if !disableToggle { toggleTaskCompletion() } }) {
                         ZStack {
                             Circle()
                                 .fill(

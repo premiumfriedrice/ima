@@ -10,6 +10,7 @@ import SwiftUI
 struct AchievedHabitsView: View {
     let habits: [Habit]
     @Environment(\.appBackground) private var appBackground
+    @Environment(\.dismiss) private var dismiss
     @State private var selectedHabit: Habit?
 
     var body: some View {
@@ -17,7 +18,21 @@ struct AchievedHabitsView: View {
             appBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header
+                // Header with back button
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.callout)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .padding(10)
+                            .background(.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+
                 VStack(alignment: .leading, spacing: 10) {
                     Text("HABITS")
                         .font(.caption2)
@@ -32,7 +47,7 @@ struct AchievedHabitsView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 25)
-                .padding(.top, 12)
+                .padding(.top, 8)
                 .padding(.bottom, 16)
 
                 if habits.isEmpty {
@@ -56,10 +71,7 @@ struct AchievedHabitsView: View {
                 }
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("")
-        .toolbarBackground(appBackground, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(item: $selectedHabit) { habit in
             HabitInfoView(habit: habit)
         }

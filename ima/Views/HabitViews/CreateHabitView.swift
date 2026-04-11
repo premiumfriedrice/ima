@@ -14,7 +14,7 @@ struct CreateHabitView: View {
     @Environment(\.appBackground) private var appBackground
 
     @State private var title: String = ""
-    @State private var isGoalHabit: Bool = false
+    @State private var isChallengeHabit: Bool = false
     @State private var frequencyCount: Int = 1
     @State private var frequencyUnit: FrequencyUnit = .daily
     @State private var goalTarget: Int = 30
@@ -94,20 +94,20 @@ struct CreateHabitView: View {
                                 TypeOption(
                                     label: "Perpetual",
                                     caption: "Track with a target rate",
-                                    isSelected: !isGoalHabit
+                                    isSelected: !isChallengeHabit
                                 ) {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        isGoalHabit = false
+                                        isChallengeHabit = false
                                     }
                                 }
 
                                 TypeOption(
-                                    label: "Goal",
+                                    label: "Challenge",
                                     caption: "Reach a set number",
-                                    isSelected: isGoalHabit
+                                    isSelected: isChallengeHabit
                                 ) {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        isGoalHabit = true
+                                        isChallengeHabit = true
                                     }
                                 }
                             }
@@ -157,7 +157,7 @@ struct CreateHabitView: View {
                         .padding(.horizontal, 25)
 
                         // MARK: - Type-Specific Target
-                        if isGoalHabit {
+                        if isChallengeHabit {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("TARGET")
                                     .font(.caption2)
@@ -272,8 +272,8 @@ struct CreateHabitView: View {
             title: title,
             frequencyCount: frequencyCount,
             frequencyUnit: frequencyUnit,
-            goalTarget: isGoalHabit ? goalTarget : 0,
-            targetRate: isGoalHabit ? 0 : targetRate
+            goalTarget: isChallengeHabit ? goalTarget : 0,
+            targetRate: isChallengeHabit ? 0 : targetRate
         )
         modelContext.insert(newHabit)
         UINotificationFeedbackGenerator().notificationOccurred(.success)

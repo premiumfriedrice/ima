@@ -22,8 +22,8 @@ enum AppBackground: String, CaseIterable, Identifiable {
         case .pureBlack: return .black
         case .charcoal:  return Color(red: 0.08, green: 0.08, blue: 0.09)
         case .graphite:  return Color(red: 0.11, green: 0.11, blue: 0.12)
-        case .navy:      return Color(red: 0.04, green: 0.06, blue: 0.12)
-        case .midnight:  return Color(red: 0.07, green: 0.05, blue: 0.12)
+        case .navy:      return Color(red: 0.06, green: 0.09, blue: 0.18)
+        case .midnight:  return Color(red: 0.10, green: 0.07, blue: 0.18)
         }
     }
 }

@@ -24,7 +24,7 @@ final class Habit {
     // Target completion rate for ongoing habits (0–100, default 80%)
     var targetRate: Int = 80
 
-    var isGoalHabit: Bool { goalTarget > 0 }
+    var isChallengeHabit: Bool { goalTarget > 0 }
     var isPerpetual: Bool { goalTarget == 0 }
 
     // Computed property to handle the Enum conversion

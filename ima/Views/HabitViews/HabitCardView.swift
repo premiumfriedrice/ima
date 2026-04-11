@@ -31,19 +31,15 @@ struct HabitCardView: View {
             
             // MARK: - Left Side: Text Info
             VStack(alignment: .leading, spacing: 5) {
-                Text(habit.title)
-                    .font(.body)
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                
+                MarqueeText(text: habit.title, font: .body, foregroundStyle: .white)
+
                 HStack {
                     Text("\(displayCount)/\(habit.frequencyCount) \(timePeriodString)")
                 }
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.7))
             }
-            
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
             
             // MARK: - Right Side: Button
             ProgressRingWithDots(habit: habit, fillFactor: 1.0, readOnly: readOnly, overrideCount: displayDate != nil ? displayCount : nil) {

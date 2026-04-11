@@ -16,6 +16,7 @@ struct HabitGroupView: View {
     
     // 1. Add state to track the active habit for the sheet
     @State private var selectedHabit: Habit?
+    @State private var showingCreate = false
     
     // 2. State variables for collapsing sections
     @State private var isDailyExpanded = true
@@ -150,9 +151,9 @@ struct HabitGroupView: View {
                             }
 
                             // MARK: - Achieved Card
-                            if !achievedGoalHabits.isEmpty {
+                            if !achievedChallengeHabits.isEmpty {
                                 NavigationLink {
-                                    AchievedHabitsView(habits: achievedGoalHabits)
+                                    AchievedHabitsView(habits: achievedChallengeHabits)
                                 } label: {
                                     HStack(spacing: 10) {
                                         Image(systemName: "trophy.fill")
@@ -165,7 +166,7 @@ struct HabitGroupView: View {
 
                                         Spacer()
 
-                                        Text("\(achievedGoalHabits.count)")
+                                        Text("\(achievedChallengeHabits.count)")
                                             .font(.caption)
                                             .foregroundStyle(.white.opacity(0.4))
 
@@ -196,14 +197,23 @@ struct HabitGroupView: View {
                 
                 // MARK: - STICKY HEADER
                 .safeAreaInset(edge: .top, spacing: 0) {
-                    VStack(spacing: 0) {
+                    HStack {
                         Text("Habits")
                             .foregroundStyle(.white)
                             .font(.title)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 20)
-                            .zIndex(1)
+
+                        Spacer()
+
+                        Button { showingCreate = true } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16))
+                                .foregroundStyle(.white.opacity(0.6))
+                                .padding(10)
+                                .background(.white.opacity(0.1))
+                                .clipShape(Circle())
+                        }
                     }
+                    .padding(.horizontal, 20)
                     .background {
                         ZStack {
                             appBackground
@@ -215,6 +225,9 @@ struct HabitGroupView: View {
         }
         .sheet(item: $selectedHabit) { habit in
             HabitInfoView(habit: habit)
+        }
+        .sheet(isPresented: $showingCreate) {
+            CreateHabitView()
         }
         .background(appBackground)
         .navigationBarHidden(true)
@@ -235,9 +248,9 @@ struct HabitGroupView: View {
         habits.filter { $0.frequencyUnit == .monthly }.sorted { !$0.isFullyDone && $1.isFullyDone }
     }
 
-    private var achievedGoalHabits: [Habit] {
+    private var achievedChallengeHabits: [Habit] {
         habits.filter { habit in
-            guard habit.isGoalHabit else { return false }
+            guard habit.isChallengeHabit else { return false }
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             formatter.timeZone = .current

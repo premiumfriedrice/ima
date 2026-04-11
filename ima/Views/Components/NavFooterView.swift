@@ -32,7 +32,6 @@ enum AppTab: Int, CaseIterable, Identifiable {
 }
 
 struct NavFooterView: View {
-    @Binding var activeCreateSheet: CreateSheetType?
     @Binding var selectedTab: AppTab
     @Environment(\.appBackground) private var appBackground
     var body: some View {
@@ -78,13 +77,7 @@ struct NavFooterView: View {
         let active = selectedTab == tab
 
         Button {
-            if selectedTab == tab && tab == .habits {
-                activeCreateSheet = .habit
-            } else if selectedTab == tab && tab == .usertasks {
-                activeCreateSheet = .task
-            } else {
-                selectedTab = tab
-            }
+            selectedTab = tab
         } label: {
             tabIcon(tab, active: active)
                 .frame(height: 30)
@@ -184,7 +177,6 @@ struct TaskTabIcon: View {
         VStack {
             Spacer()
             NavFooterView(
-                activeCreateSheet: .constant(nil),
                 selectedTab: .constant(.habits)
             )
         }

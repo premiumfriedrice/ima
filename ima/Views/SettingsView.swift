@@ -162,6 +162,7 @@ struct SettingsView: View {
         HStack(spacing: 0) {
             ForEach(options) { bg in
                 Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     withAnimation(.easeInOut(duration: 0.3)) {
                         backgroundRaw = bg.rawValue
                     }

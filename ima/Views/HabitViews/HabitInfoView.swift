@@ -61,6 +61,7 @@ struct HabitInfoView: View {
                             Spacer()
 
                             Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 withAnimation(.snappy) {
                                     isEditing = false
                                     currentDetent = .medium
@@ -92,6 +93,7 @@ struct HabitInfoView: View {
                             Spacer()
 
                             Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 withAnimation(.snappy) {
                                     isEditing = true
                                     currentDetent = .large
@@ -524,6 +526,7 @@ struct HabitInfoView: View {
             titleVisibility: .visible
         ) {
             Button("Delete Habit", role: .destructive) {
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
                 dismiss()
                 Task {
                     try? await Task.sleep(for: .seconds(0.35))

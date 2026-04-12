@@ -68,6 +68,7 @@ struct UserTaskGroupView: View {
                                 .contentShape(Rectangle()) // Makes entire header tappable
                                 .onTapGesture {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                         isHighPriorityExpanded.toggle()
                                     }
                                 }
@@ -76,7 +77,7 @@ struct UserTaskGroupView: View {
                                     if isHighPriorityExpanded {
                                         ForEach(highPriorityTasks) { task in
                                             UserTaskCardView(task: task)
-                                                .onTapGesture { selectedTask = task }
+                                                .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedTask = task }
                                                 .padding(.bottom, 10)
                                         }
                                     }
@@ -96,6 +97,7 @@ struct UserTaskGroupView: View {
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                         isMediumPriorityExpanded.toggle()
                                     }
                                 }
@@ -103,7 +105,7 @@ struct UserTaskGroupView: View {
                                     if isMediumPriorityExpanded {
                                         ForEach(mediumPriorityTasks) { task in
                                             UserTaskCardView(task: task)
-                                                .onTapGesture { selectedTask = task }
+                                                .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedTask = task }
                                                 .padding(.bottom, 10)
                                         }
                                     }
@@ -123,6 +125,7 @@ struct UserTaskGroupView: View {
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                         isLowPriorityExpanded.toggle()
                                     }
                                 }
@@ -130,7 +133,7 @@ struct UserTaskGroupView: View {
                                     if isLowPriorityExpanded {
                                         ForEach(lowPriorityTasks) { task in
                                             UserTaskCardView(task: task)
-                                                .onTapGesture { selectedTask = task }
+                                                .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedTask = task }
                                                 .padding(.bottom, 10)
                                         }
                                     }

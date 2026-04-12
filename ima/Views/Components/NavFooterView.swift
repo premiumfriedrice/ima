@@ -77,6 +77,7 @@ struct NavFooterView: View {
         let active = selectedTab == tab
 
         Button {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             selectedTab = tab
         } label: {
             tabIcon(tab, active: active)

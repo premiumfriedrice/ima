@@ -50,6 +50,7 @@ struct UserTaskInfoView: View {
                             Spacer()
 
                             Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 withAnimation(.snappy) {
                                     isEditing = false
                                     dismissKeyboard()
@@ -95,6 +96,7 @@ struct UserTaskInfoView: View {
 
                             // Edit button
                             Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 withAnimation(.snappy) {
                                     isEditing = true
                                     currentDetent = .large
@@ -367,6 +369,7 @@ struct UserTaskInfoView: View {
                                         Button {
                                             withAnimation(.snappy) {
                                                 subtask.isCompleted.toggle()
+                                                UIImpactFeedbackGenerator(style: subtask.isCompleted ? .medium : .light).impactOccurred()
                                             }
                                         } label: {
                                             Image(systemName: subtask.isCompleted ? "checkmark.circle.fill" : "circle")
@@ -502,6 +505,7 @@ struct UserTaskInfoView: View {
             titleVisibility: .visible
         ) {
             Button("Delete Task", role: .destructive) {
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
                 dismiss()
                 Task {
                     try? await Task.sleep(for: .seconds(0.35))
@@ -522,11 +526,12 @@ struct UserTaskInfoView: View {
 
     private func addSubtask() {
         guard !newSubtaskTitle.isEmpty else { return }
-        
+
         withAnimation {
             let newSub = Subtask(title: newSubtaskTitle)
             userTask.subtasks.append(newSub)
-            
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
             // Reset input
             newSubtaskTitle = ""
             isInputFocused = false

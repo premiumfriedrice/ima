@@ -388,6 +388,7 @@ struct CreateTaskView: View {
             tempSubtasks.append(newSubtaskInput)
             newSubtaskInput = ""
             isInputFocused = true
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
     }
     

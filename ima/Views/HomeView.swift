@@ -140,6 +140,7 @@ struct HomeView: View {
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                 isMustDoExpanded.toggle()
                                             }
                                         }
@@ -147,12 +148,12 @@ struct HomeView: View {
                                             if isMustDoExpanded {
                                                 ForEach(mustDoHabits) { habit in
                                                     HabitCardView(habit: habit)
-                                                        .onTapGesture { selectedHabit = habit }
+                                                        .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedHabit = habit }
                                                         .padding(.bottom, 10)
                                                 }
                                                 ForEach(mustDoTasks) { task in
                                                     UserTaskCardView(task: task)
-                                                        .onTapGesture { selectedTask = task }
+                                                        .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedTask = task }
                                                         .padding(.bottom, 10)
                                                 }
                                             }
@@ -170,6 +171,7 @@ struct HomeView: View {
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                 isCanDoExpanded.toggle()
                                             }
                                         }
@@ -177,12 +179,12 @@ struct HomeView: View {
                                             if isCanDoExpanded {
                                                 ForEach(canDoHabits) { habit in
                                                     HabitCardView(habit: habit)
-                                                        .onTapGesture { selectedHabit = habit }
+                                                        .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedHabit = habit }
                                                         .padding(.bottom, 10)
                                                 }
                                                 ForEach(canDoTasks) { task in
                                                     UserTaskCardView(task: task)
-                                                        .onTapGesture { selectedTask = task }
+                                                        .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedTask = task }
                                                         .padding(.bottom, 10)
                                                 }
                                             }
@@ -210,13 +212,14 @@ struct HomeView: View {
                                         ForEach(dayHabits) { habit in
                                             HabitCardView(habit: habit, readOnly: true, displayDate: day)
                                                 .onTapGesture {
+                                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                     readOnlyHabit = ReadOnlyHabitItem(habit: habit, date: day)
                                                 }
                                                 .padding(.bottom, 10)
                                         }
                                         ForEach(dayTasks) { task in
                                             UserTaskCardView(task: task, disableToggle: true)
-                                                .onTapGesture { readOnlyTask = task }
+                                                .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); readOnlyTask = task }
                                                 .padding(.bottom, 10)
                                         }
                                     }
@@ -286,6 +289,9 @@ struct HomeView: View {
         }
         .sheet(item: $readOnlyTask) { task in
             UserTaskInfoView(userTask: task, readOnly: true)
+        }
+        .onChange(of: selectedDay) {
+            UISelectionFeedbackGenerator().selectionChanged()
         }
     }
 }

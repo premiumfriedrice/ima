@@ -338,30 +338,32 @@ struct ProfileView: View {
                                         .font(.system(size: 36, weight: .bold))
                                         .foregroundStyle(.green.gradient)
 
-                                    VStack(spacing: 8) {
+                                    VStack(spacing: 10) {
                                         ForEach(Array(perpetualHabits.enumerated()), id: \.element.id) { index, habit in
                                             let rate = completionRate(for: habit)
-                                            HStack(spacing: 10) {
-                                                Text(habit.title)
-                                                    .font(.caption)
-                                                    .foregroundStyle(.white.opacity(0.7))
-                                                    .lineLimit(1)
-                                                    .frame(width: 80, alignment: .trailing)
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                HStack {
+                                                    Text(habit.title)
+                                                        .font(.caption)
+                                                        .foregroundStyle(.white.opacity(0.7))
+                                                        .lineLimit(1)
+
+                                                    Spacer()
+
+                                                    Text("\(Int(rate * 100))%")
+                                                        .font(.caption)
+                                                        .foregroundStyle(.white.opacity(0.5))
+                                                }
 
                                                 AnimatedBar(
                                                     progress: rate,
                                                     color: .green,
                                                     delay: 0.3 + Double(index) * 0.08
                                                 )
-
-                                                Text("\(Int(rate * 100))%")
-                                                    .font(.caption2)
-                                                    .foregroundStyle(.white.opacity(0.5))
-                                                    .frame(width: 32, alignment: .trailing)
                                             }
                                         }
                                     }
-                                    .padding(.horizontal, 20)
+                                    .padding(.horizontal, 24)
                                 }
                             }
 

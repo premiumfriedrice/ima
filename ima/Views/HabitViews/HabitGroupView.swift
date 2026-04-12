@@ -82,6 +82,7 @@ struct HabitGroupView: View {
                                 .contentShape(Rectangle()) // Make header tappable
                                 .onTapGesture {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                         isDailyExpanded.toggle()
                                     }
                                 }
@@ -89,7 +90,7 @@ struct HabitGroupView: View {
                                     if isDailyExpanded {
                                         ForEach(dailyHabits) { habit in
                                             HabitCardView(habit: habit)
-                                                .onTapGesture { selectedHabit = habit }
+                                                .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedHabit = habit }
                                                 .padding(.bottom, 10)
                                         }
                                     }
@@ -109,6 +110,7 @@ struct HabitGroupView: View {
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                         isWeeklyExpanded.toggle()
                                     }
                                 }
@@ -116,7 +118,7 @@ struct HabitGroupView: View {
                                     if isWeeklyExpanded {
                                         ForEach(weeklyHabits) { habit in
                                             HabitCardView(habit: habit)
-                                                .onTapGesture { selectedHabit = habit }
+                                                .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedHabit = habit }
                                                 .padding(.bottom, 10)
                                         }
                                     }
@@ -136,6 +138,7 @@ struct HabitGroupView: View {
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                         isMonthlyExpanded.toggle()
                                     }
                                 }
@@ -143,7 +146,7 @@ struct HabitGroupView: View {
                                     if isMonthlyExpanded {
                                         ForEach(monthlyHabits) { habit in
                                             HabitCardView(habit: habit)
-                                                .onTapGesture { selectedHabit = habit }
+                                                .onTapGesture { UIImpactFeedbackGenerator(style: .light).impactOccurred(); selectedHabit = habit }
                                                 .padding(.bottom, 10)
                                         }
                                     }

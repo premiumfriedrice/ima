@@ -82,7 +82,32 @@ struct SettingsView: View {
                                         .padding(.leading, 56)
 
                                     NavigationLink {
-                                        LegalPageView(title: "Privacy Policy", content: "This privacy policy will be updated soon.")
+                                        LegalPageView(title: "Privacy Policy", content: """
+Last updated: April 2026
+
+ima is designed with your privacy in mind. Here's what you need to know:
+
+DATA COLLECTION
+ima does not collect, transmit, or share any personal data. All information you enter — including habits, tasks, subtasks, profile name, tagline, and preferences — is stored entirely on your device.
+
+DATA STORAGE
+All data is stored locally using Apple's SwiftData framework and UserDefaults. Your data never leaves your device. There are no servers, no cloud sync, and no accounts.
+
+THIRD-PARTY SERVICES
+ima does not use any third-party analytics, advertising, or tracking services. There are no SDKs that collect data about your usage.
+
+CONTACT INFORMATION
+The optional profile name and tagline you enter are stored locally on your device and are never transmitted anywhere.
+
+DATA DELETION
+You can delete all app data at any time by deleting the app from your device. Individual habits and tasks can be deleted from within the app.
+
+CHANGES TO THIS POLICY
+If this policy changes in a future update, you will be notified through the App Store update notes.
+
+CONTACT
+If you have questions about this privacy policy, contact us at support@ima.app.
+""")
                                     } label: {
                                         SettingsRow(icon: "hand.raised.fill", title: "Privacy Policy", color: .blue) {
                                             Image(systemName: "chevron.right")
@@ -97,7 +122,32 @@ struct SettingsView: View {
                                         .padding(.leading, 56)
 
                                     NavigationLink {
-                                        LegalPageView(title: "Terms & Conditions", content: "Terms and conditions will be updated soon.")
+                                        LegalPageView(title: "Terms & Conditions", content: """
+Last updated: April 2026
+
+By using ima, you agree to the following terms:
+
+USE OF THE APP
+ima is a personal productivity app for tracking habits and tasks. You may use it for personal, non-commercial purposes.
+
+YOUR DATA
+All data you create in ima is yours. It is stored locally on your device. We do not have access to your data and cannot recover it if lost.
+
+DISCLAIMER
+ima is provided "as is" without warranties of any kind. We are not responsible for any loss of data, missed habits, or incomplete tasks.
+
+LIMITATION OF LIABILITY
+To the maximum extent permitted by law, the developers of ima shall not be liable for any damages arising from the use or inability to use the app.
+
+APP STORE
+Your use of ima is also subject to Apple's Terms of Service and App Store guidelines.
+
+CHANGES
+We may update these terms from time to time. Continued use of the app after changes constitutes acceptance of the updated terms.
+
+CONTACT
+Questions about these terms can be directed to support@ima.app.
+""")
                                     } label: {
                                         SettingsRow(icon: "doc.text.fill", title: "Terms & Conditions", color: .yellow) {
                                             Image(systemName: "chevron.right")

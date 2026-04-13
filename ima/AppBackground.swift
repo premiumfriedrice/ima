@@ -26,12 +26,23 @@ enum AppBackground: String, CaseIterable, Identifiable {
         case .midnight:  return Color(red: 0.10, green: 0.07, blue: 0.18)
         }
     }
+
+    /// Alternate icon name — nil means use the default (black) icon
+    var iconName: String? {
+        switch self {
+        case .pureBlack: return "AppIcon-black"
+        case .charcoal:  return nil
+        case .graphite:  return "AppIcon-graphite"
+        case .navy:      return "AppIcon-navy"
+        case .midnight:  return "AppIcon-midnight"
+        }
+    }
 }
 
 // MARK: - Environment Key
 
 private struct AppBackgroundKey: EnvironmentKey {
-    static let defaultValue: Color = .black
+    static let defaultValue: Color = Color(red: 0.08, green: 0.08, blue: 0.09)
 }
 
 extension EnvironmentValues {

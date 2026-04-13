@@ -52,6 +52,23 @@ struct StatInfoSheet: View {
         .presentationDragIndicator(.hidden)
         .presentationBackground(appBackground)
         .presentationCornerRadius(40)
+        .overlay {
+            RoundedRectangle(cornerRadius: 40)
+                .stroke(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(0.2), location: 0.0),
+                            .init(color: .white.opacity(0.05), location: 0.2),
+                            .init(color: .clear, location: 0.5)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 3
+                )
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+        }
     }
 }
 
@@ -136,6 +153,23 @@ struct ProfileStatDetailShell<Content: View>: View {
         .presentationDragIndicator(.hidden)
         .presentationBackground(appBackground)
         .presentationCornerRadius(40)
+        .overlay {
+            RoundedRectangle(cornerRadius: 40)
+                .stroke(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(0.2), location: 0.0),
+                            .init(color: .white.opacity(0.05), location: 0.2),
+                            .init(color: .clear, location: 0.5)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 3
+                )
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+        }
         .onAppear {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                 iconVisible = true

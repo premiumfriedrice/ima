@@ -42,22 +42,22 @@ struct HabitGroupView: View {
             ZStack(alignment: .bottom) {
                 ScrollView {
                     if habits.isEmpty {
-                        VStack(spacing: 10) {
+                        VStack(spacing: 12) {
                             Image(systemName: "tray")
                                 .font(.system(size: 60))
                                 .foregroundStyle(.white.opacity(0.5))
-                            
+
                             VStack {
                                 Text("No Habits Yet")
                                     .font(.title2)
-                                
+
                                 Text("Tap the + button to create your first habit.")
                                     .font(.body)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 40)
                             }
                         }
-                        .padding(.top, 100)
+                        .padding(.top, 40)
                         .font(.caption)
                         .kerning(1.0)
                         .opacity(0.5)

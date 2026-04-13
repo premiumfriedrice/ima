@@ -36,10 +36,10 @@ struct HomeView: View {
     private var weekDays: [Date] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let weekday = calendar.component(.weekday, from: today)
-        let mondayOffset = (weekday == 1) ? -6 : -(weekday - 2)
-        guard let monday = calendar.date(byAdding: .day, value: mondayOffset, to: today) else { return [] }
-        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: monday) }
+        let weekday = calendar.component(.weekday, from: today) // Sunday = 1
+        let sundayOffset = -(weekday - 1)
+        guard let sunday = calendar.date(byAdding: .day, value: sundayOffset, to: today) else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: sunday) }
     }
 
     private var isToday: Bool {

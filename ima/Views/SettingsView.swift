@@ -10,7 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appBackground) private var appBackground
-    @AppStorage("appBackground") private var backgroundRaw: String = AppBackground.pureBlack.rawValue
+    @AppStorage("appBackground") private var backgroundRaw: String = AppBackground.charcoal.rawValue
 
     var body: some View {
         NavigationStack {
@@ -68,7 +68,7 @@ struct SettingsView: View {
                                     .foregroundStyle(.white)
 
                                 VStack(spacing: 0) {
-                                    Link(destination: URL(string: "mailto:support@ima.app")!) {
+                                    Link(destination: URL(string: "mailto:sudofriedrice@gmail.com")!) {
                                         SettingsRow(icon: "envelope.fill", title: "Contact Us", color: .pink) {
                                             Image(systemName: "arrow.up.right")
                                                 .font(.system(size: 12, weight: .bold))
@@ -106,7 +106,7 @@ CHANGES TO THIS POLICY
 If this policy changes in a future update, you will be notified through the App Store update notes.
 
 CONTACT
-If you have questions about this privacy policy, contact us at support@ima.app.
+If you have questions about this privacy policy, contact us at sudofriedrice@gmail.com.
 """)
                                     } label: {
                                         SettingsRow(icon: "hand.raised.fill", title: "Privacy Policy", color: .blue) {
@@ -146,7 +146,7 @@ CHANGES
 We may update these terms from time to time. Continued use of the app after changes constitutes acceptance of the updated terms.
 
 CONTACT
-Questions about these terms can be directed to support@ima.app.
+Questions about these terms can be directed to sudofriedrice@gmail.com.
 """)
                                     } label: {
                                         SettingsRow(icon: "doc.text.fill", title: "Terms & Conditions", color: .yellow) {
@@ -216,6 +216,8 @@ Questions about these terms can be directed to support@ima.app.
                     withAnimation(.easeInOut(duration: 0.3)) {
                         backgroundRaw = bg.rawValue
                     }
+                    // Switch app icon to match
+                    UIApplication.shared.setAlternateIconName(bg.iconName)
                 } label: {
                     VStack(spacing: 6) {
                         Circle()

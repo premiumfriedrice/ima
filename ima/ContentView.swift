@@ -15,7 +15,7 @@ struct ContentView: View {
     @Query(sort: \Habit.title) private var habits: [Habit]
     @Query(sort: \UserTask.dateCreated) private var tasks: [UserTask]
     
-    @AppStorage("appBackground") private var backgroundRaw: String = AppBackground.pureBlack.rawValue
+    @AppStorage("appBackground") private var backgroundRaw: String = AppBackground.charcoal.rawValue
 
     @State private var selectedTab: AppTab = .home
     

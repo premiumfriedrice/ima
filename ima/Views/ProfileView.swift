@@ -19,9 +19,10 @@ struct ProfileView: View {
 
     // State for Settings Sheet
     @State private var showSettings = false
-    @State private var showEmojiPicker = false
     @State private var isEditingName = false
     @State private var isEditingTagline = false
+    @State private var emojiInput: String = ""
+    @FocusState private var isEmojiFocused: Bool
 
     // Profile data
     @AppStorage("profileEmoji") private var profileEmoji: String = "🎯"
@@ -236,19 +237,46 @@ struct ProfileView: View {
                     // MARK: - Profile Hero
                     VStack(spacing: 16) {
                         // Emoji Avatar
-                        Button { showEmojiPicker = true } label: {
-                            ZStack {
-                                Circle()
-                                    .fill(.ultraThinMaterial.opacity(0.2))
-                                    .frame(width: 80, height: 80)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(.white.opacity(0.15), lineWidth: 1)
-                                    )
+                        ZStack {
+                            Circle()
+                                .fill(.ultraThinMaterial.opacity(0.2))
+                                .frame(width: 80, height: 80)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            isEmojiFocused
+                                                ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                                : AnyShapeStyle(Color.white.opacity(0.15)),
+                                            lineWidth: isEmojiFocused ? 2 : 1
+                                        )
+                                )
 
-                                Text(profileEmoji)
-                                    .font(.system(size: 40))
-                            }
+                            TextField("", text: $emojiInput)
+                                .font(.system(size: 40))
+                                .multilineTextAlignment(.center)
+                                .focused($isEmojiFocused)
+                                .frame(width: 60, height: 60)
+                                .tint(.clear)
+                                .onChange(of: emojiInput) { _, newValue in
+                                    let emojis = newValue.filter { $0.isEmoji }
+                                    if let last = emojis.last {
+                                        profileEmoji = String(last)
+                                        emojiInput = String(last)
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                        isEmojiFocused = false
+                                    } else if newValue.isEmpty {
+                                        emojiInput = profileEmoji
+                                    } else {
+                                        emojiInput = profileEmoji
+                                    }
+                                }
+                        }
+                        .onTapGesture {
+                            emojiInput = profileEmoji
+                            isEmojiFocused = true
+                        }
+                        .onAppear {
+                            emojiInput = profileEmoji
                         }
 
                         // Personality title
@@ -689,97 +717,11 @@ struct ProfileView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
-        .sheet(isPresented: $showEmojiPicker) {
-            EmojiPickerView(selected: $profileEmoji)
-        }
     }
 }
 
 // MARK: - Emoji Picker
 
-struct EmojiPickerView: View {
-    @Binding var selected: String
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.appBackground) private var appBackground
-    @State private var emojiInput: String = ""
-    @FocusState private var isFocused: Bool
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Capsule()
-                .fill(Color.white.opacity(0.5))
-                .frame(width: 36, height: 5)
-                .padding(.top, 12)
-
-            Text("CHOOSE AVATAR")
-                .font(.caption2)
-                .textCase(.uppercase)
-                .kerning(1.0)
-                .foregroundStyle(.white.opacity(0.5))
-
-            // Preview
-            ZStack {
-                Circle()
-                    .fill(.ultraThinMaterial.opacity(0.2))
-                    .frame(width: 100, height: 100)
-                    .overlay(
-                        Circle()
-                            .stroke(.white.opacity(0.15), lineWidth: 1)
-                    )
-
-                Text(emojiInput.isEmpty ? selected : emojiInput)
-                    .font(.system(size: 50))
-            }
-
-            // Hidden text field that opens emoji keyboard
-            TextField("", text: $emojiInput)
-                .focused($isFocused)
-                .frame(width: 1, height: 1)
-                .opacity(0.01)
-                .onChange(of: emojiInput) { _, newValue in
-                    // Only keep the last emoji character
-                    let emojis = newValue.filter { $0.isEmoji }
-                    if let last = emojis.last {
-                        selected = String(last)
-                        emojiInput = String(last)
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    }
-                }
-
-            Text("Tap below to open emoji keyboard")
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.3))
-
-            Button {
-                isFocused = true
-            } label: {
-                Text("Choose Emoji")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background {
-                        Capsule()
-                            .fill(.ultraThinMaterial.opacity(0.2))
-                    }
-                    .overlay {
-                        Capsule()
-                            .stroke(.white.opacity(0.15), lineWidth: 1)
-                    }
-            }
-
-            Spacer()
-        }
-        .presentationDetents([.height(340)])
-        .presentationDragIndicator(.hidden)
-        .presentationBackground(appBackground)
-        .presentationCornerRadius(40)
-        .onAppear {
-            emojiInput = selected
-        }
-    }
-}
 
 extension Character {
     var isEmoji: Bool {

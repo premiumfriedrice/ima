@@ -72,8 +72,9 @@ struct CreateHabitView: View {
                                 .opacity(0.5)
                                 .foregroundStyle(.white)
 
-                            TextField("e.g., Read, Meditate...", text: $title)
+                            TextField("e.g., Read, Meditate...", text: $title, axis: .vertical)
                                 .font(.title)
+                                .lineLimit(1...3)
                                 .tint(.blue)
                                 .autocorrectionDisabled()
                                 .accessibilityIdentifier("HabitTitleInput")
